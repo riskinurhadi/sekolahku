@@ -8,6 +8,9 @@ $conn = getConnection();
 $guru_id = $_SESSION['user_id'];
 $message = '';
 
+// Get mata pelajaran for dropdown (harus diambil sebelum POST processing)
+$mata_pelajaran = $conn->query("SELECT * FROM mata_pelajaran WHERE guru_id = $guru_id ORDER BY nama_pelajaran")->fetch_all(MYSQLI_ASSOC);
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $mata_pelajaran_id = $_POST['mata_pelajaran_id'];
@@ -69,13 +72,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         $conn->close();
         echo "<script>showSuccess('Soal berhasil ditambahkan!'); setTimeout(function(){ window.location.href = 'soal.php'; }, 1500);</script>";
+        exit(); // Stop execution after redirect
     } else {
         $message = 'error:Gagal menambahkan soal!';
     }
 }
-
-// Get mata pelajaran for dropdown
-$mata_pelajaran = $conn->query("SELECT * FROM mata_pelajaran WHERE guru_id = $guru_id ORDER BY nama_pelajaran")->fetch_all(MYSQLI_ASSOC);
 
 $conn->close();
 ?>
