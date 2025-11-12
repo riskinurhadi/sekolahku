@@ -11,69 +11,7 @@ $message = '';
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['action'])) {
-        if ($_POST['action'] == 'add') {
-            $mata_pelajaran_id = $_POST['mata_pelajaran_id'];
-            $judul = $_POST['judul'];
-            $deskripsi = $_POST['deskripsi'] ?? '';
-            $jenis = $_POST['jenis'];
-            $waktu_pengerjaan = $_POST['waktu_pengerjaan'] ?? 60;
-            $tanggal_mulai = $_POST['tanggal_mulai'] ?? null;
-            $tanggal_selesai = $_POST['tanggal_selesai'] ?? null;
-            $status = $_POST['status'] ?? 'draft';
-            
-            $stmt = $conn->prepare("INSERT INTO soal (mata_pelajaran_id, guru_id, judul, deskripsi, jenis, waktu_pengerjaan, tanggal_mulai, tanggal_selesai, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("iisssisss", $mata_pelajaran_id, $guru_id, $judul, $deskripsi, $jenis, $waktu_pengerjaan, $tanggal_mulai, $tanggal_selesai, $status);
-            
-            if ($stmt->execute()) {
-                $soal_id = $stmt->insert_id;
-                $stmt->close();
-                
-                // Handle item soal
-                if (isset($_POST['pertanyaan']) && is_array($_POST['pertanyaan'])) {
-                    $urutan_counter = 1; // Counter untuk urutan yang sebenarnya
-                    
-                    foreach ($_POST['pertanyaan'] as $index => $pertanyaan) {
-                        // Skip jika pertanyaan kosong
-                        if (empty(trim($pertanyaan))) {
-                            continue;
-                        }
-                        
-                        $jenis_jawaban = $_POST['jenis_jawaban'][$index] ?? 'pilihan_ganda';
-                        $poin = $_POST['poin'][$index] ?? 1;
-                        
-                        // Insert item soal dengan urutan yang benar
-                        $stmt = $conn->prepare("INSERT INTO item_soal (soal_id, pertanyaan, jenis_jawaban, poin, urutan) VALUES (?, ?, ?, ?, ?)");
-                        $stmt->bind_param("issii", $soal_id, $pertanyaan, $jenis_jawaban, $poin, $urutan_counter);
-                        $stmt->execute();
-                        $item_soal_id = $stmt->insert_id;
-                        $stmt->close();
-                        
-                        // Handle pilihan jawaban untuk pilihan ganda
-                        if ($jenis_jawaban == 'pilihan_ganda' && isset($_POST['pilihan'][$index]) && is_array($_POST['pilihan'][$index])) {
-                            $urutan_pilihan_counter = 1;
-                            foreach ($_POST['pilihan'][$index] as $pilihan_index => $pilihan_text) {
-                                if (!empty(trim($pilihan_text))) {
-                                    $is_benar = isset($_POST['is_benar'][$index][$pilihan_index]) ? 1 : 0;
-                                    
-                                    $stmt = $conn->prepare("INSERT INTO pilihan_jawaban (item_soal_id, pilihan, is_benar, urutan) VALUES (?, ?, ?, ?)");
-                                    $stmt->bind_param("isii", $item_soal_id, $pilihan_text, $is_benar, $urutan_pilihan_counter);
-                                    $stmt->execute();
-                                    $stmt->close();
-                                    
-                                    $urutan_pilihan_counter++;
-                                }
-                            }
-                        }
-                        
-                        $urutan_counter++; // Increment untuk pertanyaan berikutnya
-                    }
-                }
-                
-                $message = 'success:Soal berhasil ditambahkan!';
-            } else {
-                $message = 'error:Gagal menambahkan soal!';
-            }
-        } elseif ($_POST['action'] == 'delete') {
+        if ($_POST['action'] == 'delete') {
             $id = $_POST['id'];
             $stmt = $conn->prepare("DELETE FROM soal WHERE id = ? AND guru_id = ?");
             $stmt->bind_param("ii", $id, $guru_id);
@@ -111,9 +49,6 @@ $stmt->execute();
 $soal_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
-// Get mata pelajaran for dropdown
-$mata_pelajaran = $conn->query("SELECT * FROM mata_pelajaran WHERE guru_id = $guru_id ORDER BY nama_pelajaran")->fetch_all(MYSQLI_ASSOC);
-
 $conn->close();
 ?>
 
@@ -130,149 +65,15 @@ $conn->close();
     </script>
 <?php endif; ?>
 
-<div class="row mb-4">
-    <div class="col-12">
-        <h2 class="mb-0">Kelola Soal & Quiz</h2>
-        <p class="text-muted">Buat dan kelola soal, quiz, dan ujian</p>
-    </div>
-</div>
-
-<!-- Add Soal Form -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Tambah Soal Baru</h5>
-            </div>
-            <div class="card-body">
-                <form method="POST" id="addSoalForm">
-                    <input type="hidden" name="action" value="add">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Mata Pelajaran <span class="text-danger">*</span></label>
-                            <select class="form-select" name="mata_pelajaran_id" id="mata_pelajaran_id" required>
-                                <option value="">Pilih Mata Pelajaran</option>
-                                <?php foreach ($mata_pelajaran as $mp): ?>
-                                    <option value="<?php echo $mp['id']; ?>"><?php echo htmlspecialchars($mp['nama_pelajaran']); ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Jenis Soal <span class="text-danger">*</span></label>
-                            <select class="form-select" name="jenis" id="jenis_soal" required>
-                                <option value="quiz">Quiz</option>
-                                <option value="pilihan_ganda">Pilihan Ganda</option>
-                                <option value="isian">Isian</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <label class="form-label">Judul Soal <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="judul" required>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <label class="form-label">Deskripsi</label>
-                            <textarea class="form-control" name="deskripsi" rows="2"></textarea>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Waktu Pengerjaan (menit)</label>
-                            <input type="number" class="form-control" name="waktu_pengerjaan" value="60" min="1">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Tanggal Mulai</label>
-                            <input type="datetime-local" class="form-control" name="tanggal_mulai">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Tanggal Selesai</label>
-                            <input type="datetime-local" class="form-control" name="tanggal_selesai">
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Status</label>
-                            <select class="form-select" name="status">
-                                <option value="draft">Draft</option>
-                                <option value="aktif">Aktif</option>
-                                <option value="selesai">Selesai</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <hr>
-                    <h5>Pertanyaan</h5>
-                    <div id="pertanyaan-container">
-                        <div class="pertanyaan-item mb-4 p-3 border rounded">
-                            <div class="row mb-2">
-                                <div class="col-md-8">
-                                    <label class="form-label">Pertanyaan 1 <span class="text-danger">*</span></label>
-                                    <textarea class="form-control" name="pertanyaan[]" rows="2" required></textarea>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label">Jenis Jawaban</label>
-                                    <select class="form-select jenis-jawaban" name="jenis_jawaban[]">
-                                        <option value="pilihan_ganda">Pilihan Ganda</option>
-                                        <option value="isian">Isian</option>
-                                        <option value="essay">Essay</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label">Poin</label>
-                                    <input type="number" class="form-control" name="poin[]" value="1" min="1">
-                                </div>
-                            </div>
-                            <div class="pilihan-container">
-                                <label class="form-label">Pilihan Jawaban</label>
-                                <div class="pilihan-item mb-2">
-                                    <div class="input-group">
-                                        <div class="input-group-text">
-                                            <input type="radio" name="is_benar[0][0]" value="1">
-                                        </div>
-                                        <input type="text" class="form-control" name="pilihan[0][]" placeholder="Pilihan A">
-                                    </div>
-                                </div>
-                                <div class="pilihan-item mb-2">
-                                    <div class="input-group">
-                                        <div class="input-group-text">
-                                            <input type="radio" name="is_benar[0][1]" value="1">
-                                        </div>
-                                        <input type="text" class="form-control" name="pilihan[0][]" placeholder="Pilihan B">
-                                    </div>
-                                </div>
-                                <div class="pilihan-item mb-2">
-                                    <div class="input-group">
-                                        <div class="input-group-text">
-                                            <input type="radio" name="is_benar[0][2]" value="1">
-                                        </div>
-                                        <input type="text" class="form-control" name="pilihan[0][]" placeholder="Pilihan C">
-                                    </div>
-                                </div>
-                                <div class="pilihan-item mb-2">
-                                    <div class="input-group">
-                                        <div class="input-group-text">
-                                            <input type="radio" name="is_benar[0][3]" value="1">
-                                        </div>
-                                        <input type="text" class="form-control" name="pilihan[0][]" placeholder="Pilihan D">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-secondary" onclick="tambahPertanyaan()">
-                        <i class="bi bi-plus"></i> Tambah Pertanyaan
-                    </button>
-                    
-                    <hr>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save"></i> Simpan Soal
-                    </button>
-                </form>
-            </div>
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2>Kelola Soal & Quiz</h2>
+            <p>Daftar semua soal, quiz, dan ujian yang telah dibuat</p>
         </div>
+        <a href="tambah_soal.php" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Tambah Soal Baru
+        </a>
     </div>
 </div>
 
@@ -286,7 +87,7 @@ $conn->close();
             <div class="card-body">
                 <?php if (count($soal_list) > 0): ?>
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <table class="table table-hover" id="soalTable">
                             <thead>
                                 <tr>
                                     <th>Judul</th>
@@ -294,6 +95,7 @@ $conn->close();
                                     <th>Jenis</th>
                                     <th>Status</th>
                                     <th>Waktu</th>
+                                    <th>Tanggal Dibuat</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -305,9 +107,9 @@ $conn->close();
                                         <td>
                                             <?php 
                                             $jenis_labels = [
-                                                'quiz' => 'Quiz',
-                                                'pilihan_ganda' => 'Pilihan Ganda',
-                                                'isian' => 'Isian'
+                                                'quiz' => '<span class="badge bg-info">Quiz</span>',
+                                                'pilihan_ganda' => '<span class="badge bg-primary">Pilihan Ganda</span>',
+                                                'isian' => '<span class="badge bg-warning">Isian</span>'
                                             ];
                                             echo $jenis_labels[$soal['jenis']] ?? $soal['jenis'];
                                             ?>
@@ -324,8 +126,9 @@ $conn->close();
                                             </form>
                                         </td>
                                         <td><?php echo $soal['waktu_pengerjaan']; ?> menit</td>
+                                        <td><?php echo date('d/m/Y H:i', strtotime($soal['created_at'])); ?></td>
                                         <td>
-                                            <form method="POST" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus soal ini?');">
+                                            <form method="POST" style="display: inline;" onsubmit="return confirmDelete('soal');">
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="id" value="<?php echo $soal['id']; ?>">
                                                 <button type="submit" class="btn btn-sm btn-danger">
@@ -339,10 +142,13 @@ $conn->close();
                         </table>
                     </div>
                 <?php else: ?>
-                    <div class="empty-state">
-                        <i class="bi bi-file-earmark-text"></i>
-                        <h5>Belum ada soal</h5>
-                        <p>Mulai dengan menambahkan soal baru di atas.</p>
+                    <div class="empty-state text-center py-5">
+                        <i class="bi bi-file-earmark-text" style="font-size: 4rem; color: #ccc;"></i>
+                        <h5 class="mt-3">Belum ada soal</h5>
+                        <p class="text-muted">Mulai dengan menambahkan soal baru</p>
+                        <a href="tambah_soal.php" class="btn btn-primary mt-3">
+                            <i class="bi bi-plus-circle"></i> Tambah Soal Baru
+                        </a>
                     </div>
                 <?php endif; ?>
             </div>
@@ -351,111 +157,25 @@ $conn->close();
 </div>
 
 <script>
-function tambahPertanyaan() {
-    const container = document.getElementById('pertanyaan-container');
-    const existingItems = container.querySelectorAll('.pertanyaan-item');
-    const nextIndex = existingItems.length; // Index berikutnya berdasarkan jumlah item yang ada
-    
-    const newItem = document.createElement('div');
-    newItem.className = 'pertanyaan-item mb-4 p-3 border rounded';
-    newItem.innerHTML = `
-        <div class="row mb-2">
-            <div class="col-md-8">
-                <label class="form-label">Pertanyaan ${nextIndex + 1} <span class="text-danger">*</span></label>
-                <textarea class="form-control" name="pertanyaan[]" rows="2" required></textarea>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Jenis Jawaban</label>
-                <select class="form-select jenis-jawaban" name="jenis_jawaban[]" onchange="togglePilihan(this)">
-                    <option value="pilihan_ganda">Pilihan Ganda</option>
-                    <option value="isian">Isian</option>
-                    <option value="essay">Essay</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Poin</label>
-                <input type="number" class="form-control" name="poin[]" value="1" min="1">
-            </div>
-        </div>
-        <div class="pilihan-container">
-            <label class="form-label">Pilihan Jawaban</label>
-            <div class="pilihan-item mb-2">
-                <div class="input-group">
-                    <div class="input-group-text">
-                        <input type="radio" name="is_benar[${nextIndex}][0]" value="1">
-                    </div>
-                    <input type="text" class="form-control" name="pilihan[${nextIndex}][]" placeholder="Pilihan A">
-                </div>
-            </div>
-            <div class="pilihan-item mb-2">
-                <div class="input-group">
-                    <div class="input-group-text">
-                        <input type="radio" name="is_benar[${nextIndex}][1]" value="1">
-                    </div>
-                    <input type="text" class="form-control" name="pilihan[${nextIndex}][]" placeholder="Pilihan B">
-                </div>
-            </div>
-            <div class="pilihan-item mb-2">
-                <div class="input-group">
-                    <div class="input-group-text">
-                        <input type="radio" name="is_benar[${nextIndex}][2]" value="1">
-                    </div>
-                    <input type="text" class="form-control" name="pilihan[${nextIndex}][]" placeholder="Pilihan C">
-                </div>
-            </div>
-            <div class="pilihan-item mb-2">
-                <div class="input-group">
-                    <div class="input-group-text">
-                        <input type="radio" name="is_benar[${nextIndex}][3]" value="1">
-                    </div>
-                    <input type="text" class="form-control" name="pilihan[${nextIndex}][]" placeholder="Pilihan D">
-                </div>
-            </div>
-        </div>
-        <button type="button" class="btn btn-sm btn-danger mt-2" onclick="this.closest('.pertanyaan-item').remove(); updatePertanyaanNumbers();">
-            <i class="bi bi-trash"></i> Hapus Pertanyaan
-        </button>
-    `;
-    container.appendChild(newItem);
-    
-    // Re-initialize toggle for new item
-    const newSelect = newItem.querySelector('.jenis-jawaban');
-    newSelect.addEventListener('change', function() {
-        togglePilihan(this);
+$(document).ready(function() {
+    <?php if (count($soal_list) > 0): ?>
+    // Initialize DataTable
+    initDataTable('#soalTable', {
+        order: [[5, 'desc']], // Sort by created_at descending
+        columnDefs: [
+            { orderable: false, targets: [6] } // Disable sorting on action column
+        ]
     });
-}
-
-function updatePertanyaanNumbers() {
-    const container = document.getElementById('pertanyaan-container');
-    const items = container.querySelectorAll('.pertanyaan-item');
-    items.forEach((item, index) => {
-        const label = item.querySelector('label');
-        if (label) {
-            label.textContent = `Pertanyaan ${index + 1} `;
-            const span = document.createElement('span');
-            span.className = 'text-danger';
-            span.textContent = '*';
-            label.appendChild(span);
-        }
-    });
-}
-
-function togglePilihan(select) {
-    const container = select.closest('.pertanyaan-item').querySelector('.pilihan-container');
-    if (select.value === 'pilihan_ganda') {
-        container.style.display = 'block';
-    } else {
-        container.style.display = 'none';
+    <?php endif; ?>
+    
+    // Confirm delete
+    function confirmDelete(type) {
+        return confirm('Apakah Anda yakin ingin menghapus ' + type + ' ini?');
     }
-}
-
-// Initialize toggle for existing items
-document.querySelectorAll('.jenis-jawaban').forEach(select => {
-    select.addEventListener('change', function() {
-        togglePilihan(this);
-    });
+    
+    // Make confirmDelete available globally
+    window.confirmDelete = confirmDelete;
 });
 </script>
 
 <?php require_once '../../includes/footer.php'; ?>
-
