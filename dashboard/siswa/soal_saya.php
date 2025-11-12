@@ -20,107 +20,111 @@ $soal_list = $conn->query("SELECT s.*, mp.nama_pelajaran,
 $conn->close();
 ?>
 
-<div class="row mb-4">
-    <div class="col-12">
-        <h2 class="mb-0">Soal Saya</h2>
-        <p class="text-muted">Daftar semua soal yang tersedia untuk Anda</p>
-    </div>
+<div class="page-header">
+    <h2>Soal Saya</h2>
+    <p>Daftar semua soal yang tersedia untuk Anda</p>
 </div>
 
 <div class="row">
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-list"></i> Daftar Soal</h5>
+                <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Daftar Soal</h5>
             </div>
             <div class="card-body">
-                <?php if (count($soal_list) > 0): ?>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
+                <div class="table-responsive">
+                    <table id="soalSayaTable" class="table table-hover" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Judul</th>
+                                <th>Mata Pelajaran</th>
+                                <th>Jenis</th>
+                                <th>Status Soal</th>
+                                <th>Waktu</th>
+                                <th>Status Pengerjaan</th>
+                                <th>Nilai</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($soal_list as $soal): ?>
                                 <tr>
-                                    <th>Judul</th>
-                                    <th>Mata Pelajaran</th>
-                                    <th>Jenis</th>
-                                    <th>Status Soal</th>
-                                    <th>Waktu</th>
-                                    <th>Status Pengerjaan</th>
-                                    <th>Nilai</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($soal_list as $soal): ?>
-                                    <tr>
-                                        <td><strong><?php echo htmlspecialchars($soal['judul']); ?></strong></td>
-                                        <td><?php echo htmlspecialchars($soal['nama_pelajaran']); ?></td>
-                                        <td>
-                                            <?php 
-                                            $jenis_labels = [
-                                                'quiz' => 'Quiz',
-                                                'pilihan_ganda' => 'Pilihan Ganda',
-                                                'isian' => 'Isian'
-                                            ];
-                                            echo $jenis_labels[$soal['jenis']] ?? $soal['jenis'];
-                                            ?>
-                                        </td>
-                                        <td>
-                                            <?php 
-                                            $status_badges = [
-                                                'draft' => 'bg-secondary',
-                                                'aktif' => 'bg-success',
-                                                'selesai' => 'bg-warning'
-                                            ];
-                                            $badge_class = $status_badges[$soal['status']] ?? 'bg-secondary';
-                                            ?>
-                                            <span class="badge <?php echo $badge_class; ?>"><?php echo ucfirst($soal['status']); ?></span>
-                                        </td>
-                                        <td><?php echo $soal['waktu_pengerjaan']; ?> menit</td>
-                                        <td>
+                                    <td><strong><?php echo htmlspecialchars($soal['judul']); ?></strong></td>
+                                    <td><?php echo htmlspecialchars($soal['nama_pelajaran']); ?></td>
+                                    <td>
+                                        <?php 
+                                        $jenis_labels = [
+                                            'quiz' => 'Quiz',
+                                            'pilihan_ganda' => 'Pilihan Ganda',
+                                            'isian' => 'Isian'
+                                        ];
+                                        echo $jenis_labels[$soal['jenis']] ?? $soal['jenis'];
+                                        ?>
+                                    </td>
+                                    <td>
+                                        <?php 
+                                        $status_badges = [
+                                            'draft' => 'bg-secondary',
+                                            'aktif' => 'bg-success',
+                                            'selesai' => 'bg-warning'
+                                        ];
+                                        $badge_class = $status_badges[$soal['status']] ?? 'bg-secondary';
+                                        ?>
+                                        <span class="badge <?php echo $badge_class; ?>"><?php echo ucfirst($soal['status']); ?></span>
+                                    </td>
+                                    <td><?php echo $soal['waktu_pengerjaan']; ?> menit</td>
+                                    <td>
+                                        <?php if ($soal['sudah_dikerjakan'] > 0): ?>
+                                            <span class="badge bg-success">Selesai</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-warning">Belum Dikerjakan</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if ($soal['nilai'] !== null): ?>
+                                            <strong><?php echo number_format($soal['nilai'], 2); ?></strong>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if ($soal['status'] == 'aktif'): ?>
                                             <?php if ($soal['sudah_dikerjakan'] > 0): ?>
-                                                <span class="badge bg-success">Selesai</span>
+                                                <a href="hasil.php?soal_id=<?php echo $soal['id']; ?>" class="btn btn-sm btn-info">
+                                                    <i class="bi bi-eye"></i> Lihat Hasil
+                                                </a>
                                             <?php else: ?>
-                                                <span class="badge bg-warning">Belum Dikerjakan</span>
+                                                <a href="kerjakan_soal.php?id=<?php echo $soal['id']; ?>" class="btn btn-sm btn-primary">
+                                                    <i class="bi bi-pencil"></i> Kerjakan
+                                                </a>
                                             <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <?php if ($soal['nilai'] !== null): ?>
-                                                <strong><?php echo number_format($soal['nilai'], 2); ?></strong>
-                                            <?php else: ?>
-                                                <span class="text-muted">-</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <?php if ($soal['status'] == 'aktif'): ?>
-                                                <?php if ($soal['sudah_dikerjakan'] > 0): ?>
-                                                    <a href="hasil.php?soal_id=<?php echo $soal['id']; ?>" class="btn btn-sm btn-info">
-                                                        <i class="bi bi-eye"></i> Lihat Hasil
-                                                    </a>
-                                                <?php else: ?>
-                                                    <a href="kerjakan_soal.php?id=<?php echo $soal['id']; ?>" class="btn btn-sm btn-primary">
-                                                        <i class="bi bi-pencil"></i> Kerjakan
-                                                    </a>
-                                                <?php endif; ?>
-                                            <?php else: ?>
-                                                <span class="text-muted">Tidak tersedia</span>
-                                            <?php endif; ?>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php else: ?>
-                    <div class="empty-state">
-                        <i class="bi bi-file-earmark-text"></i>
-                        <h5>Belum ada soal</h5>
-                        <p>Belum ada soal yang tersedia untuk Anda.</p>
-                    </div>
-                <?php endif; ?>
+                                        <?php else: ?>
+                                            <span class="text-muted">Tidak tersedia</span>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<?php require_once '../../includes/footer.php'; ?>
+<script>
+$(document).ready(function() {
+    $('#soalSayaTable').DataTable({
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
+        },
+        responsive: true,
+        order: [[0, 'asc']],
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
+    });
+});
+</script>
 
+<?php require_once '../../includes/footer.php'; ?>

@@ -83,6 +83,7 @@ $conn->close();
         $msg = explode(':', $message);
         if ($msg[0] == 'success') {
             echo "showSuccess('" . addslashes($msg[1]) . "');";
+            echo "setTimeout(function(){ window.location.reload(); }, 1500);";
         } else {
             echo "showError('" . addslashes($msg[1]) . "');";
         }
@@ -90,23 +91,74 @@ $conn->close();
     </script>
 <?php endif; ?>
 
-<div class="row mb-4">
-    <div class="col-12">
-        <h2 class="mb-0">Kelola Kepala Sekolah</h2>
-        <p class="text-muted">Tambah dan kelola data kepala sekolah</p>
-    </div>
+<div class="page-header">
+    <h2>Kelola Kepala Sekolah</h2>
+    <p>Tambah dan kelola data kepala sekolah</p>
 </div>
 
-<!-- Add Kepala Sekolah Form -->
-<div class="row mb-4">
+<!-- Kepala Sekolah List -->
+<div class="row">
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Tambah Kepala Sekolah Baru</h5>
+                <h5 class="mb-0"><i class="bi bi-person-badge"></i> Daftar Kepala Sekolah</h5>
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addKepalaSekolahModal">
+                    <i class="bi bi-plus-circle"></i> Tambah Kepala Sekolah
+                </button>
             </div>
             <div class="card-body">
-                <form method="POST" id="addKepalaSekolahForm">
-                    <input type="hidden" name="action" value="add">
+                <div class="table-responsive">
+                    <table id="kepalaSekolahTable" class="table table-hover" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Nama Lengkap</th>
+                                <th>Email</th>
+                                <th>Sekolah</th>
+                                <th>Tanggal Dibuat</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($kepala_sekolah as $ks): ?>
+                                <tr>
+                                    <td><strong><?php echo htmlspecialchars($ks['username']); ?></strong></td>
+                                    <td><?php echo htmlspecialchars($ks['nama_lengkap']); ?></td>
+                                    <td><?php echo htmlspecialchars($ks['email'] ?? '-'); ?></td>
+                                    <td><?php echo htmlspecialchars($ks['nama_sekolah'] ?? '-'); ?></td>
+                                    <td><?php echo date('d/m/Y', strtotime($ks['created_at'])); ?></td>
+                                    <td>
+                                        <form method="POST" style="display: inline;" onsubmit="event.preventDefault(); confirmDelete('kepala sekolah').then(result => { if(result) this.submit(); }); return false;">
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="id" value="<?php echo $ks['id']; ?>">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="bi bi-trash"></i> Hapus
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Kepala Sekolah Modal -->
+<div class="modal fade" id="addKepalaSekolahModal" tabindex="-1" aria-labelledby="addKepalaSekolahModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST" id="addKepalaSekolahForm">
+                <input type="hidden" name="action" value="add">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addKepalaSekolahModalLabel">
+                        <i class="bi bi-plus-circle"></i> Tambah Kepala Sekolah Baru
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Username <span class="text-danger">*</span></label>
@@ -124,7 +176,7 @@ $conn->close();
                             <label class="form-label">Email</label>
                             <input type="email" class="form-control" name="email">
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-12 mb-3">
                             <label class="form-label">Sekolah <span class="text-danger">*</span></label>
                             <select class="form-select" name="sekolah_id" required>
                                 <option value="">Pilih Sekolah</option>
@@ -133,72 +185,32 @@ $conn->close();
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-save"></i> Simpan
-                            </button>
-                        </div>
                     </div>
-                </form>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Simpan
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
-<!-- Kepala Sekolah List -->
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-list"></i> Daftar Kepala Sekolah</h5>
-            </div>
-            <div class="card-body">
-                <?php if (count($kepala_sekolah) > 0): ?>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Username</th>
-                                    <th>Nama Lengkap</th>
-                                    <th>Email</th>
-                                    <th>Sekolah</th>
-                                    <th>Tanggal Dibuat</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($kepala_sekolah as $ks): ?>
-                                    <tr>
-                                        <td><strong><?php echo htmlspecialchars($ks['username']); ?></strong></td>
-                                        <td><?php echo htmlspecialchars($ks['nama_lengkap']); ?></td>
-                                        <td><?php echo htmlspecialchars($ks['email'] ?? '-'); ?></td>
-                                        <td><?php echo htmlspecialchars($ks['nama_sekolah'] ?? '-'); ?></td>
-                                        <td><?php echo date('d/m/Y', strtotime($ks['created_at'])); ?></td>
-                                        <td>
-                                            <form method="POST" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus kepala sekolah ini?');">
-                                                <input type="hidden" name="action" value="delete">
-                                                <input type="hidden" name="id" value="<?php echo $ks['id']; ?>">
-                                                <button type="submit" class="btn btn-sm btn-danger">
-                                                    <i class="bi bi-trash"></i> Hapus
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php else: ?>
-                    <div class="empty-state">
-                        <i class="bi bi-person-badge"></i>
-                        <h5>Belum ada kepala sekolah</h5>
-                        <p>Mulai dengan menambahkan kepala sekolah baru di atas.</p>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-</div>
+<script>
+$(document).ready(function() {
+    $('#kepalaSekolahTable').DataTable({
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
+        },
+        responsive: true,
+        order: [[0, 'asc']],
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
+    });
+});
+</script>
 
 <?php require_once '../../includes/footer.php'; ?>
-

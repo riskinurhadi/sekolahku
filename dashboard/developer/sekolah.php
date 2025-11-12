@@ -55,6 +55,7 @@ $conn->close();
         $msg = explode(':', $message);
         if ($msg[0] == 'success') {
             echo "showSuccess('" . addslashes($msg[1]) . "');";
+            echo "setTimeout(function(){ window.location.reload(); }, 1500);";
         } else {
             echo "showError('" . addslashes($msg[1]) . "');";
         }
@@ -62,23 +63,80 @@ $conn->close();
     </script>
 <?php endif; ?>
 
-<div class="row mb-4">
-    <div class="col-12">
-        <h2 class="mb-0">Kelola Sekolah</h2>
-        <p class="text-muted">Tambah dan kelola data sekolah</p>
-    </div>
+<div class="page-header">
+    <h2>Kelola Sekolah</h2>
+    <p>Tambah dan kelola data sekolah</p>
 </div>
 
-<!-- Add School Form -->
-<div class="row mb-4">
+<!-- Schools List -->
+<div class="row">
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Tambah Sekolah Baru</h5>
+                <h5 class="mb-0"><i class="bi bi-building"></i> Daftar Sekolah</h5>
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addSchoolModal">
+                    <i class="bi bi-plus-circle"></i> Tambah Sekolah
+                </button>
             </div>
             <div class="card-body">
-                <form method="POST" id="addSchoolForm">
-                    <input type="hidden" name="action" value="add">
+                <div class="table-responsive">
+                    <table id="schoolsTable" class="table table-hover" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Nama Sekolah</th>
+                                <th>Alamat</th>
+                                <th>Kepala Sekolah</th>
+                                <th>Telepon</th>
+                                <th>Email</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($schools as $school): ?>
+                                <tr>
+                                    <td><strong><?php echo htmlspecialchars($school['nama_sekolah']); ?></strong></td>
+                                    <td><?php echo htmlspecialchars($school['alamat'] ?? '-'); ?></td>
+                                    <td>
+                                        <?php if ($school['kepala_sekolah_nama']): ?>
+                                            <span class="badge bg-success"><?php echo htmlspecialchars($school['kepala_sekolah_nama']); ?></span>
+                                        <?php else: ?>
+                                            <span class="badge bg-warning">Belum ditetapkan</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($school['telepon'] ?? '-'); ?></td>
+                                    <td><?php echo htmlspecialchars($school['email'] ?? '-'); ?></td>
+                                    <td>
+                                        <form method="POST" style="display: inline;" onsubmit="event.preventDefault(); confirmDelete('sekolah').then(result => { if(result) this.submit(); }); return false;">
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="id" value="<?php echo $school['id']; ?>">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="bi bi-trash"></i> Hapus
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add School Modal -->
+<div class="modal fade" id="addSchoolModal" tabindex="-1" aria-labelledby="addSchoolModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST" id="addSchoolForm">
+                <input type="hidden" name="action" value="add">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addSchoolModalLabel">
+                        <i class="bi bi-plus-circle"></i> Tambah Sekolah Baru
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Nama Sekolah <span class="text-danger">*</span></label>
@@ -96,78 +154,41 @@ $conn->close();
                             <label class="form-label">Alamat</label>
                             <textarea class="form-control" name="alamat" rows="2"></textarea>
                         </div>
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-save"></i> Simpan
-                            </button>
-                        </div>
                     </div>
-                </form>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Simpan
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
-<!-- Schools List -->
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-list"></i> Daftar Sekolah</h5>
-            </div>
-            <div class="card-body">
-                <?php if (count($schools) > 0): ?>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Nama Sekolah</th>
-                                    <th>Alamat</th>
-                                    <th>Kepala Sekolah</th>
-                                    <th>Telepon</th>
-                                    <th>Email</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($schools as $school): ?>
-                                    <tr>
-                                        <td><strong><?php echo htmlspecialchars($school['nama_sekolah']); ?></strong></td>
-                                        <td><?php echo htmlspecialchars($school['alamat'] ?? '-'); ?></td>
-                                        <td>
-                                            <?php if ($school['kepala_sekolah_nama']): ?>
-                                                <span class="badge bg-success"><?php echo htmlspecialchars($school['kepala_sekolah_nama']); ?></span>
-                                            <?php else: ?>
-                                                <span class="badge bg-warning">Belum ditetapkan</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td><?php echo htmlspecialchars($school['telepon'] ?? '-'); ?></td>
-                                        <td><?php echo htmlspecialchars($school['email'] ?? '-'); ?></td>
-                                        <td>
-                                            <form method="POST" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus sekolah ini?');">
-                                                <input type="hidden" name="action" value="delete">
-                                                <input type="hidden" name="id" value="<?php echo $school['id']; ?>">
-                                                <button type="submit" class="btn btn-sm btn-danger">
-                                                    <i class="bi bi-trash"></i> Hapus
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php else: ?>
-                    <div class="empty-state">
-                        <i class="bi bi-building"></i>
-                        <h5>Belum ada sekolah</h5>
-                        <p>Mulai dengan menambahkan sekolah baru di atas.</p>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-</div>
+<script>
+$(document).ready(function() {
+    $('#schoolsTable').DataTable({
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
+        },
+        responsive: true,
+        order: [[0, 'asc']],
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
+    });
+    
+    // Reset form when modal is closed
+    $('#addSchoolModal').on('hidden.bs.modal', function () {
+        $(this).find('form')[0].reset();
+    });
+});
+
+function confirmDelete(type) {
+    return confirm('Apakah Anda yakin ingin menghapus ' + type + ' ini?');
+}
+</script>
 
 <?php require_once '../../includes/footer.php'; ?>
-

@@ -14,6 +14,27 @@ $(document).ready(function() {
             $('#content').removeClass('active');
         });
     }
+    
+    // Initialize all DataTables with default settings
+    if ($.fn.DataTable) {
+        $('.dataTable').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
+            },
+            responsive: true,
+            pageLength: 10,
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
+            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
+            order: [[0, 'asc']]
+        });
+    }
+    
+    // Reset modal form when closed
+    $('.modal').on('hidden.bs.modal', function () {
+        $(this).find('form')[0].reset();
+        $(this).find('.is-invalid').removeClass('is-invalid');
+        $(this).find('.invalid-feedback').remove();
+    });
 });
 
 // SweetAlert2 Helper Functions
@@ -23,7 +44,9 @@ function showSuccess(message) {
         title: 'Berhasil!',
         text: message,
         timer: 2000,
-        showConfirmButton: false
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end'
     });
 }
 
@@ -31,7 +54,8 @@ function showError(message) {
     Swal.fire({
         icon: 'error',
         title: 'Error!',
-        text: message
+        text: message,
+        confirmButtonText: 'OK'
     });
 }
 
@@ -41,8 +65,8 @@ function showConfirm(message, callback) {
         text: message,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
+        confirmButtonColor: '#6366f1',
+        cancelButtonColor: '#64748b',
         confirmButtonText: 'Ya, lanjutkan!',
         cancelButtonText: 'Batal'
     }).then((result) => {
@@ -62,3 +86,34 @@ function validateForm(formId) {
     return true;
 }
 
+// Confirm delete with SweetAlert (for inline forms)
+function confirmDelete(type) {
+    return Swal.fire({
+        title: 'Apakah Anda yakin?',
+        text: 'Data ' + type + ' akan dihapus secara permanen!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        return result.isConfirmed;
+    });
+}
+
+// Initialize DataTable with custom options
+function initDataTable(tableId, options = {}) {
+    const defaultOptions = {
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
+        },
+        responsive: true,
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
+        order: [[0, 'asc']]
+    };
+    
+    return $(tableId).DataTable($.extend(true, {}, defaultOptions, options));
+}

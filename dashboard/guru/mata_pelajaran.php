@@ -55,6 +55,7 @@ $conn->close();
         $msg = explode(':', $message);
         if ($msg[0] == 'success') {
             echo "showSuccess('" . addslashes($msg[1]) . "');";
+            echo "setTimeout(function(){ window.location.reload(); }, 1500);";
         } else {
             echo "showError('" . addslashes($msg[1]) . "');";
         }
@@ -62,42 +63,9 @@ $conn->close();
     </script>
 <?php endif; ?>
 
-<div class="row mb-4">
-    <div class="col-12">
-        <h2 class="mb-0">Kelola Mata Pelajaran</h2>
-        <p class="text-muted">Tambah dan kelola mata pelajaran yang Anda ajarkan</p>
-    </div>
-</div>
-
-<!-- Add Mata Pelajaran Form -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Tambah Mata Pelajaran Baru</h5>
-            </div>
-            <div class="card-body">
-                <form method="POST" id="addMataPelajaranForm">
-                    <input type="hidden" name="action" value="add">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Nama Pelajaran <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="nama_pelajaran" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Kode Pelajaran</label>
-                            <input type="text" class="form-control" name="kode_pelajaran" placeholder="Contoh: MAT-001">
-                        </div>
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-save"></i> Simpan
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+<div class="page-header">
+    <h2>Kelola Mata Pelajaran</h2>
+    <p>Tambah dan kelola mata pelajaran yang Anda ajarkan</p>
 </div>
 
 <!-- Mata Pelajaran List -->
@@ -105,51 +73,93 @@ $conn->close();
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-list"></i> Daftar Mata Pelajaran</h5>
+                <h5 class="mb-0"><i class="bi bi-book"></i> Daftar Mata Pelajaran</h5>
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addMataPelajaranModal">
+                    <i class="bi bi-plus-circle"></i> Tambah Mata Pelajaran
+                </button>
             </div>
             <div class="card-body">
-                <?php if (count($mata_pelajaran) > 0): ?>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
+                <div class="table-responsive">
+                    <table id="mataPelajaranTable" class="table table-hover" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Kode</th>
+                                <th>Nama Pelajaran</th>
+                                <th>Tanggal Dibuat</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($mata_pelajaran as $mp): ?>
                                 <tr>
-                                    <th>Kode</th>
-                                    <th>Nama Pelajaran</th>
-                                    <th>Tanggal Dibuat</th>
-                                    <th>Aksi</th>
+                                    <td><strong><?php echo htmlspecialchars($mp['kode_pelajaran'] ?: '-'); ?></strong></td>
+                                    <td><?php echo htmlspecialchars($mp['nama_pelajaran']); ?></td>
+                                    <td><?php echo date('d/m/Y', strtotime($mp['created_at'])); ?></td>
+                                    <td>
+                                        <form method="POST" style="display: inline;" onsubmit="event.preventDefault(); confirmDelete('mata pelajaran').then(result => { if(result) this.submit(); }); return false;">
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="id" value="<?php echo $mp['id']; ?>">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="bi bi-trash"></i> Hapus
+                                            </button>
+                                        </form>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($mata_pelajaran as $mp): ?>
-                                    <tr>
-                                        <td><strong><?php echo htmlspecialchars($mp['kode_pelajaran'] ?: '-'); ?></strong></td>
-                                        <td><?php echo htmlspecialchars($mp['nama_pelajaran']); ?></td>
-                                        <td><?php echo date('d/m/Y', strtotime($mp['created_at'])); ?></td>
-                                        <td>
-                                            <form method="POST" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus mata pelajaran ini?');">
-                                                <input type="hidden" name="action" value="delete">
-                                                <input type="hidden" name="id" value="<?php echo $mp['id']; ?>">
-                                                <button type="submit" class="btn btn-sm btn-danger">
-                                                    <i class="bi bi-trash"></i> Hapus
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php else: ?>
-                    <div class="empty-state">
-                        <i class="bi bi-book"></i>
-                        <h5>Belum ada mata pelajaran</h5>
-                        <p>Mulai dengan menambahkan mata pelajaran baru di atas.</p>
-                    </div>
-                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<?php require_once '../../includes/footer.php'; ?>
+<!-- Add Mata Pelajaran Modal -->
+<div class="modal fade" id="addMataPelajaranModal" tabindex="-1" aria-labelledby="addMataPelajaranModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" id="addMataPelajaranForm">
+                <input type="hidden" name="action" value="add">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addMataPelajaranModalLabel">
+                        <i class="bi bi-plus-circle"></i> Tambah Mata Pelajaran Baru
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nama Pelajaran <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="nama_pelajaran" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Kode Pelajaran</label>
+                        <input type="text" class="form-control" name="kode_pelajaran" placeholder="Contoh: MAT-001">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
+<script>
+$(document).ready(function() {
+    $('#mataPelajaranTable').DataTable({
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
+        },
+        responsive: true,
+        order: [[0, 'asc']],
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
+    });
+});
+</script>
+
+<?php require_once '../../includes/footer.php'; ?>

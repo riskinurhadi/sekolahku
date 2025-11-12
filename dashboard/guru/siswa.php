@@ -56,6 +56,7 @@ $conn->close();
         $msg = explode(':', $message);
         if ($msg[0] == 'success') {
             echo "showSuccess('" . addslashes($msg[1]) . "');";
+            echo "setTimeout(function(){ window.location.reload(); }, 1500);";
         } else {
             echo "showError('" . addslashes($msg[1]) . "');";
         }
@@ -63,23 +64,72 @@ $conn->close();
     </script>
 <?php endif; ?>
 
-<div class="row mb-4">
-    <div class="col-12">
-        <h2 class="mb-0">Kelola Siswa</h2>
-        <p class="text-muted">Tambah dan kelola data siswa</p>
-    </div>
+<div class="page-header">
+    <h2>Kelola Siswa</h2>
+    <p>Tambah dan kelola data siswa</p>
 </div>
 
-<!-- Add Student Form -->
-<div class="row mb-4">
+<!-- Students List -->
+<div class="row">
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Tambah Siswa Baru</h5>
+                <h5 class="mb-0"><i class="bi bi-people"></i> Daftar Siswa</h5>
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+                    <i class="bi bi-plus-circle"></i> Tambah Siswa
+                </button>
             </div>
             <div class="card-body">
-                <form method="POST" id="addStudentForm">
-                    <input type="hidden" name="action" value="add">
+                <div class="table-responsive">
+                    <table id="studentsTable" class="table table-hover" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Nama Lengkap</th>
+                                <th>Email</th>
+                                <th>Tanggal Dibuat</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($students as $student): ?>
+                                <tr>
+                                    <td><strong><?php echo htmlspecialchars($student['username']); ?></strong></td>
+                                    <td><?php echo htmlspecialchars($student['nama_lengkap']); ?></td>
+                                    <td><?php echo htmlspecialchars($student['email'] ?? '-'); ?></td>
+                                    <td><?php echo date('d/m/Y', strtotime($student['created_at'])); ?></td>
+                                    <td>
+                                        <form method="POST" style="display: inline;" onsubmit="event.preventDefault(); confirmDelete('siswa').then(result => { if(result) this.submit(); }); return false;">
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="id" value="<?php echo $student['id']; ?>">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="bi bi-trash"></i> Hapus
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Student Modal -->
+<div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST" id="addStudentForm">
+                <input type="hidden" name="action" value="add">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addStudentModalLabel">
+                        <i class="bi bi-plus-circle"></i> Tambah Siswa Baru
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Username <span class="text-danger">*</span></label>
@@ -97,70 +147,32 @@ $conn->close();
                             <label class="form-label">Email</label>
                             <input type="email" class="form-control" name="email">
                         </div>
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-save"></i> Simpan
-                            </button>
-                        </div>
                     </div>
-                </form>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Simpan
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
-<!-- Students List -->
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-list"></i> Daftar Siswa</h5>
-            </div>
-            <div class="card-body">
-                <?php if (count($students) > 0): ?>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Username</th>
-                                    <th>Nama Lengkap</th>
-                                    <th>Email</th>
-                                    <th>Tanggal Dibuat</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($students as $student): ?>
-                                    <tr>
-                                        <td><strong><?php echo htmlspecialchars($student['username']); ?></strong></td>
-                                        <td><?php echo htmlspecialchars($student['nama_lengkap']); ?></td>
-                                        <td><?php echo htmlspecialchars($student['email'] ?? '-'); ?></td>
-                                        <td><?php echo date('d/m/Y', strtotime($student['created_at'])); ?></td>
-                                        <td>
-                                            <form method="POST" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus siswa ini?');">
-                                                <input type="hidden" name="action" value="delete">
-                                                <input type="hidden" name="id" value="<?php echo $student['id']; ?>">
-                                                <button type="submit" class="btn btn-sm btn-danger">
-                                                    <i class="bi bi-trash"></i> Hapus
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php else: ?>
-                    <div class="empty-state">
-                        <i class="bi bi-people"></i>
-                        <h5>Belum ada siswa</h5>
-                        <p>Mulai dengan menambahkan siswa baru di atas.</p>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-</div>
+<script>
+$(document).ready(function() {
+    $('#studentsTable').DataTable({
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
+        },
+        responsive: true,
+        order: [[0, 'asc']],
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
+    });
+});
+</script>
 
 <?php require_once '../../includes/footer.php'; ?>
-
