@@ -30,33 +30,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 
                 // Handle item soal
                 if (isset($_POST['pertanyaan']) && is_array($_POST['pertanyaan'])) {
+                    $urutan_counter = 1; // Counter untuk urutan yang sebenarnya
+                    
                     foreach ($_POST['pertanyaan'] as $index => $pertanyaan) {
-                        if (!empty(trim($pertanyaan))) {
-                            $jenis_jawaban = $_POST['jenis_jawaban'][$index] ?? 'pilihan_ganda';
-                            $poin = $_POST['poin'][$index] ?? 1;
-                            
-                            $stmt = $conn->prepare("INSERT INTO item_soal (soal_id, pertanyaan, jenis_jawaban, poin, urutan) VALUES (?, ?, ?, ?, ?)");
-                            $urutan = $index + 1;
-                            $stmt->bind_param("issii", $soal_id, $pertanyaan, $jenis_jawaban, $poin, $urutan);
-                            $stmt->execute();
-                            $item_soal_id = $stmt->insert_id;
-                            $stmt->close();
-                            
-                            // Handle pilihan jawaban untuk pilihan ganda
-                            if ($jenis_jawaban == 'pilihan_ganda' && isset($_POST['pilihan'][$index]) && is_array($_POST['pilihan'][$index])) {
-                                foreach ($_POST['pilihan'][$index] as $pilihan_index => $pilihan_text) {
-                                    if (!empty(trim($pilihan_text))) {
-                                        $is_benar = isset($_POST['is_benar'][$index][$pilihan_index]) ? 1 : 0;
-                                        $urutan_pilihan = $pilihan_index + 1;
-                                        
-                                        $stmt = $conn->prepare("INSERT INTO pilihan_jawaban (item_soal_id, pilihan, is_benar, urutan) VALUES (?, ?, ?, ?)");
-                                        $stmt->bind_param("isii", $item_soal_id, $pilihan_text, $is_benar, $urutan_pilihan);
-                                        $stmt->execute();
-                                        $stmt->close();
-                                    }
+                        // Skip jika pertanyaan kosong
+                        if (empty(trim($pertanyaan))) {
+                            continue;
+                        }
+                        
+                        $jenis_jawaban = $_POST['jenis_jawaban'][$index] ?? 'pilihan_ganda';
+                        $poin = $_POST['poin'][$index] ?? 1;
+                        
+                        // Insert item soal dengan urutan yang benar
+                        $stmt = $conn->prepare("INSERT INTO item_soal (soal_id, pertanyaan, jenis_jawaban, poin, urutan) VALUES (?, ?, ?, ?, ?)");
+                        $stmt->bind_param("issii", $soal_id, $pertanyaan, $jenis_jawaban, $poin, $urutan_counter);
+                        $stmt->execute();
+                        $item_soal_id = $stmt->insert_id;
+                        $stmt->close();
+                        
+                        // Handle pilihan jawaban untuk pilihan ganda
+                        if ($jenis_jawaban == 'pilihan_ganda' && isset($_POST['pilihan'][$index]) && is_array($_POST['pilihan'][$index])) {
+                            $urutan_pilihan_counter = 1;
+                            foreach ($_POST['pilihan'][$index] as $pilihan_index => $pilihan_text) {
+                                if (!empty(trim($pilihan_text))) {
+                                    $is_benar = isset($_POST['is_benar'][$index][$pilihan_index]) ? 1 : 0;
+                                    
+                                    $stmt = $conn->prepare("INSERT INTO pilihan_jawaban (item_soal_id, pilihan, is_benar, urutan) VALUES (?, ?, ?, ?)");
+                                    $stmt->bind_param("isii", $item_soal_id, $pilihan_text, $is_benar, $urutan_pilihan_counter);
+                                    $stmt->execute();
+                                    $stmt->close();
+                                    
+                                    $urutan_pilihan_counter++;
                                 }
                             }
                         }
+                        
+                        $urutan_counter++; // Increment untuk pertanyaan berikutnya
                     }
                 }
                 
@@ -342,16 +351,17 @@ $conn->close();
 </div>
 
 <script>
-let pertanyaanCount = 1;
-
 function tambahPertanyaan() {
     const container = document.getElementById('pertanyaan-container');
+    const existingItems = container.querySelectorAll('.pertanyaan-item');
+    const nextIndex = existingItems.length; // Index berikutnya berdasarkan jumlah item yang ada
+    
     const newItem = document.createElement('div');
     newItem.className = 'pertanyaan-item mb-4 p-3 border rounded';
     newItem.innerHTML = `
         <div class="row mb-2">
             <div class="col-md-8">
-                <label class="form-label">Pertanyaan ${pertanyaanCount + 1} <span class="text-danger">*</span></label>
+                <label class="form-label">Pertanyaan ${nextIndex + 1} <span class="text-danger">*</span></label>
                 <textarea class="form-control" name="pertanyaan[]" rows="2" required></textarea>
             </div>
             <div class="col-md-2">
@@ -372,42 +382,62 @@ function tambahPertanyaan() {
             <div class="pilihan-item mb-2">
                 <div class="input-group">
                     <div class="input-group-text">
-                        <input type="radio" name="is_benar[${pertanyaanCount}][0]" value="1">
+                        <input type="radio" name="is_benar[${nextIndex}][0]" value="1">
                     </div>
-                    <input type="text" class="form-control" name="pilihan[${pertanyaanCount}][]" placeholder="Pilihan A">
+                    <input type="text" class="form-control" name="pilihan[${nextIndex}][]" placeholder="Pilihan A">
                 </div>
             </div>
             <div class="pilihan-item mb-2">
                 <div class="input-group">
                     <div class="input-group-text">
-                        <input type="radio" name="is_benar[${pertanyaanCount}][1]" value="1">
+                        <input type="radio" name="is_benar[${nextIndex}][1]" value="1">
                     </div>
-                    <input type="text" class="form-control" name="pilihan[${pertanyaanCount}][]" placeholder="Pilihan B">
+                    <input type="text" class="form-control" name="pilihan[${nextIndex}][]" placeholder="Pilihan B">
                 </div>
             </div>
             <div class="pilihan-item mb-2">
                 <div class="input-group">
                     <div class="input-group-text">
-                        <input type="radio" name="is_benar[${pertanyaanCount}][2]" value="1">
+                        <input type="radio" name="is_benar[${nextIndex}][2]" value="1">
                     </div>
-                    <input type="text" class="form-control" name="pilihan[${pertanyaanCount}][]" placeholder="Pilihan C">
+                    <input type="text" class="form-control" name="pilihan[${nextIndex}][]" placeholder="Pilihan C">
                 </div>
             </div>
             <div class="pilihan-item mb-2">
                 <div class="input-group">
                     <div class="input-group-text">
-                        <input type="radio" name="is_benar[${pertanyaanCount}][3]" value="1">
+                        <input type="radio" name="is_benar[${nextIndex}][3]" value="1">
                     </div>
-                    <input type="text" class="form-control" name="pilihan[${pertanyaanCount}][]" placeholder="Pilihan D">
+                    <input type="text" class="form-control" name="pilihan[${nextIndex}][]" placeholder="Pilihan D">
                 </div>
             </div>
         </div>
-        <button type="button" class="btn btn-sm btn-danger mt-2" onclick="this.closest('.pertanyaan-item').remove()">
+        <button type="button" class="btn btn-sm btn-danger mt-2" onclick="this.closest('.pertanyaan-item').remove(); updatePertanyaanNumbers();">
             <i class="bi bi-trash"></i> Hapus Pertanyaan
         </button>
     `;
     container.appendChild(newItem);
-    pertanyaanCount++;
+    
+    // Re-initialize toggle for new item
+    const newSelect = newItem.querySelector('.jenis-jawaban');
+    newSelect.addEventListener('change', function() {
+        togglePilihan(this);
+    });
+}
+
+function updatePertanyaanNumbers() {
+    const container = document.getElementById('pertanyaan-container');
+    const items = container.querySelectorAll('.pertanyaan-item');
+    items.forEach((item, index) => {
+        const label = item.querySelector('label');
+        if (label) {
+            label.textContent = `Pertanyaan ${index + 1} `;
+            const span = document.createElement('span');
+            span.className = 'text-danger';
+            span.textContent = '*';
+            label.appendChild(span);
+        }
+    });
 }
 
 function togglePilihan(select) {

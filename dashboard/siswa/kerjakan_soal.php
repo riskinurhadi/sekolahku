@@ -36,13 +36,21 @@ if ($hasil_exist) {
 }
 
 // Get item soal
-$item_soal = $conn->query("SELECT * FROM item_soal WHERE soal_id = $soal_id ORDER BY urutan")->fetch_all(MYSQLI_ASSOC);
+$stmt = $conn->prepare("SELECT * FROM item_soal WHERE soal_id = ? ORDER BY urutan ASC");
+$stmt->bind_param("i", $soal_id);
+$stmt->execute();
+$item_soal = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
 
 // Get pilihan jawaban for each item
-foreach ($item_soal as &$item) {
+foreach ($item_soal as $key => $item) {
     $item_id = $item['id'];
-    $pilihan = $conn->query("SELECT * FROM pilihan_jawaban WHERE item_soal_id = $item_id ORDER BY urutan")->fetch_all(MYSQLI_ASSOC);
-    $item['pilihan'] = $pilihan;
+    $stmt = $conn->prepare("SELECT * FROM pilihan_jawaban WHERE item_soal_id = ? ORDER BY urutan ASC");
+    $stmt->bind_param("i", $item_id);
+    $stmt->execute();
+    $pilihan = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+    $item_soal[$key]['pilihan'] = $pilihan;
 }
 
 // Handle form submission
@@ -59,13 +67,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $total_poin = 0;
     $poin_diperoleh = 0;
     
-    // Process answers
-    foreach ($item_soal as $item) {
+    // Re-get item soal to ensure fresh data
+    $stmt = $conn->prepare("SELECT * FROM item_soal WHERE soal_id = ? ORDER BY urutan ASC");
+    $stmt->bind_param("i", $soal_id);
+    $stmt->execute();
+    $item_soal_fresh = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+    
+    // Process answers - collect all first, then process
+    $jawaban_data = [];
+    foreach ($item_soal_fresh as $item) {
         $item_id = $item['id'];
         $total_poin += $item['poin'];
-        
-        // Delete existing answer
-        $conn->query("DELETE FROM jawaban_siswa WHERE soal_id = $soal_id AND siswa_id = $siswa_id AND item_soal_id = $item_id");
         
         if ($item['jenis_jawaban'] == 'pilihan_ganda') {
             $pilihan_id = $_POST['jawaban'][$item_id] ?? 0;
@@ -77,27 +90,50 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $pilihan = $stmt->get_result()->fetch_assoc();
                 $stmt->close();
                 
-                $poin = $pilihan['is_benar'] ? $item['poin'] : 0;
+                $poin = $pilihan && $pilihan['is_benar'] ? $item['poin'] : 0;
                 $poin_diperoleh += $poin;
                 
-                $stmt = $conn->prepare("INSERT INTO jawaban_siswa (soal_id, siswa_id, item_soal_id, pilihan_jawaban_id, poin_diperoleh) VALUES (?, ?, ?, ?, ?)");
-                $stmt->bind_param("iiiii", $soal_id, $siswa_id, $item_id, $pilihan_id, $poin);
-                $stmt->execute();
-                $stmt->close();
+                $jawaban_data[] = [
+                    'item_id' => $item_id,
+                    'pilihan_id' => $pilihan_id,
+                    'poin' => $poin,
+                    'type' => 'pilihan_ganda'
+                ];
             }
         } else {
             $jawaban_text = $_POST['jawaban'][$item_id] ?? '';
-            if (!empty($jawaban_text)) {
+            if (!empty(trim($jawaban_text))) {
                 // For isian/essay, give full points (can be reviewed by teacher later)
                 $poin = $item['poin'];
                 $poin_diperoleh += $poin;
                 
-                $stmt = $conn->prepare("INSERT INTO jawaban_siswa (soal_id, siswa_id, item_soal_id, jawaban, poin_diperoleh) VALUES (?, ?, ?, ?, ?)");
-                $stmt->bind_param("iissi", $soal_id, $siswa_id, $item_id, $jawaban_text, $poin);
-                $stmt->execute();
-                $stmt->close();
+                $jawaban_data[] = [
+                    'item_id' => $item_id,
+                    'jawaban_text' => $jawaban_text,
+                    'poin' => $poin,
+                    'type' => 'text'
+                ];
             }
         }
+    }
+    
+    // Delete all existing answers for this soal and siswa first
+    $stmt = $conn->prepare("DELETE FROM jawaban_siswa WHERE soal_id = ? AND siswa_id = ?");
+    $stmt->bind_param("ii", $soal_id, $siswa_id);
+    $stmt->execute();
+    $stmt->close();
+    
+    // Insert all answers
+    foreach ($jawaban_data as $jawaban) {
+        if ($jawaban['type'] == 'pilihan_ganda') {
+            $stmt = $conn->prepare("INSERT INTO jawaban_siswa (soal_id, siswa_id, item_soal_id, pilihan_jawaban_id, poin_diperoleh) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("iiiii", $soal_id, $siswa_id, $jawaban['item_id'], $jawaban['pilihan_id'], $jawaban['poin']);
+        } else {
+            $stmt = $conn->prepare("INSERT INTO jawaban_siswa (soal_id, siswa_id, item_soal_id, jawaban, poin_diperoleh) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("iissi", $soal_id, $siswa_id, $jawaban['item_id'], $jawaban['jawaban_text'], $jawaban['poin']);
+        }
+        $stmt->execute();
+        $stmt->close();
     }
     
     // Calculate nilai
@@ -120,11 +156,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 $conn->close();
 ?>
 
-<div class="row mb-4">
-    <div class="col-12">
-        <h2 class="mb-0"><?php echo htmlspecialchars($soal['judul']); ?></h2>
-        <p class="text-muted">Mata Pelajaran: <?php echo htmlspecialchars($soal['nama_pelajaran']); ?> | Waktu: <?php echo $soal['waktu_pengerjaan']; ?> menit</p>
-    </div>
+<div class="page-header">
+    <h2><?php echo htmlspecialchars($soal['judul']); ?></h2>
+    <p>Mata Pelajaran: <?php echo htmlspecialchars($soal['nama_pelajaran']); ?> | Waktu: <?php echo $soal['waktu_pengerjaan']; ?> menit</p>
 </div>
 
 <?php if (!empty($soal['deskripsi'])): ?>
@@ -133,16 +167,22 @@ $conn->close();
     </div>
 <?php endif; ?>
 
+<?php if (empty($item_soal)): ?>
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i> Belum ada pertanyaan untuk soal ini.
+    </div>
+<?php else: ?>
 <form method="POST" id="soalForm">
     <?php foreach ($item_soal as $index => $item): ?>
         <div class="card mb-3">
-            <div class="card-header">
-                <h5 class="mb-0">Pertanyaan <?php echo $index + 1; ?> <span class="badge bg-primary"><?php echo $item['poin']; ?> Poin</span></h5>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Pertanyaan <?php echo $index + 1; ?></h5>
+                <span class="badge bg-primary"><?php echo $item['poin']; ?> Poin</span>
             </div>
             <div class="card-body">
                 <p class="mb-3"><strong><?php echo htmlspecialchars($item['pertanyaan']); ?></strong></p>
                 
-                <?php if ($item['jenis_jawaban'] == 'pilihan_ganda' && count($item['pilihan']) > 0): ?>
+                <?php if ($item['jenis_jawaban'] == 'pilihan_ganda' && !empty($item['pilihan'])): ?>
                     <div class="ms-4">
                         <?php foreach ($item['pilihan'] as $pilihan): ?>
                             <div class="form-check mb-2">
@@ -173,6 +213,7 @@ $conn->close();
         </a>
     </div>
 </form>
+<?php endif; ?>
 
 <?php require_once '../../includes/footer.php'; ?>
 
