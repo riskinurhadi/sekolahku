@@ -106,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
     // Update hasil_ujian
     $stmt = $conn->prepare("UPDATE hasil_ujian SET total_poin = ?, poin_diperoleh = ?, nilai = ?, status = 'selesai', waktu_selesai = ? WHERE soal_id = ? AND siswa_id = ?");
-    $stmt->bind_param("iidssii", $total_poin, $poin_diperoleh, $nilai, $waktu_selesai, $soal_id, $siswa_id);
+    $stmt->bind_param("iidsii", $total_poin, $poin_diperoleh, $nilai, $waktu_selesai, $soal_id, $siswa_id);
     $stmt->execute();
     $stmt->close();
     
