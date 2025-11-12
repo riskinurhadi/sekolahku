@@ -25,9 +25,14 @@ if (!$hasil) {
 }
 
 // Get item soal and jawaban
-$item_soal = $conn->query("SELECT * FROM item_soal WHERE soal_id = $soal_id ORDER BY urutan")->fetch_all(MYSQLI_ASSOC);
+$stmt = $conn->prepare("SELECT * FROM item_soal WHERE soal_id = ? ORDER BY urutan");
+$stmt->bind_param("i", $soal_id);
+$stmt->execute();
+$item_soal = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
 
-foreach ($item_soal as &$item) {
+// Get jawaban dan pilihan untuk setiap item
+foreach ($item_soal as $key => $item) {
     $item_id = $item['id'];
     
     // Get jawaban siswa
@@ -40,22 +45,36 @@ foreach ($item_soal as &$item) {
     $jawaban = $stmt->get_result()->fetch_assoc();
     $stmt->close();
     
-    $item['jawaban'] = $jawaban;
+    $item_soal[$key]['jawaban'] = $jawaban;
     
     // Get all pilihan for display
-    $pilihan = $conn->query("SELECT * FROM pilihan_jawaban WHERE item_soal_id = $item_id ORDER BY urutan")->fetch_all(MYSQLI_ASSOC);
-    $item['pilihan'] = $pilihan;
+    $stmt = $conn->prepare("SELECT * FROM pilihan_jawaban WHERE item_soal_id = ? ORDER BY urutan");
+    $stmt->bind_param("i", $item_id);
+    $stmt->execute();
+    $pilihan = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+    
+    $item_soal[$key]['pilihan'] = $pilihan;
 }
 
 $conn->close();
+
+// Show success message if redirected from submit
+if (isset($_GET['success']) && $_GET['success'] == 1) {
+    echo "<script>showSuccess('Soal berhasil dikerjakan!');</script>";
+}
 ?>
 
-<div class="row mb-4">
-    <div class="col-12">
-        <h2 class="mb-0">Hasil Ujian</h2>
-        <p class="text-muted"><?php echo htmlspecialchars($hasil['judul']); ?> - <?php echo htmlspecialchars($hasil['nama_pelajaran']); ?></p>
-    </div>
+<div class="page-header">
+    <h2>Hasil Ujian</h2>
+    <p><?php echo htmlspecialchars($hasil['judul']); ?> - <?php echo htmlspecialchars($hasil['nama_pelajaran']); ?></p>
 </div>
+
+<?php if (empty($item_soal)): ?>
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i> Belum ada item soal untuk soal ini.
+    </div>
+<?php else: ?>
 
 <!-- Summary Card -->
 <div class="row mb-4">
@@ -108,21 +127,21 @@ $conn->close();
                         <div class="card-body">
                             <p class="mb-3"><strong><?php echo htmlspecialchars($item['pertanyaan']); ?></strong></p>
                             
-                            <?php if ($item['jenis_jawaban'] == 'pilihan_ganda'): ?>
+                            <?php if ($item['jenis_jawaban'] == 'pilihan_ganda' && !empty($item['pilihan'])): ?>
                                 <div class="ms-4">
                                     <?php foreach ($item['pilihan'] as $pilihan): ?>
                                         <div class="form-check mb-2">
                                             <input class="form-check-input" type="radio" disabled
-                                                <?php echo ($item['jawaban']['pilihan_jawaban_id'] ?? 0) == $pilihan['id'] ? 'checked' : ''; ?>>
+                                                <?php echo (isset($item['jawaban']['pilihan_jawaban_id']) && $item['jawaban']['pilihan_jawaban_id'] == $pilihan['id']) ? 'checked' : ''; ?>>
                                             <label class="form-check-label <?php 
                                                 if ($pilihan['is_benar']) echo 'text-success fw-bold';
-                                                if (($item['jawaban']['pilihan_jawaban_id'] ?? 0) == $pilihan['id'] && !$pilihan['is_benar']) echo 'text-danger';
+                                                if (isset($item['jawaban']['pilihan_jawaban_id']) && $item['jawaban']['pilihan_jawaban_id'] == $pilihan['id'] && !$pilihan['is_benar']) echo 'text-danger';
                                             ?>">
                                                 <?php echo htmlspecialchars($pilihan['pilihan']); ?>
                                                 <?php if ($pilihan['is_benar']): ?>
                                                     <i class="bi bi-check-circle-fill text-success"></i> (Benar)
                                                 <?php endif; ?>
-                                                <?php if (($item['jawaban']['pilihan_jawaban_id'] ?? 0) == $pilihan['id'] && !$pilihan['is_benar']): ?>
+                                                <?php if (isset($item['jawaban']['pilihan_jawaban_id']) && $item['jawaban']['pilihan_jawaban_id'] == $pilihan['id'] && !$pilihan['is_benar']): ?>
                                                     <i class="bi bi-x-circle-fill text-danger"></i> (Jawaban Anda)
                                                 <?php endif; ?>
                                             </label>
@@ -149,5 +168,6 @@ $conn->close();
     </div>
 </div>
 
-<?php require_once '../../includes/footer.php'; ?>
+<?php endif; ?>
 
+<?php require_once '../../includes/footer.php'; ?>

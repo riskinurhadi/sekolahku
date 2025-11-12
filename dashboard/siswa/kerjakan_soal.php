@@ -112,12 +112,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
     $conn->close();
     
-    echo "<script>
-        showSuccess('Soal berhasil dikerjakan!');
-        setTimeout(function() {
-            window.location.href = 'hasil.php?soal_id=$soal_id';
-        }, 1500);
-    </script>";
+    // Redirect dengan parameter success
+    header('Location: hasil.php?soal_id=' . $soal_id . '&success=1');
     exit();
 }
 
