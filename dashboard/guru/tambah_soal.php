@@ -2,7 +2,6 @@
 $page_title = 'Tambah Soal Baru';
 require_once '../../config/session.php';
 requireRole(['guru']);
-require_once '../../includes/header.php';
 
 $conn = getConnection();
 $guru_id = $_SESSION['user_id'];
@@ -11,7 +10,7 @@ $message = '';
 // Get mata pelajaran for dropdown (harus diambil sebelum POST processing)
 $mata_pelajaran = $conn->query("SELECT * FROM mata_pelajaran WHERE guru_id = $guru_id ORDER BY nama_pelajaran")->fetch_all(MYSQLI_ASSOC);
 
-// Handle form submission
+// Handle form submission BEFORE header output
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $mata_pelajaran_id = $_POST['mata_pelajaran_id'];
     $judul = $_POST['judul'];
@@ -71,14 +70,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         
         $conn->close();
-        echo "<script>showSuccess('Soal berhasil ditambahkan!'); setTimeout(function(){ window.location.href = 'soal.php'; }, 1500);</script>";
-        exit(); // Stop execution after redirect
+        // Redirect dengan parameter success BEFORE any output
+        header('Location: soal.php?success=1');
+        exit();
     } else {
         $message = 'error:Gagal menambahkan soal!';
     }
 }
 
 $conn->close();
+require_once '../../includes/header.php';
 ?>
 
 <?php if ($message): ?>
@@ -356,4 +357,3 @@ document.querySelectorAll('.jenis-jawaban').forEach(select => {
 </script>
 
 <?php require_once '../../includes/footer.php'; ?>
-

@@ -8,6 +8,11 @@ $conn = getConnection();
 $guru_id = $_SESSION['user_id'];
 $message = '';
 
+// Check for success parameter from redirect
+if (isset($_GET['success']) && $_GET['success'] == 1) {
+    $message = 'success:Soal berhasil ditambahkan!';
+}
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['action'])) {
