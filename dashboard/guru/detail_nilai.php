@@ -64,11 +64,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
         
         // Recalculate total poin and nilai
         $stmt = $conn->prepare("SELECT 
-            SUM(is.poin) as total_poin,
+            SUM(its.poin) as total_poin,
             COALESCE(SUM(js.poin_diperoleh), 0) as poin_diperoleh
-            FROM item_soal is
-            LEFT JOIN jawaban_siswa js ON is.id = js.item_soal_id AND js.siswa_id = ?
-            WHERE is.soal_id = ?");
+            FROM item_soal its
+            LEFT JOIN jawaban_siswa js ON its.id = js.item_soal_id AND js.siswa_id = ?
+            WHERE its.soal_id = ?");
         $stmt->bind_param("ii", $siswa_id, $soal_id);
         $stmt->execute();
         $result = $stmt->get_result()->fetch_assoc();
