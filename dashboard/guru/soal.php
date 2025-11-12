@@ -133,13 +133,14 @@ $conn->close();
                                         <td><?php echo $soal['waktu_pengerjaan']; ?> menit</td>
                                         <td><?php echo date('d/m/Y H:i', strtotime($soal['created_at'])); ?></td>
                                         <td>
-                                            <form method="POST" style="display: inline;" onsubmit="return confirmDelete('soal');">
-                                                <input type="hidden" name="action" value="delete">
-                                                <input type="hidden" name="id" value="<?php echo $soal['id']; ?>">
-                                                <button type="submit" class="btn btn-sm btn-danger">
+                                            <div class="btn-group">
+                                                <a href="nilai_ujian.php?soal_id=<?php echo $soal['id']; ?>" class="btn btn-sm btn-info" title="Lihat & Nilai Hasil Ujian">
+                                                    <i class="bi bi-clipboard-check"></i> Nilai
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-danger" onclick="confirmDeleteSoal(<?php echo $soal['id']; ?>, '<?php echo htmlspecialchars($soal['judul'], ENT_QUOTES); ?>')">
                                                     <i class="bi bi-trash"></i> Hapus
                                                 </button>
-                                            </form>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -173,13 +174,42 @@ $(document).ready(function() {
     });
     <?php endif; ?>
     
-    // Confirm delete
-    function confirmDelete(type) {
-        return confirm('Apakah Anda yakin ingin menghapus ' + type + ' ini?');
+    // Confirm delete dengan SweetAlert2
+    function confirmDeleteSoal(id, judul) {
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            html: 'Soal <strong>"' + judul + '"</strong> akan dihapus secara permanen!<br>Semua data terkait (pertanyaan, jawaban siswa, hasil ujian) juga akan ikut terhapus.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Create form and submit
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.style.display = 'none';
+                
+                const actionInput = document.createElement('input');
+                actionInput.type = 'hidden';
+                actionInput.name = 'action';
+                actionInput.value = 'delete';
+                form.appendChild(actionInput);
+                
+                const idInput = document.createElement('input');
+                idInput.type = 'hidden';
+                idInput.name = 'id';
+                idInput.value = id;
+                form.appendChild(idInput);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
     }
-    
-    // Make confirmDelete available globally
-    window.confirmDelete = confirmDelete;
 });
 </script>
 

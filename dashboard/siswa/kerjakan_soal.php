@@ -103,9 +103,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         } else {
             $jawaban_text = $_POST['jawaban'][$item_id] ?? '';
             if (!empty(trim($jawaban_text))) {
-                // For isian/essay, give full points (can be reviewed by teacher later)
-                $poin = $item['poin'];
-                $poin_diperoleh += $poin;
+                // For isian/essay, set poin to 0 initially (will be reviewed by teacher)
+                $poin = 0; // Guru akan menilai manual nanti
                 
                 $jawaban_data[] = [
                     'item_id' => $item_id,
