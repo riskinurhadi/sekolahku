@@ -4,6 +4,19 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Fungsi untuk mendapatkan base path relatif ke root
+function getBasePath() {
+    if (!isset($_SERVER['SCRIPT_NAME'])) {
+        return '';
+    }
+    
+    $script_path = dirname($_SERVER['SCRIPT_NAME']);
+    $path_parts = array_filter(explode('/', $script_path));
+    $levels = count($path_parts);
+    
+    return $levels > 0 ? str_repeat('../', $levels) : '';
+}
+
 // Fungsi untuk cek apakah user sudah login
 function isLoggedIn() {
     return isset($_SESSION['user_id']) && isset($_SESSION['user_role']);

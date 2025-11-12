@@ -12,7 +12,7 @@
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     
     <!-- Custom JS -->
-    <script src="../assets/js/main.js"></script>
+    <script src="<?php echo getBasePath(); ?>assets/js/main.js"></script>
     
     <?php if (isset($additional_scripts)): ?>
         <?php echo $additional_scripts; ?>
