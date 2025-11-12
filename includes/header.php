@@ -87,6 +87,11 @@ $stmt->close();
                         </a>
                     </li>
                     <li>
+                        <a href="mulai_pelajaran.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'mulai_pelajaran.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-play-circle"></i> Mulai Pelajaran
+                        </a>
+                    </li>
+                    <li>
                         <a href="soal.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'soal.php' ? 'active' : ''; ?>">
                             <i class="bi bi-file-earmark-text"></i> Soal & Quiz
                         </a>
@@ -94,6 +99,11 @@ $stmt->close();
                 <?php endif; ?>
                 
                 <?php if ($_SESSION['user_role'] == 'siswa'): ?>
+                    <li>
+                        <a href="presensi.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'presensi.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-clipboard-check"></i> Presensi
+                        </a>
+                    </li>
                     <li>
                         <a href="soal_saya.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'soal_saya.php' ? 'active' : ''; ?>">
                             <i class="bi bi-file-earmark-text"></i> Soal Saya

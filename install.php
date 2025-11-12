@@ -144,6 +144,34 @@ $password_hash = password_hash('admin123', PASSWORD_DEFAULT);
                             UNIQUE KEY unique_soal_siswa (soal_id, siswa_id),
                             INDEX idx_soal (soal_id),
                             INDEX idx_siswa (siswa_id)
+                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+                        
+                        "CREATE TABLE IF NOT EXISTS sesi_pelajaran (
+                            id INT PRIMARY KEY AUTO_INCREMENT,
+                            mata_pelajaran_id INT NOT NULL,
+                            guru_id INT NOT NULL,
+                            kode_presensi VARCHAR(10) UNIQUE NOT NULL,
+                            waktu_mulai DATETIME NOT NULL,
+                            waktu_selesai DATETIME NOT NULL,
+                            status ENUM('aktif', 'selesai') DEFAULT 'aktif',
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                            INDEX idx_mata_pelajaran (mata_pelajaran_id),
+                            INDEX idx_guru (guru_id),
+                            INDEX idx_kode (kode_presensi),
+                            INDEX idx_status (status)
+                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+                        
+                        "CREATE TABLE IF NOT EXISTS presensi (
+                            id INT PRIMARY KEY AUTO_INCREMENT,
+                            sesi_pelajaran_id INT NOT NULL,
+                            siswa_id INT NOT NULL,
+                            waktu_presensi DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            status ENUM('hadir', 'terlambat', 'tidak_hadir') DEFAULT 'hadir',
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            UNIQUE KEY unique_sesi_siswa (sesi_pelajaran_id, siswa_id),
+                            INDEX idx_sesi (sesi_pelajaran_id),
+                            INDEX idx_siswa (siswa_id)
                         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
                     ];
                     
@@ -162,7 +190,11 @@ $password_hash = password_hash('admin123', PASSWORD_DEFAULT);
                         "ALTER TABLE jawaban_siswa ADD FOREIGN KEY (item_soal_id) REFERENCES item_soal(id) ON DELETE CASCADE",
                         "ALTER TABLE jawaban_siswa ADD FOREIGN KEY (pilihan_jawaban_id) REFERENCES pilihan_jawaban(id) ON DELETE SET NULL",
                         "ALTER TABLE hasil_ujian ADD FOREIGN KEY (soal_id) REFERENCES soal(id) ON DELETE CASCADE",
-                        "ALTER TABLE hasil_ujian ADD FOREIGN KEY (siswa_id) REFERENCES users(id) ON DELETE CASCADE"
+                        "ALTER TABLE hasil_ujian ADD FOREIGN KEY (siswa_id) REFERENCES users(id) ON DELETE CASCADE",
+                        "ALTER TABLE sesi_pelajaran ADD FOREIGN KEY (mata_pelajaran_id) REFERENCES mata_pelajaran(id) ON DELETE CASCADE",
+                        "ALTER TABLE sesi_pelajaran ADD FOREIGN KEY (guru_id) REFERENCES users(id) ON DELETE CASCADE",
+                        "ALTER TABLE presensi ADD FOREIGN KEY (sesi_pelajaran_id) REFERENCES sesi_pelajaran(id) ON DELETE CASCADE",
+                        "ALTER TABLE presensi ADD FOREIGN KEY (siswa_id) REFERENCES users(id) ON DELETE CASCADE"
                     ];
                     
                     echo "<h5>Membuat Tabel...</h5>";
