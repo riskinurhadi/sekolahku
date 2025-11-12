@@ -1,7 +1,7 @@
 -- Database Schema untuk Portal Sekolah
 
-CREATE DATABASE IF NOT EXISTS portal_sekolah;
-USE portal_sekolah;
+CREATE DATABASE IF NOT EXISTS sekolahku;
+USE sekolahku;
 
 -- Tabel Users (untuk semua layer)
 CREATE TABLE users (
