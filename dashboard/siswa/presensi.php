@@ -3,8 +3,8 @@ $page_title = 'Presensi';
 require_once '../../config/session.php';
 require_once '../../config/database.php';
 requireRole(['siswa']);
-require_once '../../includes/header.php';
 
+// Handle presensi - MUST be before header output
 $conn = getConnection();
 $siswa_id = $_SESSION['user_id'];
 $sekolah_id = $_SESSION['sekolah_id'] ?? null;
@@ -20,11 +20,12 @@ if (!$sekolah_id) {
     $sekolah_id = $user['sekolah_id'] ?? null;
 }
 
-// Handle presensi
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'presensi') {
-    $kode_presensi = strtoupper(trim($_POST['kode_presensi']));
+    $kode_presensi = strtoupper(trim($_POST['kode_presensi'] ?? ''));
     
-    if (!$sekolah_id) {
+    if (empty($kode_presensi)) {
+        $message = 'error:Kode presensi tidak boleh kosong!';
+    } elseif (!$sekolah_id) {
         $message = 'error:Anda belum terdaftar di sekolah!';
     } else {
         // Cari sesi dengan kode tersebut yang masih aktif (lebih fleksibel - masih bisa presensi sampai waktu selesai)
@@ -62,12 +63,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                 $stmt->bind_param("iis", $sesi['id'], $siswa_id, $status);
                 
                 if ($stmt->execute()) {
-                    $conn->close();
-                    // Redirect dengan parameter success
+                    $stmt->close();
+                    // Redirect dengan parameter success BEFORE any output
                     header('Location: presensi.php?success=1&status=' . urlencode($status == 'terlambat' ? 'Terlambat' : 'Hadir'));
+                    $conn->close();
                     exit();
                 } else {
-                    $message = 'error:Gagal melakukan presensi!';
+                    $message = 'error:Gagal melakukan presensi! Error: ' . $conn->error;
                 }
                 $stmt->close();
             }
@@ -83,44 +85,58 @@ if (isset($_GET['success']) && $_GET['success'] == 1) {
     $message = 'success:Presensi berhasil! Status: ' . $status_text;
 }
 
+// Now include header AFTER handling POST
+require_once '../../includes/header.php';
+
 // Get active sessions for this school
+$active_sessions = [];
 if ($sekolah_id) {
     // Get sessions that are active and within time range, or just active (more flexible)
-    $stmt = $conn->prepare("SELECT sp.*, mp.nama_pelajaran, u.nama_lengkap as nama_guru,
-        (SELECT COUNT(*) FROM presensi WHERE sesi_pelajaran_id = sp.id) as jumlah_presensi,
-        CASE 
-            WHEN NOW() < sp.waktu_mulai THEN 'belum_mulai'
-            WHEN NOW() BETWEEN sp.waktu_mulai AND sp.waktu_selesai THEN 'berlangsung'
-            ELSE 'selesai'
-        END as status_waktu
-        FROM sesi_pelajaran sp 
-        JOIN mata_pelajaran mp ON sp.mata_pelajaran_id = mp.id 
-        JOIN users u ON sp.guru_id = u.id
-        WHERE sp.status = 'aktif' 
-        AND NOW() <= sp.waktu_selesai
-        AND mp.sekolah_id = ?
-        ORDER BY sp.waktu_mulai DESC");
-    $stmt->bind_param("i", $sekolah_id);
-    $stmt->execute();
-    $active_sessions = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
-} else {
-    $active_sessions = [];
+    // Check if table exists first
+    $table_check = $conn->query("SHOW TABLES LIKE 'sesi_pelajaran'");
+    if ($table_check && $table_check->num_rows > 0) {
+        $stmt = $conn->prepare("SELECT sp.*, mp.nama_pelajaran, u.nama_lengkap as nama_guru,
+            (SELECT COUNT(*) FROM presensi WHERE sesi_pelajaran_id = sp.id) as jumlah_presensi,
+            CASE 
+                WHEN NOW() < sp.waktu_mulai THEN 'belum_mulai'
+                WHEN NOW() BETWEEN sp.waktu_mulai AND sp.waktu_selesai THEN 'berlangsung'
+                ELSE 'selesai'
+            END as status_waktu
+            FROM sesi_pelajaran sp 
+            JOIN mata_pelajaran mp ON sp.mata_pelajaran_id = mp.id 
+            JOIN users u ON sp.guru_id = u.id
+            WHERE sp.status = 'aktif' 
+            AND NOW() <= sp.waktu_selesai
+            AND mp.sekolah_id = ?
+            ORDER BY sp.waktu_mulai DESC");
+        if ($stmt) {
+            $stmt->bind_param("i", $sekolah_id);
+            $stmt->execute();
+            $active_sessions = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+            $stmt->close();
+        }
+    }
 }
 
 // Get my presensi history
-$stmt = $conn->prepare("SELECT p.*, sp.kode_presensi, mp.nama_pelajaran, u.nama_lengkap as nama_guru
-    FROM presensi p
-    JOIN sesi_pelajaran sp ON p.sesi_pelajaran_id = sp.id
-    JOIN mata_pelajaran mp ON sp.mata_pelajaran_id = mp.id
-    JOIN users u ON sp.guru_id = u.id
-    WHERE p.siswa_id = ?
-    ORDER BY p.waktu_presensi DESC
-    LIMIT 10");
-$stmt->bind_param("i", $siswa_id);
-$stmt->execute();
-$my_presensi = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
+$my_presensi = [];
+$table_check = $conn->query("SHOW TABLES LIKE 'presensi'");
+if ($table_check && $table_check->num_rows > 0) {
+    $stmt = $conn->prepare("SELECT p.*, sp.kode_presensi, mp.nama_pelajaran, u.nama_lengkap as nama_guru
+        FROM presensi p
+        JOIN sesi_pelajaran sp ON p.sesi_pelajaran_id = sp.id
+        JOIN mata_pelajaran mp ON sp.mata_pelajaran_id = mp.id
+        JOIN users u ON sp.guru_id = u.id
+        WHERE p.siswa_id = ?
+        ORDER BY p.waktu_presensi DESC
+        LIMIT 10");
+    if ($stmt) {
+        $stmt->bind_param("i", $siswa_id);
+        $stmt->execute();
+        $my_presensi = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+    }
+}
 
 $conn->close();
 ?>
@@ -151,13 +167,13 @@ $conn->close();
                 <h5 class="mb-0"><i class="bi bi-key"></i> Input Kode Presensi</h5>
             </div>
             <div class="card-body">
-                <form method="POST" id="presensiForm" onsubmit="return validatePresensi()">
+                <form method="POST" id="presensiForm" action="presensi.php" onsubmit="return validatePresensi()">
                     <input type="hidden" name="action" value="presensi">
                     <div class="mb-3">
                         <label class="form-label">Masukkan Kode Presensi <span class="text-danger">*</span></label>
                         <input type="text" class="form-control text-center fs-4 fw-bold" name="kode_presensi" id="kode_presensi"
-                            placeholder="ABCD12" maxlength="6" style="letter-spacing: 0.5em;" required autocomplete="off">
-                        <small class="text-muted">Masukkan kode yang diberikan oleh guru</small>
+                            placeholder="ABCD12" maxlength="10" style="letter-spacing: 0.5em;" required autocomplete="off" value="<?php echo isset($_POST['kode_presensi']) ? htmlspecialchars($_POST['kode_presensi']) : ''; ?>">
+                        <small class="text-muted">Masukkan kode yang diberikan oleh guru (minimal 3 karakter)</small>
                     </div>
                     <button type="submit" class="btn btn-primary w-100" id="btnPresensi">
                         <i class="bi bi-check-circle"></i> Presensi
@@ -279,8 +295,8 @@ $conn->close();
 <script>
 function validatePresensi() {
     const kode = document.getElementById('kode_presensi').value.trim().toUpperCase();
-    if (!kode || kode.length < 6) {
-        showError('Kode presensi harus 6 karakter!');
+    if (!kode || kode.length < 3) {
+        showError('Kode presensi minimal 3 karakter!');
         return false;
     }
     
@@ -289,6 +305,7 @@ function validatePresensi() {
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Memproses...';
     
+    // Allow form to submit normally
     return true;
 }
 
@@ -307,7 +324,18 @@ $(document).ready(function() {
     // Clear form after successful presensi
     <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
     $('#kode_presensi').val('');
+    // Re-enable button in case of redirect
+    $('#btnPresensi').prop('disabled', false).html('<i class="bi bi-check-circle"></i> Presensi');
     <?php endif; ?>
+    
+    // Prevent double submit
+    $('#presensiForm').on('submit', function(e) {
+        const btn = $('#btnPresensi');
+        if (btn.prop('disabled')) {
+            e.preventDefault();
+            return false;
+        }
+    });
 });
 </script>
 
