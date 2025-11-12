@@ -13,17 +13,50 @@ $mata_pelajaran = $conn->query("SELECT * FROM mata_pelajaran WHERE guru_id = $gu
 
 // Handle form submission BEFORE header output
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $mata_pelajaran_id = $_POST['mata_pelajaran_id'];
-    $judul = $_POST['judul'];
-    $deskripsi = $_POST['deskripsi'] ?? '';
-    $jenis = $_POST['jenis'];
-    $waktu_pengerjaan = $_POST['waktu_pengerjaan'] ?? 60;
-    $tanggal_mulai = $_POST['tanggal_mulai'] ?? null;
-    $tanggal_selesai = $_POST['tanggal_selesai'] ?? null;
-    $status = $_POST['status'] ?? 'draft';
+    // Validasi field required
+    $errors = [];
     
-    $stmt = $conn->prepare("INSERT INTO soal (mata_pelajaran_id, guru_id, judul, deskripsi, jenis, waktu_pengerjaan, tanggal_mulai, tanggal_selesai, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("iisssisss", $mata_pelajaran_id, $guru_id, $judul, $deskripsi, $jenis, $waktu_pengerjaan, $tanggal_mulai, $tanggal_selesai, $status);
+    if (empty($_POST['mata_pelajaran_id'])) {
+        $errors[] = 'Mata pelajaran harus dipilih';
+    }
+    if (empty(trim($_POST['judul']))) {
+        $errors[] = 'Judul soal harus diisi';
+    }
+    if (empty($_POST['jenis'])) {
+        $errors[] = 'Jenis soal harus dipilih';
+    }
+    
+    // Validasi pertanyaan minimal 1
+    $pertanyaan_count = 0;
+    if (isset($_POST['pertanyaan']) && is_array($_POST['pertanyaan'])) {
+        foreach ($_POST['pertanyaan'] as $pertanyaan) {
+            if (!empty(trim($pertanyaan))) {
+                $pertanyaan_count++;
+            }
+        }
+    }
+    if ($pertanyaan_count == 0) {
+        $errors[] = 'Minimal harus ada 1 pertanyaan yang diisi';
+    }
+    
+    // Jika ada error, set message dan skip insert
+    if (!empty($errors)) {
+        $message = 'error:' . implode(', ', $errors);
+    } else {
+        $mata_pelajaran_id = $_POST['mata_pelajaran_id'];
+        $judul = trim($_POST['judul']);
+        $deskripsi = trim($_POST['deskripsi'] ?? '');
+        $jenis = $_POST['jenis'];
+        $waktu_pengerjaan = !empty($_POST['waktu_pengerjaan']) ? (int)$_POST['waktu_pengerjaan'] : 60;
+        
+        // Handle datetime - set to NULL if empty
+        $tanggal_mulai = !empty($_POST['tanggal_mulai']) ? $_POST['tanggal_mulai'] : null;
+        $tanggal_selesai = !empty($_POST['tanggal_selesai']) ? $_POST['tanggal_selesai'] : null;
+        
+        $status = $_POST['status'] ?? 'draft';
+        
+        $stmt = $conn->prepare("INSERT INTO soal (mata_pelajaran_id, guru_id, judul, deskripsi, jenis, waktu_pengerjaan, tanggal_mulai, tanggal_selesai, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("iisssisss", $mata_pelajaran_id, $guru_id, $judul, $deskripsi, $jenis, $waktu_pengerjaan, $tanggal_mulai, $tanggal_selesai, $status);
     
     if ($stmt->execute()) {
         $soal_id = $stmt->insert_id;
@@ -74,8 +107,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Redirect dengan parameter success BEFORE any output
         header('Location: soal.php?success=1');
         exit();
-    } else {
-        $message = 'error:Gagal menambahkan soal!';
+        } else {
+            $message = 'error:Gagal menambahkan soal!';
+        }
     }
 }
 
@@ -115,7 +149,7 @@ require_once '../../includes/header.php';
                 <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Form Tambah Soal</h5>
             </div>
             <div class="card-body">
-                <form method="POST" id="addSoalForm">
+                <form method="POST" id="addSoalForm" onsubmit="return validateForm()">
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Mata Pelajaran <span class="text-danger">*</span></label>
@@ -251,6 +285,98 @@ require_once '../../includes/header.php';
 </div>
 
 <script>
+// Validasi form sebelum submit
+function validateForm() {
+    const form = document.getElementById('addSoalForm');
+    const errors = [];
+    
+    // Validasi mata pelajaran
+    const mataPelajaran = document.getElementById('mata_pelajaran_id');
+    if (!mataPelajaran.value) {
+        errors.push('Mata pelajaran harus dipilih');
+        mataPelajaran.classList.add('is-invalid');
+    } else {
+        mataPelajaran.classList.remove('is-invalid');
+    }
+    
+    // Validasi judul
+    const judul = document.querySelector('input[name="judul"]');
+    if (!judul.value.trim()) {
+        errors.push('Judul soal harus diisi');
+        judul.classList.add('is-invalid');
+    } else {
+        judul.classList.remove('is-invalid');
+    }
+    
+    // Validasi pertanyaan minimal 1
+    const pertanyaanInputs = document.querySelectorAll('textarea[name="pertanyaan[]"]');
+    let pertanyaanCount = 0;
+    pertanyaanInputs.forEach(input => {
+        if (input.value.trim()) {
+            pertanyaanCount++;
+            input.classList.remove('is-invalid');
+        }
+    });
+    
+    // Hanya tandai sebagai invalid jika tidak ada pertanyaan yang terisi sama sekali
+    if (pertanyaanCount === 0) {
+        errors.push('Minimal harus ada 1 pertanyaan yang diisi');
+        pertanyaanInputs.forEach(input => {
+            input.classList.add('is-invalid');
+        });
+    }
+    
+    // Validasi pilihan jawaban untuk pilihan ganda (hanya untuk pertanyaan yang terisi)
+    const pertanyaanItems = document.querySelectorAll('.pertanyaan-item');
+    pertanyaanItems.forEach((item, index) => {
+        const pertanyaanText = item.querySelector('textarea[name="pertanyaan[]"]');
+        // Hanya validasi jika pertanyaan terisi
+        if (pertanyaanText && pertanyaanText.value.trim()) {
+            const jenisJawaban = item.querySelector('select[name="jenis_jawaban[]"]');
+            if (jenisJawaban && jenisJawaban.value === 'pilihan_ganda') {
+                // Cari semua input pilihan dalam item ini
+                const pilihanContainer = item.querySelector('.pilihan-container');
+                if (pilihanContainer) {
+                    const pilihanInputs = pilihanContainer.querySelectorAll('input[type="text"][name*="pilihan"]');
+                    let hasPilihan = false;
+                    
+                    pilihanInputs.forEach(input => {
+                        if (input.value.trim()) {
+                            hasPilihan = true;
+                        }
+                    });
+                    
+                    if (!hasPilihan) {
+                        errors.push('Pertanyaan ' + (index + 1) + ': Pilihan jawaban harus diisi untuk pilihan ganda');
+                    }
+                    
+                    // Validasi jawaban benar
+                    const benarRadios = pilihanContainer.querySelectorAll('input[type="radio"]');
+                    let hasBenar = false;
+                    benarRadios.forEach(radio => {
+                        if (radio.checked) {
+                            hasBenar = true;
+                        }
+                    });
+                    
+                    if (!hasBenar) {
+                        errors.push('Pertanyaan ' + (index + 1) + ': Harus dipilih jawaban yang benar');
+                    }
+                }
+            }
+        }
+    });
+    
+    // Jika ada error, tampilkan dan prevent submit
+    if (errors.length > 0) {
+        showError(errors.join('<br>'));
+        return false;
+    }
+    
+    // Jika semua valid, allow submit
+    return true;
+}
+
 function tambahPertanyaan() {
     const container = document.getElementById('pertanyaan-container');
     const existingItems = container.querySelectorAll('.pertanyaan-item');
