@@ -128,8 +128,8 @@ $stmt->close();
             <!-- Top Header -->
             <div class="dashboard-top-header">
                 <div class="logo-section">
-                    <div class="logo-icon">IA</div>
-                    <h4 class="logo-text">Portal Sekolah Academy</h4>
+                    <!-- <div class="logo-icon">IA</div> -->
+                    <h4 class="logo-text">Dashboard Sekolahku</h4>
                 </div>
                 <div class="search-section">
                     <div class="search-wrapper">
