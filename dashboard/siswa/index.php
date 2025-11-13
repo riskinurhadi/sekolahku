@@ -49,11 +49,6 @@ $active_soal = $conn->query("SELECT s.*, mp.nama_pelajaran,
 $conn->close();
 ?>
 
-<div class="dashboard-header">
-    <h2>Selamat Datang, <?php echo htmlspecialchars($user['nama_lengkap']); ?>! 👋</h2>
-    <p>Berikut adalah ringkasan aktivitas pembelajaran Anda.</p>
-</div>
-
 <!-- Statistics Cards -->
 <div class="row statistics-row">
     <div class="col-xl-3 col-md-6 mb-4">

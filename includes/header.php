@@ -125,30 +125,40 @@ $stmt->close();
         
         <!-- Page Content -->
         <div id="content" class="content">
-            <!-- Top Navbar -->
-            <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
-                <div class="container-fluid">
-                    <button type="button" id="sidebarCollapse" class="btn btn-light">
-                        <i class="bi bi-list"></i>
-                    </button>
-                    
-                    <div class="ms-auto d-flex align-items-center">
-                        <div class="me-3">
-                            <span class="text-muted">Selamat Datang, <strong><?php echo htmlspecialchars($user['nama_lengkap']); ?>!</strong></span>
+            <!-- Top Header -->
+            <div class="dashboard-top-header">
+                <div class="welcome-section">
+                    <h2>Selamat Datang, <?php echo htmlspecialchars($user['nama_lengkap']); ?>!</h2>
+                    <p>Berikut adalah ringkasan aktivitas terbaru di <?php echo isset($user['sekolah_id']) && $user['sekolah_id'] ? 'website Anda' : 'sistem Anda'; ?>.</p>
+                </div>
+                <div class="user-profile-section">
+                    <div class="user-profile-info">
+                        <div class="user-avatar">
+                            <?php echo strtoupper(substr($user['nama_lengkap'], 0, 1)); ?>
                         </div>
-                        <div class="dropdown">
-                            <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-person-circle"></i> <?php echo htmlspecialchars($user['nama_lengkap']); ?>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="profil.php"><i class="bi bi-person"></i> Profil</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger" href="../logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
-                            </ul>
+                        <div class="user-details">
+                            <p class="user-name"><?php echo htmlspecialchars($user['nama_lengkap']); ?></p>
+                            <p class="user-role"><?php 
+                                $role_labels = [
+                                    'developer' => 'Developer',
+                                    'kepala_sekolah' => 'Kepala Sekolah',
+                                    'guru' => 'Guru',
+                                    'siswa' => 'Siswa'
+                                ];
+                                echo $role_labels[$_SESSION['user_role']] ?? ucfirst($_SESSION['user_role']);
+                            ?></p>
                         </div>
                     </div>
+                    <div class="user-actions">
+                        <a href="#" class="action-btn" title="Toggle Theme">
+                            <i class="bi bi-moon"></i>
+                        </a>
+                        <a href="../logout.php" class="action-btn logout-btn" title="Logout">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </a>
+                    </div>
                 </div>
-            </nav>
+            </div>
             
             <!-- Main Content -->
             <div class="container-fluid">
