@@ -39,7 +39,7 @@ $stmt->close();
         <!-- Sidebar -->
         <nav id="sidebar" class="sidebar">
             <div class="sidebar-header">
-                <h4><i class="bi bi-mortarboard-fill"></i> <?php echo isset($user['sekolah_id']) && $user['sekolah_id'] ? 'Sekolah' : 'Portal'; ?></h4>
+                <h4><i class="bi bi-mortarboard-fill"></i> <?php echo isset($user['sekolah_id']) && $user['sekolah_id'] ? 'Sekolah' : 'Portal'; ?>ku</h4>
             </div>
             
             <ul class="list-unstyled components">
