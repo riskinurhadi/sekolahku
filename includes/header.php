@@ -39,7 +39,7 @@ $stmt->close();
         <!-- Sidebar -->
         <nav id="sidebar" class="sidebar">
             <div class="sidebar-header">
-                <h4><i class="bi bi-mortarboard-fill"></i> <?php echo isset($user['sekolah_id']) && $user['sekolah_id'] ? 'Sekolah' : 'Portal'; ?></h4>
+                <h4><i class="bi bi-mortarboard-fill"></i> <?php echo isset($user['sekolah_id']) && $user['sekolah_id'] ? 'Sekolah' : 'Portal'; ?> Academy</h4>
             </div>
             
             <ul class="list-unstyled components">
@@ -129,7 +129,7 @@ $stmt->close();
             <div class="dashboard-top-header">
                 <div class="logo-section">
                     <div class="logo-icon">IA</div>
-                    <h4 class="logo-text">Portal Sekolah</h4>
+                    <h4 class="logo-text">Portal Sekolah Academy</h4>
                 </div>
                 <div class="search-section">
                     <div class="search-wrapper">
