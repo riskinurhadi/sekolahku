@@ -58,7 +58,7 @@ $conn->close();
             </div>
             <div class="stat-content">
                 <div class="stat-value"><?php echo $stats['total_soal_aktif']; ?></div>
-                <div class="stat-label">Soal Aktif</div>
+                <div class="stat-label">Soal<br>Aktif</div>
             </div>
         </div>
     </div>
@@ -70,7 +70,7 @@ $conn->close();
             </div>
             <div class="stat-content">
                 <div class="stat-value"><?php echo $stats['total_soal_selesai']; ?></div>
-                <div class="stat-label">Soal Selesai</div>
+                <div class="stat-label">Soal<br>Selesai</div>
             </div>
         </div>
     </div>
