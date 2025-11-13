@@ -129,7 +129,7 @@ $stmt->close();
             <div class="dashboard-top-header">
                 <div class="logo-section"> 
                     <!-- <div class="logo-icon">IA</div> -->
-                    <h4 class="logo-text">Dashboard Sekolahku</h4>
+                    <h4 class="logo-text">Dashboard</h4>
                 </div>
                 <div class="search-section">
                     <div class="search-wrapper">
