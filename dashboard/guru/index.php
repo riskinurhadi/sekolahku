@@ -72,7 +72,7 @@ $conn->close();
             </div>
             <div class="stat-content">
                 <div class="stat-value"><?php echo $stats['total_mata_pelajaran']; ?></div>
-                <div class="stat-label">Mata Pelajaran</div>
+                <div class="stat-label">Mapel</div>
             </div>
         </div>
     </div>
