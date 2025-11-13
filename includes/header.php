@@ -39,7 +39,7 @@ $stmt->close();
         <!-- Sidebar -->
         <nav id="sidebar" class="sidebar">
             <div class="sidebar-header">
-                <h4>Admin <?php echo isset($user['sekolah_id']) && $user['sekolah_id'] ? 'Sekolah' : 'Portal'; ?></h4>
+                <h4><i class="bi bi-mortarboard-fill"></i> <?php echo isset($user['sekolah_id']) && $user['sekolah_id'] ? 'Sekolah' : 'Portal'; ?></h4>
             </div>
             
             <ul class="list-unstyled components">
@@ -127,11 +127,27 @@ $stmt->close();
         <div id="content" class="content">
             <!-- Top Header -->
             <div class="dashboard-top-header">
-                <div class="welcome-section">
-                    <h2>Selamat Datang, <?php echo htmlspecialchars($user['nama_lengkap']); ?>!</h2>
-                    <p>Berikut adalah ringkasan aktivitas terbaru di <?php echo isset($user['sekolah_id']) && $user['sekolah_id'] ? 'website Anda' : 'sistem Anda'; ?>.</p>
+                <div class="logo-section">
+                    <div class="logo-icon">IA</div>
+                    <h4 class="logo-text">Portal Sekolah</h4>
+                </div>
+                <div class="search-section">
+                    <div class="search-wrapper">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text" class="search-input" placeholder="What do you want to find?">
+                    </div>
                 </div>
                 <div class="user-profile-section">
+                    <div class="header-icons">
+                        <a href="#" class="icon-btn" title="Notifications">
+                            <i class="bi bi-bell"></i>
+                            <span class="badge">3</span>
+                        </a>
+                        <a href="#" class="icon-btn" title="Messages">
+                            <i class="bi bi-chat-dots"></i>
+                            <span class="badge">2</span>
+                        </a>
+                    </div>
                     <div class="user-profile-info">
                         <div class="user-avatar">
                             <?php echo strtoupper(substr($user['nama_lengkap'], 0, 1)); ?>
@@ -148,14 +164,6 @@ $stmt->close();
                                 echo $role_labels[$_SESSION['user_role']] ?? ucfirst($_SESSION['user_role']);
                             ?></p>
                         </div>
-                    </div>
-                    <div class="user-actions">
-                        <a href="#" class="action-btn" title="Toggle Theme">
-                            <i class="bi bi-moon"></i>
-                        </a>
-                        <a href="../logout.php" class="action-btn logout-btn" title="Logout">
-                            <i class="bi bi-box-arrow-right"></i>
-                        </a>
                     </div>
                 </div>
             </div>
