@@ -56,8 +56,10 @@ $conn->close();
             <div class="stat-icon">
                 <i class="bi bi-file-earmark-text"></i>
             </div>
-            <div class="stat-value"><?php echo $stats['total_soal_aktif']; ?></div>
-            <div class="stat-label">Soal Aktif</div>
+            <div class="stat-content">
+                <div class="stat-value"><?php echo $stats['total_soal_aktif']; ?></div>
+                <div class="stat-label">Soal Aktif</div>
+            </div>
         </div>
     </div>
     
@@ -66,8 +68,10 @@ $conn->close();
             <div class="stat-icon">
                 <i class="bi bi-check-circle"></i>
             </div>
-            <div class="stat-value"><?php echo $stats['total_soal_selesai']; ?></div>
-            <div class="stat-label">Soal Selesai</div>
+            <div class="stat-content">
+                <div class="stat-value"><?php echo $stats['total_soal_selesai']; ?></div>
+                <div class="stat-label">Soal Selesai</div>
+            </div>
         </div>
     </div>
     
@@ -76,8 +80,10 @@ $conn->close();
             <div class="stat-icon">
                 <i class="bi bi-star"></i>
             </div>
-            <div class="stat-value"><?php echo $stats['rata_rata_nilai']; ?></div>
-            <div class="stat-label">Rata-rata Nilai</div>
+            <div class="stat-content">
+                <div class="stat-value"><?php echo $stats['rata_rata_nilai']; ?></div>
+                <div class="stat-label">Rata-rata Nilai</div>
+            </div>
         </div>
     </div>
     
@@ -86,8 +92,10 @@ $conn->close();
             <div class="stat-icon">
                 <i class="bi bi-clock-history"></i>
             </div>
-            <div class="stat-value"><?php echo $stats['total_soal_aktif'] - $stats['total_soal_selesai']; ?></div>
-            <div class="stat-label">Belum Dikerjakan</div>
+            <div class="stat-content">
+                <div class="stat-value"><?php echo $stats['total_soal_aktif'] - $stats['total_soal_selesai']; ?></div>
+                <div class="stat-label">Belum Dikerjakan</div>
+            </div>
         </div>
     </div>
 </div>

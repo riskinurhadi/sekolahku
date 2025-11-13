@@ -47,8 +47,10 @@ $conn->close();
             <div class="stat-icon">
                 <i class="bi bi-building"></i>
             </div>
-            <div class="stat-value"><?php echo $stats['total_sekolah']; ?></div>
-            <div class="stat-label">Total Sekolah</div>
+            <div class="stat-content">
+                <div class="stat-value"><?php echo $stats['total_sekolah']; ?></div>
+                <div class="stat-label">Total Sekolah</div>
+            </div>
         </div>
     </div>
     
@@ -57,8 +59,10 @@ $conn->close();
             <div class="stat-icon">
                 <i class="bi bi-person-badge"></i>
             </div>
-            <div class="stat-value"><?php echo $stats['total_kepala_sekolah']; ?></div>
-            <div class="stat-label">Total Kepala Sekolah</div>
+            <div class="stat-content">
+                <div class="stat-value"><?php echo $stats['total_kepala_sekolah']; ?></div>
+                <div class="stat-label">Total Kepala Sekolah</div>
+            </div>
         </div>
     </div>
     
@@ -67,8 +71,10 @@ $conn->close();
             <div class="stat-icon">
                 <i class="bi bi-person-workspace"></i>
             </div>
-            <div class="stat-value"><?php echo $stats['total_guru']; ?></div>
-            <div class="stat-label">Total Guru</div>
+            <div class="stat-content">
+                <div class="stat-value"><?php echo $stats['total_guru']; ?></div>
+                <div class="stat-label">Total Guru</div>
+            </div>
         </div>
     </div>
     
@@ -77,8 +83,10 @@ $conn->close();
             <div class="stat-icon">
                 <i class="bi bi-people"></i>
             </div>
-            <div class="stat-value"><?php echo $stats['total_siswa']; ?></div>
-            <div class="stat-label">Total Siswa</div>
+            <div class="stat-content">
+                <div class="stat-value"><?php echo $stats['total_siswa']; ?></div>
+                <div class="stat-label">Total Siswa</div>
+            </div>
         </div>
     </div>
 </div>
