@@ -127,7 +127,7 @@ $stmt->close();
         <div id="content" class="content">
             <!-- Top Header -->
             <div class="dashboard-top-header">
-                <div class="logo-section">
+                <div class="logo-section"> 
                     <!-- <div class="logo-icon">IA</div> -->
                     <h4 class="logo-text">Dashboard Sekolahku</h4>
                 </div>
