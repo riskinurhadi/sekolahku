@@ -51,15 +51,13 @@ $recent_soal = $conn->query("SELECT s.*, mp.nama_pelajaran
 $conn->close();
 ?>
 
-<div class="row mb-4">
-    <div class="col-12">
-        <h2 class="mb-0">Selamat Datang, <?php echo htmlspecialchars($user['nama_lengkap']); ?>!</h2>
-        <p class="text-muted">Berikut adalah ringkasan aktivitas terbaru di dashboard Anda.</p>
-    </div>
+<div class="dashboard-header">
+    <h2>Selamat Datang, <?php echo htmlspecialchars($user['nama_lengkap']); ?>! 👋</h2>
+    <p>Berikut adalah ringkasan aktivitas terbaru di dashboard Anda.</p>
 </div>
 
 <!-- Statistics Cards -->
-<div class="row mb-4">
+<div class="row statistics-row">
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="stat-card primary">
             <div class="stat-icon">
@@ -104,10 +102,10 @@ $conn->close();
 <!-- Recent Soal -->
 <div class="row">
     <div class="col-12">
-        <div class="card">
+        <div class="dashboard-card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Soal Terbaru</h5>
-                <a href="soal.php" class="text-success text-decoration-none">Lihat Semua <i class="bi bi-arrow-right"></i></a>
+                <a href="soal.php" class="text-decoration-none">Lihat Semua <i class="bi bi-arrow-right"></i></a>
             </div>
             <div class="card-body">
                 <?php if (count($recent_soal) > 0): ?>

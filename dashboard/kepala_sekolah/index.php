@@ -57,15 +57,13 @@ $recent_teachers = $conn->query("SELECT * FROM users
 $conn->close();
 ?>
 
-<div class="row mb-4">
-    <div class="col-12">
-        <h2 class="mb-0">Selamat Datang, <?php echo htmlspecialchars($user['nama_lengkap']); ?>!</h2>
-        <p class="text-muted">Berikut adalah ringkasan aktivitas terbaru di <?php echo htmlspecialchars($sekolah['nama_sekolah']); ?>.</p>
-    </div>
+<div class="dashboard-header">
+    <h2>Selamat Datang, <?php echo htmlspecialchars($user['nama_lengkap']); ?>! 👋</h2>
+    <p>Berikut adalah ringkasan aktivitas terbaru di <strong><?php echo htmlspecialchars($sekolah['nama_sekolah']); ?></strong>.</p>
 </div>
 
 <!-- Statistics Cards -->
-<div class="row mb-4">
+<div class="row statistics-row">
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="stat-card primary">
             <div class="stat-icon">
@@ -110,10 +108,10 @@ $conn->close();
 <!-- Recent Teachers -->
 <div class="row">
     <div class="col-12">
-        <div class="card">
+        <div class="dashboard-card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="bi bi-person-workspace"></i> Guru Terbaru</h5>
-                <a href="guru.php" class="text-success text-decoration-none">Lihat Semua <i class="bi bi-arrow-right"></i></a>
+                <a href="guru.php" class="text-decoration-none">Lihat Semua <i class="bi bi-arrow-right"></i></a>
             </div>
             <div class="card-body">
                 <?php if (count($recent_teachers) > 0): ?>
