@@ -61,7 +61,7 @@ $conn->close();
             </div>
             <div class="stat-content">
                 <div class="stat-value"><?php echo $stats['total_kepala_sekolah']; ?></div>
-                <div class="stat-label">Total Guru</div>
+                <div class="stat-label">Kep. Sekolah</div>
             </div>
         </div>
     </div>
