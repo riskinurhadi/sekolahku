@@ -157,8 +157,8 @@ $conn->close();
                                             <?php endif; ?>
                                         </td>
                                     </tr>
-                                <?php endforeach; ?>
-                            </tbody>
+                                <?php endforeach;?> 
+                            </tbody> 
                         </table>
                     </div>
                 <?php else: ?>

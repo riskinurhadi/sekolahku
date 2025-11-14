@@ -38,32 +38,7 @@ if ($hasil_exist) {
     exit();
 }
 
-// Re-establish connection if needed
-if (!isset($conn) || !$conn || $conn->ping() === false) {
-    $conn = getConnection();
-}
-
-require_once '../../includes/header.php';
-
-// Get item soal
-$stmt = $conn->prepare("SELECT * FROM item_soal WHERE soal_id = ? ORDER BY urutan ASC");
-$stmt->bind_param("i", $soal_id);
-$stmt->execute();
-$item_soal = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
-
-// Get pilihan jawaban for each item
-foreach ($item_soal as $key => $item) {
-    $item_id = $item['id'];
-    $stmt = $conn->prepare("SELECT * FROM pilihan_jawaban WHERE item_soal_id = ? ORDER BY urutan ASC");
-    $stmt->bind_param("i", $item_id);
-    $stmt->execute();
-    $pilihan = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
-    $item_soal[$key]['pilihan'] = $pilihan;
-}
-
-// Handle form submission
+// Handle form submission BEFORE header output
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Create or update hasil_ujian
     $waktu_mulai = date('Y-m-d H:i:s');
@@ -161,6 +136,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Redirect dengan parameter success
     header('Location: hasil.php?soal_id=' . $soal_id . '&success=1');
     exit();
+}
+
+// Re-establish connection if needed
+if (!isset($conn) || !$conn || $conn->ping() === false) {
+    $conn = getConnection();
+}
+
+require_once '../../includes/header.php';
+
+// Get item soal
+$stmt = $conn->prepare("SELECT * FROM item_soal WHERE soal_id = ? ORDER BY urutan ASC");
+$stmt->bind_param("i", $soal_id);
+$stmt->execute();
+$item_soal = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+
+// Get pilihan jawaban for each item
+foreach ($item_soal as $key => $item) {
+    $item_id = $item['id'];
+    $stmt = $conn->prepare("SELECT * FROM pilihan_jawaban WHERE item_soal_id = ? ORDER BY urutan ASC");
+    $stmt->bind_param("i", $item_id);
+    $stmt->execute();
+    $pilihan = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+    $item_soal[$key]['pilihan'] = $pilihan;
 }
 ?>
 
