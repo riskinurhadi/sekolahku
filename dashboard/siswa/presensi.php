@@ -92,14 +92,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 
 // Check for success parameter
 if (isset($_GET['success']) && $_GET['success'] == 1) {
-    $status_text = $_GET['status'] ?? 'Hadir';
-    $message = 'success:Presensi berhasil! Status: ' . $status_text;
+    $message = 'success:Presensi berhasil!';
 }
 
 // Now include header AFTER handling POST
 require_once '../../includes/header.php';
 
-// Tidak perlu get active sessions lagi karena sudah dipindahkan ke halaman guru
+// Get active sessions untuk ditampilkan di halaman presensi
+$active_sessions = [];
+if ($sekolah_id) {
+    $table_check = $conn->query("SHOW TABLES LIKE 'sesi_pelajaran'");
+    if ($table_check && $table_check->num_rows > 0) {
+        $stmt = $conn->prepare("SELECT sp.*, mp.nama_pelajaran, u.nama_lengkap as nama_guru,
+            (SELECT COUNT(*) FROM presensi WHERE sesi_pelajaran_id = sp.id) as jumlah_presensi,
+            CASE 
+                WHEN NOW() < sp.waktu_mulai THEN 'belum_mulai'
+                WHEN NOW() BETWEEN sp.waktu_mulai AND sp.waktu_selesai THEN 'berlangsung'
+                ELSE 'selesai'
+            END as status_waktu,
+            (SELECT COUNT(*) FROM presensi WHERE sesi_pelajaran_id = sp.id AND siswa_id = ?) as sudah_presensi
+            FROM sesi_pelajaran sp 
+            JOIN mata_pelajaran mp ON sp.mata_pelajaran_id = mp.id 
+            JOIN users u ON sp.guru_id = u.id
+            WHERE sp.status = 'aktif' 
+            AND NOW() <= sp.waktu_selesai
+            AND mp.sekolah_id = ?
+            ORDER BY sp.waktu_mulai DESC");
+        if ($stmt) {
+            $stmt->bind_param("ii", $siswa_id, $sekolah_id);
+            $stmt->execute();
+            $active_sessions = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+            $stmt->close();
+        }
+    }
+}
 
 // Get my presensi history
 $my_presensi = [];
