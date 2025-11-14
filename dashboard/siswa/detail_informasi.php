@@ -40,8 +40,8 @@ if ($table_check && $table_check->num_rows > 0) {
             $has_access = true;
         }
         
-        // Check if specifically targeted to this user
-        if ($informasi['target_user_id'] == $user_id) {
+        // Check if specifically targeted to this user (target_user_id tidak null)
+        if ($informasi['target_user_id'] && $informasi['target_user_id'] == $user_id) {
             $has_access = true;
         }
         

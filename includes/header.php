@@ -43,8 +43,8 @@ if ($table_check && $table_check->num_rows > 0) {
     $params[] = $user_role;
     $types .= "s";
     
-    // Include pesan yang ditujukan khusus untuk user ini
-    $query .= " OR ia.target_user_id = ?)";
+    // Include pesan yang ditujukan khusus untuk user ini (target_user_id tidak null)
+    $query .= " OR (ia.target_user_id = ? AND ia.target_user_id IS NOT NULL))";
     $params[] = $user_id;
     $types .= "i";
     

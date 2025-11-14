@@ -69,8 +69,8 @@ if ($table_check && $table_check->num_rows > 0) {
     $params[] = $user_role;
     $types .= "s";
     
-    // Include pesan yang ditujukan khusus untuk user ini
-    $query .= " OR ia.target_user_id = ?)";
+    // Include pesan yang ditujukan khusus untuk user ini (target_user_id tidak null)
+    $query .= " OR (ia.target_user_id = ? AND ia.target_user_id IS NOT NULL))";
     $params[] = $user_id;
     $types .= "i";
     
@@ -94,9 +94,30 @@ if ($table_check && $table_check->num_rows > 0) {
 $conn->close();
 ?>
 
-<div class="page-header">
-    <h2><i class="bi bi-megaphone"></i> Informasi Akademik</h2>
-    <p>Daftar pesan dan informasi penting dari akademik</p>
+<?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
+    <script>
+        $(document).ready(function() {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '<?php echo isset($_GET['msg']) ? addslashes($_GET['msg']) : 'Operasi berhasil!'; ?>',
+                timer: 3000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        });
+    </script>
+<?php endif; ?>
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2><i class="bi bi-megaphone"></i> Informasi Akademik</h2>
+        <p>Daftar pesan dan informasi penting dari akademik</p>
+    </div>
+    <a href="tambah_informasi.php" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Tambah Informasi
+    </a>
 </div>
 
 <!-- Daftar Informasi Akademik -->
