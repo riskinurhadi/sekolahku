@@ -8,7 +8,6 @@ $conn = getConnection();
 $guru_id = $_SESSION['user_id'];
 $message = '';
 
-
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['action'])) {
@@ -105,14 +104,29 @@ $conn->close();
 
 <?php if ($message): ?>
     <script>
-        <?php 
-        $msg = explode(':', $message);
-        if ($msg[0] == 'success') {
-            echo "showSuccess('" . addslashes($msg[1]) . "');";
-        } else {
-            echo "showError('" . addslashes($msg[1]) . "');";
-        }
-        ?>
+        $(document).ready(function() {
+            <?php 
+            $msg = explode(':', $message);
+            if ($msg[0] == 'success') {
+                echo "Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '" . addslashes($msg[1]) . "',
+                    timer: 3000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });";
+            } else {
+                echo "Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: '" . addslashes($msg[1]) . "',
+                    confirmButtonText: 'OK'
+                });";
+            }
+            ?>
+        });
     </script>
 <?php endif; ?>
 
