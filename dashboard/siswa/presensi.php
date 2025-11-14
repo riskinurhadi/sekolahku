@@ -50,7 +50,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
             $stmt->close();
             
             if ($existing) {
-                $message = 'error:Anda sudah melakukan presensi untuk sesi ini!';
+                $error_msg = 'Anda sudah melakukan presensi untuk sesi ini!';
+                // Jika request via AJAX, return JSON
+                if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => $error_msg]);
+                    exit();
+                }
+                $message = 'error:' . $error_msg;
             } else {
                 // Cek apakah kode masih valid (dalam 30 menit)
                 $waktu_sekarang = new DateTime();
@@ -63,7 +70,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                 
                 // Jika lebih dari 30 menit, kode sudah kadaluarsa
                 if ($selisih_menit > 30) {
-                    $message = 'expired:yahh kode sudah kadaluarsa';
+                    $error_msg = 'yahh kode sudah kadaluarsa';
+                    // Jika request via AJAX, return JSON
+                    if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+                        header('Content-Type: application/json');
+                        echo json_encode(['success' => false, 'expired' => true, 'message' => $error_msg]);
+                        exit();
+                    }
+                    $message = 'expired:' . $error_msg;
                 } else {
                     // Jika dalam 30 menit, presensi berhasil dengan status hadir
                     $status = 'hadir';
@@ -75,17 +89,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                     if ($stmt->execute()) {
                         $stmt->close();
                         $conn->close();
-                        // Redirect dengan parameter success
+                        
+                        // Jika request via AJAX, return JSON
+                        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+                            header('Content-Type: application/json');
+                            echo json_encode(['success' => true, 'message' => 'Presensi berhasil!']);
+                            exit();
+                        }
+                        
+                        // Redirect dengan parameter success untuk normal form submission
                         header('Location: presensi.php?success=1');
                         exit();
                     } else {
-                        $message = 'error:Gagal melakukan presensi! Error: ' . $conn->error;
+                        $error_msg = 'Gagal melakukan presensi! Error: ' . $conn->error;
+                        // Jika request via AJAX, return JSON
+                        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+                            header('Content-Type: application/json');
+                            echo json_encode(['success' => false, 'message' => $error_msg]);
+                            exit();
+                        }
+                        $message = 'error:' . $error_msg;
                     }
                     $stmt->close();
                 }
             }
         } else {
-            $message = 'error:Kode presensi tidak valid atau sesi sudah berakhir!';
+            $error_msg = 'Kode presensi tidak valid atau sesi sudah berakhir!';
+            // Jika request via AJAX, return JSON
+            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => $error_msg]);
+                exit();
+            }
+            $message = 'error:' . $error_msg;
         }
     }
 }
@@ -212,7 +248,7 @@ $conn->close();
                                             <i class="bi bi-check-circle"></i> Anda sudah melakukan presensi
                                         </div>
                                     <?php else: ?>
-                                        <form method="POST" action="presensi.php" class="presensi-form-inline" onsubmit="return validatePresensiInline(this)">
+                                        <form method="POST" action="" class="presensi-form-inline" id="presensiForm_<?php echo $session['id']; ?>">
                                             <input type="hidden" name="action" value="presensi">
                                             <div class="input-group">
                                                 <input type="text" 
@@ -223,7 +259,7 @@ $conn->close();
                                                     required 
                                                     autocomplete="off"
                                                     style="text-transform: uppercase;">
-                                                <button type="submit" class="btn btn-primary btn-sm">
+                                                <button type="submit" class="btn btn-primary btn-sm btn-presensi-submit">
                                                     <i class="bi bi-check-circle"></i> Presensi
                                                 </button>
                                             </div>
@@ -308,37 +344,6 @@ $conn->close();
 </div>
 
 <script>
-function validatePresensiInline(form) {
-    const kodeInput = form.querySelector('input[name="kode_presensi"]');
-    const kode = kodeInput.value.trim().toUpperCase();
-    const btn = form.querySelector('button[type="submit"]');
-    
-    // Update input value to uppercase
-    kodeInput.value = kode;
-    
-    if (!kode || kode.length < 3) {
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Kode presensi minimal 3 karakter!',
-                timer: 2000
-            });
-        } else {
-            alert('Kode presensi minimal 3 karakter!');
-        }
-        return false;
-    }
-    
-    // Disable button to prevent double submit
-    btn.disabled = true;
-    const originalHtml = btn.innerHTML;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Memproses...';
-    
-    // Allow form to submit normally
-    return true;
-}
-
 $(document).ready(function() {
     <?php if (count($my_presensi) > 0): ?>
     initDataTable('#presensiTable', {
@@ -351,11 +356,141 @@ $(document).ready(function() {
         this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
     });
     
+    // Handle form submission
+    $('.presensi-form-inline').on('submit', function(e) {
+        e.preventDefault();
+        
+        const form = $(this);
+        const kodeInput = form.find('input[name="kode_presensi"]');
+        const kode = kodeInput.val().trim().toUpperCase();
+        const btn = form.find('button[type="submit"]');
+        
+        // Update input value
+        kodeInput.val(kode);
+        
+        // Validasi
+        if (!kode || kode.length < 3) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Kode presensi minimal 3 karakter!',
+                    timer: 2000
+                });
+            } else {
+                alert('Kode presensi minimal 3 karakter!');
+            }
+            return false;
+        }
+        
+        // Disable button
+        btn.prop('disabled', true);
+        const originalHtml = btn.html();
+        btn.html('<span class="spinner-border spinner-border-sm"></span> Memproses...');
+        
+        // Submit form dengan AJAX
+        $.ajax({
+            url: 'presensi.php',
+            type: 'POST',
+            data: form.serialize(),
+            dataType: 'json',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                if (response && response.success) {
+                    // Tampilkan success message
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: response.message || 'Presensi berhasil!',
+                            timer: 2000
+                        }).then(function() {
+                            // Reload page untuk update status
+                            window.location.href = 'presensi.php';
+                        });
+                    } else {
+                        alert(response.message || 'Presensi berhasil!');
+                        window.location.href = 'presensi.php';
+                    }
+                } else if (response && response.expired) {
+                    // Kode kadaluarsa
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Kode Kadaluarsa',
+                            text: response.message || 'yahh kode sudah kadaluarsa',
+                            timer: 3000
+                        });
+                    } else {
+                        alert(response.message || 'yahh kode sudah kadaluarsa');
+                    }
+                    // Re-enable button
+                    btn.prop('disabled', false);
+                    btn.html(originalHtml);
+                } else {
+                    // Error lainnya
+                    const errorMsg = response && response.message ? response.message : 'Terjadi kesalahan saat melakukan presensi.';
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: errorMsg,
+                            timer: 3000
+                        });
+                    } else {
+                        alert(errorMsg);
+                    }
+                    // Re-enable button
+                    btn.prop('disabled', false);
+                    btn.html(originalHtml);
+                }
+            },
+            error: function(xhr, status, error) {
+                // Re-enable button on error
+                btn.prop('disabled', false);
+                btn.html(originalHtml);
+                
+                // Cek jika response adalah redirect (status 302 atau HTML response)
+                if (xhr.status === 0 || xhr.responseText.includes('presensi.php')) {
+                    // Redirect terjadi, reload page
+                    window.location.href = 'presensi.php?success=1';
+                    return;
+                }
+                
+                // Parse error message dari response jika ada
+                let errorMsg = 'Terjadi kesalahan saat melakukan presensi. Silakan coba lagi.';
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response && response.message) {
+                        errorMsg = response.message;
+                    }
+                } catch(e) {
+                    // Bukan JSON, gunakan default message
+                }
+                
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMsg,
+                        timer: 3000
+                    });
+                } else {
+                    alert(errorMsg);
+                }
+            }
+        });
+        
+        return false;
+    });
+    
     // Reload page setelah success untuk update status
     <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
     setTimeout(function() {
         window.location.href = 'presensi.php';
-    }, 2000);
+    }, 2500);
     <?php endif; ?>
 });
 </script>
