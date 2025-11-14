@@ -169,11 +169,27 @@ if (!isset($conn) || !$conn || $conn->ping() === false) {
 
 // Get active sessions untuk ditampilkan di halaman presensi
 $active_sessions = [];
-if ($sekolah_id) {
-    $table_check = $conn->query("SHOW TABLES LIKE 'sesi_pelajaran'");
-    if ($table_check && $table_check->num_rows > 0) {
-        // Query untuk menampilkan sesi yang aktif dan belum selesai
-        // Termasuk sesi yang belum dimulai atau sedang berlangsung
+$debug_info = []; // Untuk debugging
+
+$table_check = $conn->query("SHOW TABLES LIKE 'sesi_pelajaran'");
+if ($table_check && $table_check->num_rows > 0) {
+    // Debug: Cek semua sesi aktif tanpa filter sekolah
+    $debug_stmt = $conn->query("SELECT sp.*, mp.nama_pelajaran, mp.sekolah_id as mp_sekolah_id, u.nama_lengkap as nama_guru
+        FROM sesi_pelajaran sp 
+        JOIN mata_pelajaran mp ON sp.mata_pelajaran_id = mp.id 
+        JOIN users u ON sp.guru_id = u.id
+        WHERE sp.status = 'aktif' 
+        AND NOW() <= sp.waktu_selesai
+        ORDER BY sp.waktu_mulai DESC
+        LIMIT 10");
+    if ($debug_stmt) {
+        $debug_info['all_active_sessions'] = $debug_stmt->fetch_all(MYSQLI_ASSOC);
+        $debug_stmt->close();
+    }
+    
+    // Query untuk menampilkan sesi yang aktif dan belum selesai
+    // Termasuk sesi yang belum dimulai atau sedang berlangsung
+    if ($sekolah_id) {
         $stmt = $conn->prepare("SELECT sp.*, mp.nama_pelajaran, u.nama_lengkap as nama_guru,
             (SELECT COUNT(*) FROM presensi WHERE sesi_pelajaran_id = sp.id) as jumlah_presensi,
             CASE 
@@ -201,7 +217,40 @@ if ($sekolah_id) {
             $active_sessions = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             $stmt->close();
         }
+    } else {
+        // Jika tidak ada sekolah_id, coba ambil semua sesi aktif (untuk debugging)
+        $stmt = $conn->prepare("SELECT sp.*, mp.nama_pelajaran, mp.sekolah_id as mp_sekolah_id, u.nama_lengkap as nama_guru,
+            (SELECT COUNT(*) FROM presensi WHERE sesi_pelajaran_id = sp.id) as jumlah_presensi,
+            CASE 
+                WHEN NOW() < sp.waktu_mulai THEN 'belum_mulai'
+                WHEN NOW() BETWEEN sp.waktu_mulai AND sp.waktu_selesai THEN 'berlangsung'
+                ELSE 'selesai'
+            END as status_waktu,
+            (SELECT COUNT(*) FROM presensi WHERE sesi_pelajaran_id = sp.id AND siswa_id = ?) as sudah_presensi
+            FROM sesi_pelajaran sp 
+            JOIN mata_pelajaran mp ON sp.mata_pelajaran_id = mp.id 
+            JOIN users u ON sp.guru_id = u.id
+            WHERE sp.status = 'aktif' 
+            AND NOW() <= sp.waktu_selesai
+            ORDER BY 
+                CASE 
+                    WHEN NOW() BETWEEN sp.waktu_mulai AND sp.waktu_selesai THEN 1
+                    WHEN NOW() < sp.waktu_mulai THEN 2
+                    ELSE 3
+                END,
+                sp.waktu_mulai DESC");
+        if ($stmt) {
+            $stmt->bind_param("i", $siswa_id);
+            $stmt->execute();
+            $active_sessions = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+            $stmt->close();
+        }
     }
+    
+    // Debug info
+    $debug_info['siswa_id'] = $siswa_id;
+    $debug_info['sekolah_id'] = $sekolah_id;
+    $debug_info['found_sessions'] = count($active_sessions);
 }
 
 // Get my presensi history
@@ -339,6 +388,25 @@ $conn->close();
                             <small class="text-muted d-block mt-2">
                                 Pastikan guru sudah memulai pelajaran dan pelajaran masih aktif
                             </small>
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($debug_info) && isset($debug_info['all_active_sessions']) && count($debug_info['all_active_sessions']) > 0): ?>
+                            <div class="alert alert-info mt-3 text-start" style="max-width: 600px; margin: 0 auto;">
+                                <strong>Debug Info:</strong><br>
+                                <small>
+                                    Ditemukan <?php echo count($debug_info['all_active_sessions']); ?> sesi aktif di database.<br>
+                                    Siswa ID: <?php echo $debug_info['siswa_id']; ?><br>
+                                    Sekolah ID: <?php echo $debug_info['sekolah_id'] ?? 'NULL'; ?><br>
+                                    <?php if (count($debug_info['all_active_sessions']) > 0): ?>
+                                        <br><strong>Sesi yang ditemukan:</strong><br>
+                                        <?php foreach ($debug_info['all_active_sessions'] as $debug_session): ?>
+                                            - <?php echo htmlspecialchars($debug_session['nama_pelajaran']); ?> 
+                                            (Sekolah ID: <?php echo $debug_session['mp_sekolah_id']; ?>, 
+                                            Status: <?php echo $debug_session['status']; ?>)<br>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </small>
+                            </div>
                         <?php endif; ?>
                     </div>
                 <?php endif; ?>
