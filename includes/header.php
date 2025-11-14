@@ -5,11 +5,58 @@ require_once __DIR__ . '/../config/database.php';
 // Get user info
 $conn = getConnection();
 $user_id = $_SESSION['user_id'];
+$user_role = $_SESSION['user_role'];
+$sekolah_id = $_SESSION['sekolah_id'] ?? null;
+
 $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
 $stmt->close();
+
+// Get sekolah_id if not set
+if (!$sekolah_id && isset($user['sekolah_id'])) {
+    $sekolah_id = $user['sekolah_id'];
+}
+
+// Get count of unread informasi akademik
+$unread_count = 0;
+$table_check = $conn->query("SHOW TABLES LIKE 'informasi_akademik'");
+if ($table_check && $table_check->num_rows > 0) {
+    $query = "SELECT COUNT(*) as count
+        FROM informasi_akademik ia
+        WHERE ia.status = 'terkirim'
+        AND ia.id NOT IN (SELECT informasi_id FROM informasi_akademik_baca WHERE user_id = ?)";
+    
+    $params = [$user_id];
+    $types = "i";
+    
+    // Filter berdasarkan sekolah jika ada
+    if ($sekolah_id) {
+        $query .= " AND (ia.sekolah_id = ? OR ia.sekolah_id IS NULL)";
+        $params[] = $sekolah_id;
+        $types .= "i";
+    }
+    
+    // Filter berdasarkan target role
+    $query .= " AND (ia.target_role = 'semua' OR ia.target_role = ?";
+    $params[] = $user_role;
+    $types .= "s";
+    
+    // Include pesan yang ditujukan khusus untuk user ini
+    $query .= " OR ia.target_user_id = ?)";
+    $params[] = $user_id;
+    $types .= "i";
+    
+    $stmt = $conn->prepare($query);
+    if ($stmt) {
+        $stmt->bind_param($types, ...$params);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        $unread_count = $result['count'] ?? 0;
+        $stmt->close();
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -73,6 +120,11 @@ $stmt->close();
                             <i class="bi bi-people"></i> Siswa
                         </a>
                     </li>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/kepala_sekolah/informasi_akademik.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'informasi_akademik.php' || basename($_SERVER['PHP_SELF']) == 'detail_informasi.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-megaphone"></i> Informasi Akademik
+                        </a>
+                    </li>
                 <?php endif; ?>
                 
                 <?php if ($_SESSION['user_role'] == 'guru'): ?>
@@ -96,6 +148,11 @@ $stmt->close();
                             <i class="bi bi-file-earmark-text"></i> Exam
                         </a>
                     </li>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/guru/informasi_akademik.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'informasi_akademik.php' || basename($_SERVER['PHP_SELF']) == 'detail_informasi.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-megaphone"></i> Informasi Akademik
+                        </a>
+                    </li>
                 <?php endif; ?>
                 
                 <?php if ($_SESSION['user_role'] == 'siswa'): ?>
@@ -112,6 +169,11 @@ $stmt->close();
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/siswa/hasil.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'hasil.php' ? 'active' : ''; ?>">
                             <i class="bi bi-clipboard-check"></i> Notice
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/siswa/informasi_akademik.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'informasi_akademik.php' || basename($_SERVER['PHP_SELF']) == 'detail_informasi.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-megaphone"></i> Informasi Akademik
                         </a>
                     </li>
                     <li>
@@ -150,9 +212,11 @@ $stmt->close();
                             <i class="bi bi-bell"></i>
                             <span class="badge">3</span>
                         </a>
-                        <a href="#" class="icon-btn" title="Messages">
+                        <a href="<?php echo getBasePath(); ?>dashboard/<?php echo $user_role; ?>/informasi_akademik.php" class="icon-btn" title="Informasi Akademik">
                             <i class="bi bi-chat-dots"></i>
-                            <span class="badge">2</span>
+                            <?php if ($unread_count > 0): ?>
+                                <span class="badge"><?php echo $unread_count > 99 ? '99+' : $unread_count; ?></span>
+                            <?php endif; ?>
                         </a>
                     </div>
                     <div class="user-profile-info">
