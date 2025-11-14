@@ -53,32 +53,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                 $message = 'error:Anda sudah melakukan presensi untuk sesi ini!';
             } else {
                 // Tentukan status (hadir atau terlambat)
-                // Status dihitung berdasarkan waktu presensi relatif terhadap waktu_mulai sesi
-                // Jika presensi dilakukan dalam 15 menit pertama setelah waktu_mulai = hadir
-                // Jika lebih dari 15 menit = terlambat
+                // Status dihitung berdasarkan waktu presensi relatif terhadap waktu kode dibuat/di-regenerate
+                // Jika presensi dilakukan dalam 30 menit pertama setelah kode dibuat = hadir
+                // Jika lebih dari 30 menit = terlambat
                 $waktu_sekarang = new DateTime();
-                $waktu_mulai = new DateTime($sesi['waktu_mulai']);
                 
-                // Jika waktu sekarang masih sebelum waktu_mulai, status = hadir (presensi awal)
-                if ($waktu_sekarang < $waktu_mulai) {
+                // Gunakan updated_at karena saat regenerate kode, updated_at akan berubah
+                // Jika updated_at sama dengan created_at, berarti kode belum pernah di-regenerate
+                $waktu_kode_dibuat = new DateTime($sesi['updated_at'] ?? $sesi['created_at']);
+                
+                // Hitung selisih dalam menit dari waktu kode dibuat/di-regenerate
+                $selisih_menit = ($waktu_sekarang->getTimestamp() - $waktu_kode_dibuat->getTimestamp()) / 60;
+                
+                // Jika presensi dalam 30 menit pertama setelah kode dibuat = hadir
+                // Jika lebih dari 30 menit = terlambat
+                if ($selisih_menit <= 30) {
                     $status = 'hadir';
                 } else {
-                    // Hitung selisih dalam menit
-                    $selisih = ($waktu_sekarang->getTimestamp() - $waktu_mulai->getTimestamp()) / 60;
-                    
-                    // Terlambat jika lebih dari 15 menit setelah waktu_mulai
-                    // Tapi jika kode baru dibuat/di-regenerate (updated_at baru), beri toleransi lebih
-                    // Gunakan updated_at karena saat regenerate kode, updated_at akan berubah
-                    $waktu_kode_terakhir_diubah = new DateTime($sesi['updated_at'] ?? $sesi['created_at']);
-                    $selisih_dari_kode = ($waktu_sekarang->getTimestamp() - $waktu_kode_terakhir_diubah->getTimestamp()) / 60;
-                    
-                    // Jika kode baru dibuat/di-regenerate (dalam 10 menit terakhir), selalu hadir
-                    // Atau jika presensi dalam 15 menit pertama dari waktu_mulai, juga hadir
-                    if ($selisih_dari_kode <= 10 || $selisih <= 15) {
-                        $status = 'hadir';
-                    } else {
-                        $status = 'terlambat';
-                    }
+                    $status = 'terlambat';
                 }
                 
                 // Insert presensi
