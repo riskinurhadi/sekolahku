@@ -197,16 +197,44 @@ $conn->close();
 
 <?php if ($message): ?>
     <script>
-        <?php 
-        $msg = explode(':', $message);
-        if ($msg[0] == 'success') {
-            echo "Swal.fire({icon: 'success', title: 'Berhasil!', text: '" . addslashes($msg[1]) . "', timer: 3000});";
-        } elseif ($msg[0] == 'expired') {
-            echo "Swal.fire({icon: 'error', title: 'Kode Kadaluarsa', text: '" . addslashes($msg[1]) . "', timer: 3000});";
-        } else {
-            echo "showError('" . addslashes($msg[1]) . "');";
-        }
-        ?>
+        // Pastikan SweetAlert2 sudah dimuat sebelum menggunakan
+        (function() {
+            function showMessage() {
+                <?php 
+                $msg = explode(':', $message);
+                if ($msg[0] == 'success') {
+                    echo "if (typeof Swal !== 'undefined') {";
+                    echo "    Swal.fire({icon: 'success', title: 'Berhasil!', text: '" . addslashes($msg[1]) . "', timer: 3000});";
+                    echo "} else {";
+                    echo "    alert('" . addslashes($msg[1]) . "');";
+                    echo "}";
+                } elseif ($msg[0] == 'expired') {
+                    echo "if (typeof Swal !== 'undefined') {";
+                    echo "    Swal.fire({icon: 'error', title: 'Kode Kadaluarsa', text: '" . addslashes($msg[1]) . "', timer: 3000});";
+                    echo "} else {";
+                    echo "    alert('" . addslashes($msg[1]) . "');";
+                    echo "}";
+                } else {
+                    echo "if (typeof showError !== 'undefined') {";
+                    echo "    showError('" . addslashes($msg[1]) . "');";
+                    echo "} else if (typeof Swal !== 'undefined') {";
+                    echo "    Swal.fire({icon: 'error', title: 'Error', text: '" . addslashes($msg[1]) . "', timer: 3000});";
+                    echo "} else {";
+                    echo "    alert('" . addslashes($msg[1]) . "');";
+                    echo "}";
+                }
+                ?>
+            }
+            
+            // Tunggu sampai semua library dimuat
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(showMessage, 500); // Tunggu 500ms untuk memastikan library dimuat
+                });
+            } else {
+                setTimeout(showMessage, 500);
+            }
+        })();
     </script>
 <?php endif; ?>
 
@@ -344,178 +372,183 @@ $conn->close();
 </div>
 
 <script>
-// Pastikan jQuery sudah dimuat
-if (typeof jQuery === 'undefined') {
-    console.error('jQuery is not loaded!');
-}
-
-$(document).ready(function() {
-    console.log('Presensi page loaded');
-    
-    <?php if (count($my_presensi) > 0): ?>
-    if (typeof initDataTable !== 'undefined') {
-        initDataTable('#presensiTable', {
-            order: [[0, 'desc']] // Sort by tanggal descending
-        });
-    }
-    <?php endif; ?>
-    
-    // Auto uppercase kode presensi pada semua form inline
-    $('.presensi-form-inline input[name="kode_presensi"]').on('input', function() {
-        this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-    });
-    
-    // Handle form submission dengan AJAX
-    $('.presensi-form-inline').on('submit', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        console.log('Form submitted');
-        
-        const form = $(this);
-        const kodeInput = form.find('input[name="kode_presensi"]');
-        const kode = kodeInput.val().trim().toUpperCase();
-        const btn = form.find('button[type="submit"]');
-        
-        // Update input value
-        kodeInput.val(kode);
-        
-        console.log('Kode:', kode);
-        
-        // Validasi
-        if (!kode || kode.length < 3) {
-            console.log('Validation failed: kode too short');
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Kode presensi minimal 3 karakter!',
-                    timer: 2000
-                });
-            } else {
-                alert('Kode presensi minimal 3 karakter!');
-            }
-            return false;
+// Pastikan script dijalankan setelah semua library dimuat
+(function() {
+    function initPresensi() {
+        // Pastikan jQuery sudah dimuat
+        if (typeof jQuery === 'undefined') {
+            console.error('jQuery is not loaded! Retrying...');
+            setTimeout(initPresensi, 100);
+            return;
         }
         
-        // Disable button
-        btn.prop('disabled', true);
-        const originalHtml = btn.html();
-        btn.html('<span class="spinner-border spinner-border-sm"></span> Memproses...');
-        
-        console.log('Sending AJAX request...');
-        
-        // Submit form dengan AJAX
-        $.ajax({
-            url: 'presensi.php',
-            type: 'POST',
-            data: form.serialize(),
-            dataType: 'json',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            success: function(response) {
-                console.log('AJAX Success:', response);
+        jQuery(document).ready(function($) {
+            console.log('Presensi page loaded');
+            
+            <?php if (count($my_presensi) > 0): ?>
+            if (typeof initDataTable !== 'undefined') {
+                initDataTable('#presensiTable', {
+                    order: [[0, 'desc']] // Sort by tanggal descending
+                });
+            }
+            <?php endif; ?>
+            
+            // Auto uppercase kode presensi pada semua form inline
+            $('.presensi-form-inline input[name="kode_presensi"]').on('input', function() {
+                this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            });
+            
+            // Handle form submission dengan AJAX
+            $('.presensi-form-inline').on('submit', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
                 
-                if (response && response.success) {
-                    // Tampilkan success message
-                    if (typeof Swal !== 'undefined') {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil!',
-                            text: response.message || 'Presensi berhasil!',
-                            timer: 2000
-                        }).then(function() {
-                            // Reload page untuk update status
-                            window.location.href = 'presensi.php';
-                        });
-                    } else {
-                        alert(response.message || 'Presensi berhasil!');
-                        window.location.href = 'presensi.php';
-                    }
-                } else if (response && response.expired) {
-                    // Kode kadaluarsa
-                    console.log('Code expired');
-                    if (typeof Swal !== 'undefined') {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Kode Kadaluarsa',
-                            text: response.message || 'yahh kode sudah kadaluarsa',
-                            timer: 3000
-                        });
-                    } else {
-                        alert(response.message || 'yahh kode sudah kadaluarsa');
-                    }
-                    // Re-enable button
-                    btn.prop('disabled', false);
-                    btn.html(originalHtml);
-                } else {
-                    // Error lainnya
-                    console.log('Error response:', response);
-                    const errorMsg = response && response.message ? response.message : 'Terjadi kesalahan saat melakukan presensi.';
+                console.log('Form submitted');
+                
+                const form = $(this);
+                const kodeInput = form.find('input[name="kode_presensi"]');
+                const kode = kodeInput.val().trim().toUpperCase();
+                const btn = form.find('button[type="submit"]');
+                
+                // Update input value
+                kodeInput.val(kode);
+                
+                console.log('Kode:', kode);
+                
+                // Validasi
+                if (!kode || kode.length < 3) {
+                    console.log('Validation failed: kode too short');
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
-                            text: errorMsg,
-                            timer: 3000
+                            text: 'Kode presensi minimal 3 karakter!',
+                            timer: 2000
                         });
                     } else {
-                        alert(errorMsg);
+                        alert('Kode presensi minimal 3 karakter!');
                     }
-                    // Re-enable button
-                    btn.prop('disabled', false);
-                    btn.html(originalHtml);
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('AJAX Error:', status, error);
-                console.error('Response:', xhr.responseText);
-                console.error('Status:', xhr.status);
-                
-                // Re-enable button on error
-                btn.prop('disabled', false);
-                btn.html(originalHtml);
-                
-                // Cek jika response adalah redirect atau HTML (bukan JSON)
-                if (xhr.status === 200 && xhr.responseText && !xhr.responseText.trim().startsWith('{')) {
-                    // Response adalah HTML (redirect terjadi), reload page
-                    console.log('Redirect detected, reloading page');
-                    window.location.href = 'presensi.php?success=1';
-                    return;
+                    return false;
                 }
                 
-                // Parse error message dari response jika ada
-                let errorMsg = 'Terjadi kesalahan saat melakukan presensi. Silakan coba lagi.';
-                try {
-                    if (xhr.responseText) {
-                        const response = JSON.parse(xhr.responseText);
-                        if (response && response.message) {
-                            errorMsg = response.message;
+                // Disable button
+                btn.prop('disabled', true);
+                const originalHtml = btn.html();
+                btn.html('<span class="spinner-border spinner-border-sm"></span> Memproses...');
+                
+                console.log('Sending AJAX request...');
+                
+                // Submit form dengan AJAX
+                $.ajax({
+                    url: 'presensi.php',
+                    type: 'POST',
+                    data: form.serialize(),
+                    dataType: 'json',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(response) {
+                        console.log('AJAX Success:', response);
+                        
+                        if (response && response.success) {
+                            // Tampilkan success message
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil!',
+                                    text: response.message || 'Presensi berhasil!',
+                                    timer: 2000
+                                }).then(function() {
+                                    // Reload page untuk update status
+                                    window.location.href = 'presensi.php';
+                                });
+                            } else {
+                                alert(response.message || 'Presensi berhasil!');
+                                window.location.href = 'presensi.php';
+                            }
+                        } else if (response && response.expired) {
+                            // Kode kadaluarsa
+                            console.log('Code expired');
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Kode Kadaluarsa',
+                                    text: response.message || 'yahh kode sudah kadaluarsa',
+                                    timer: 3000
+                                });
+                            } else {
+                                alert(response.message || 'yahh kode sudah kadaluarsa');
+                            }
+                            // Re-enable button
+                            btn.prop('disabled', false);
+                            btn.html(originalHtml);
+                        } else {
+                            // Error lainnya
+                            console.log('Error response:', response);
+                            const errorMsg = response && response.message ? response.message : 'Terjadi kesalahan saat melakukan presensi.';
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: errorMsg,
+                                    timer: 3000
+                                });
+                            } else {
+                                alert(errorMsg);
+                            }
+                            // Re-enable button
+                            btn.prop('disabled', false);
+                            btn.html(originalHtml);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', status, error);
+                        console.error('Response:', xhr.responseText);
+                        console.error('Status:', xhr.status);
+                        
+                        // Re-enable button on error
+                        btn.prop('disabled', false);
+                        btn.html(originalHtml);
+                        
+                        // Cek jika response adalah redirect atau HTML (bukan JSON)
+                        if (xhr.status === 200 && xhr.responseText && !xhr.responseText.trim().startsWith('{')) {
+                            // Response adalah HTML (redirect terjadi), reload page
+                            console.log('Redirect detected, reloading page');
+                            window.location.href = 'presensi.php?success=1';
+                            return;
+                        }
+                        
+                        // Parse error message dari response jika ada
+                        let errorMsg = 'Terjadi kesalahan saat melakukan presensi. Silakan coba lagi.';
+                        try {
+                            if (xhr.responseText) {
+                                const response = JSON.parse(xhr.responseText);
+                                if (response && response.message) {
+                                    errorMsg = response.message;
+                                }
+                            }
+                        } catch(e) {
+                            console.error('Failed to parse JSON:', e);
+                            // Bukan JSON, mungkin HTML error page
+                            errorMsg = 'Terjadi kesalahan. Silakan refresh halaman dan coba lagi.';
+                        }
+                        
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: errorMsg,
+                                timer: 3000
+                            });
+                        } else {
+                            alert(errorMsg);
                         }
                     }
-                } catch(e) {
-                    console.error('Failed to parse JSON:', e);
-                    // Bukan JSON, mungkin HTML error page
-                    errorMsg = 'Terjadi kesalahan. Silakan refresh halaman dan coba lagi.';
-                }
+                });
                 
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: errorMsg,
-                        timer: 3000
-                    });
-                } else {
-                    alert(errorMsg);
-                }
-            }
-        });
-        
-        return false;
-    });
-    
+                return false;
+            });
+            
             // Reload page setelah success untuk update status
             <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
             setTimeout(function() {
