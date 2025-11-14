@@ -239,11 +239,11 @@ $conn->close();
                     </div>
                 <?php else: ?>
                     <div class="empty-state text-center py-5">
-                        <i class="bi bi-file-earmark-text" style="font-size: 4rem; color: #ccc;"></i>
-                        <h5 class="mt-3">Belum ada soal</h5>
-                        <p class="text-muted">Mulai dengan menambahkan soal baru</p>
-                        <a href="tambah_soal.php" class="btn btn-primary mt-3">
-                            <i class="bi bi-plus-circle"></i> Tambah Soal Baru
+                        <i class="bi bi-file-earmark-text" style="font-size: 3.5rem; color: #cbd5e1; opacity: 0.6;"></i>
+                        <h5 class="mt-3 mb-2" style="font-size: 1.125rem; font-weight: 600; color: #1e293b;">Belum ada soal</h5>
+                        <p class="text-muted mb-4" style="font-size: 0.875rem; color: #64748b;">Mulai dengan menambahkan soal baru</p>
+                        <a href="tambah_soal.php" class="btn btn-primary btn-sm" style="padding: 10px 20px; font-size: 14px; font-weight: 600;">
+                            <i class="bi bi-plus-circle me-2"></i> Tambah Soal Baru
                         </a>
                     </div>
                 <?php endif; ?>
