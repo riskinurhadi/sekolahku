@@ -48,6 +48,9 @@ body {
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
     overflow-y: auto;
     overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 100px;
 }
 
 .sidebar-header {
@@ -74,6 +77,7 @@ body {
 .sidebar .components {
     padding: 20px 0;
     list-style: none;
+    flex: 1;
 }
 
 .sidebar .components li {
@@ -111,6 +115,47 @@ body {
     width: 20px;
     text-align: center;
     font-size: 18px;
+}
+
+/* Sidebar Footer - Logout Button */
+.sidebar-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    border-top: 1px solid #e9ecef;
+    background: #ffffff;
+}
+
+.sidebar-logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    width: 100%;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.sidebar-logout-btn:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+}
+
+.sidebar-logout-btn i {
+    font-size: 18px;
+    width: 20px;
+    text-align: center;
 }
 
 /* Content Area */
