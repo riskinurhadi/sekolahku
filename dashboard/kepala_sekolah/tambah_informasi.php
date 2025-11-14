@@ -30,6 +30,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     $prioritas = $_POST['prioritas'] ?? 'normal';
     $status = $_POST['status'] ?? 'draft';
     
+    // Jika target_role adalah spesifik, set target_role menjadi 'semua' dan gunakan target_user_id
+    // (karena target_role adalah ENUM yang tidak bisa NULL, kita gunakan 'semua' sebagai default)
+    if ($target_role == 'spesifik') {
+        $target_role = 'semua'; // Default, tapi akan di-filter berdasarkan target_user_id
+    }
+    
     // Validasi
     if (empty($judul)) {
         $conn->close();
@@ -38,6 +44,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     } elseif (empty($isi)) {
         $conn->close();
         header('Location: tambah_informasi.php?error=1&msg=' . urlencode('Isi informasi tidak boleh kosong!'));
+        exit;
+    } elseif ($_POST['target_role'] == 'spesifik' && !$target_user_id) {
+        $conn->close();
+        header('Location: tambah_informasi.php?error=1&msg=' . urlencode('Silakan pilih user target!'));
         exit;
     } else {
         // Insert informasi akademik
