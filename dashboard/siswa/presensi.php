@@ -52,41 +52,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
             if ($existing) {
                 $message = 'error:Anda sudah melakukan presensi untuk sesi ini!';
             } else {
-                // Tentukan status (hadir atau terlambat)
-                // Status dihitung berdasarkan waktu presensi relatif terhadap waktu kode dibuat/di-regenerate
-                // Jika presensi dilakukan dalam 30 menit pertama setelah kode dibuat = hadir
-                // Jika lebih dari 30 menit = terlambat
+                // Cek apakah kode masih valid (dalam 30 menit)
                 $waktu_sekarang = new DateTime();
                 
                 // Gunakan updated_at karena saat regenerate kode, updated_at akan berubah
-                // Jika updated_at sama dengan created_at, berarti kode belum pernah di-regenerate
                 $waktu_kode_dibuat = new DateTime($sesi['updated_at'] ?? $sesi['created_at']);
                 
                 // Hitung selisih dalam menit dari waktu kode dibuat/di-regenerate
                 $selisih_menit = ($waktu_sekarang->getTimestamp() - $waktu_kode_dibuat->getTimestamp()) / 60;
                 
-                // Jika presensi dalam 30 menit pertama setelah kode dibuat = hadir
-                // Jika lebih dari 30 menit = terlambat
-                if ($selisih_menit <= 30) {
+                // Jika lebih dari 30 menit, kode sudah kadaluarsa
+                if ($selisih_menit > 30) {
+                    $message = 'expired:yahh kode sudah kadaluarsa';
+                } else {
+                    // Jika dalam 30 menit, presensi berhasil dengan status hadir
                     $status = 'hadir';
-                } else {
-                    $status = 'terlambat';
-                }
-                
-                // Insert presensi
-                $stmt = $conn->prepare("INSERT INTO presensi (sesi_pelajaran_id, siswa_id, waktu_presensi, status) VALUES (?, ?, NOW(), ?)");
-                $stmt->bind_param("iis", $sesi['id'], $siswa_id, $status);
-                
-                if ($stmt->execute()) {
+                    
+                    // Insert presensi
+                    $stmt = $conn->prepare("INSERT INTO presensi (sesi_pelajaran_id, siswa_id, waktu_presensi, status) VALUES (?, ?, NOW(), ?)");
+                    $stmt->bind_param("iis", $sesi['id'], $siswa_id, $status);
+                    
+                    if ($stmt->execute()) {
+                        $stmt->close();
+                        // Redirect dengan parameter success
+                        header('Location: presensi.php?success=1');
+                        $conn->close();
+                        exit();
+                    } else {
+                        $message = 'error:Gagal melakukan presensi! Error: ' . $conn->error;
+                    }
                     $stmt->close();
-                    // Redirect dengan parameter success BEFORE any output
-                    header('Location: presensi.php?success=1&status=' . urlencode($status == 'terlambat' ? 'Terlambat' : 'Hadir'));
-                    $conn->close();
-                    exit();
-                } else {
-                    $message = 'error:Gagal melakukan presensi! Error: ' . $conn->error;
                 }
-                $stmt->close();
             }
         } else {
             $message = 'error:Kode presensi tidak valid atau sesi sudah berakhir!';
