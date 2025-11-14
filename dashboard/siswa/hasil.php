@@ -1,6 +1,7 @@
 <?php
 $page_title = 'Hasil Ujian';
 require_once '../../config/session.php';
+require_once '../../config/database.php';
 requireRole(['siswa']);
 
 // Handle redirect BEFORE header output
