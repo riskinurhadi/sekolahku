@@ -849,6 +849,38 @@ body {
     flex-wrap: wrap;
 }
 
+/* Presensi Lesson Item Styling */
+.presensi-lesson-item {
+    transition: all 0.2s ease;
+}
+
+.presensi-lesson-item:hover {
+    background: #f8f9fa;
+    margin-left: -8px;
+    margin-right: -8px;
+    padding-left: 8px;
+    padding-right: 8px;
+    border-radius: 8px;
+}
+
+.presensi-lesson-item:last-child {
+    border-bottom: none !important;
+}
+
+.presensi-form-inline .input-group {
+    max-width: 400px;
+}
+
+.presensi-form-inline .form-control-sm {
+    font-size: 14px;
+    padding: 6px 12px;
+}
+
+.presensi-form-inline .btn-sm {
+    padding: 6px 16px;
+    font-size: 14px;
+}
+
 /* Card Styles */
 .card {
     border: none;

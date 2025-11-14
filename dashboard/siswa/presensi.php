@@ -155,7 +155,9 @@ $conn->close();
         <?php 
         $msg = explode(':', $message);
         if ($msg[0] == 'success') {
-            echo "showSuccess('" . addslashes($msg[1]) . "');";
+            echo "Swal.fire({icon: 'success', title: 'Berhasil!', text: '" . addslashes($msg[1]) . "', timer: 3000});";
+        } elseif ($msg[0] == 'expired') {
+            echo "Swal.fire({icon: 'error', title: 'Kode Kadaluarsa', text: '" . addslashes($msg[1]) . "', timer: 3000});";
         } else {
             echo "showError('" . addslashes($msg[1]) . "');";
         }
@@ -168,26 +170,69 @@ $conn->close();
     <p>Ikuti pelajaran aktif dan lakukan presensi</p>
 </div>
 
-<!-- Form Input Kode Presensi -->
+<!-- List Mata Pelajaran Sedang Berlangsung -->
 <div class="row mb-4">
-    <div class="col-md-8 mx-auto">
+    <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-key"></i> Input Kode Presensi</h5>
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Pelajaran Sedang Berlangsung</h5>
             </div>
             <div class="card-body">
-                <form method="POST" id="presensiForm" action="presensi.php" onsubmit="return validatePresensi()">
-                    <input type="hidden" name="action" value="presensi">
-                    <div class="mb-3">
-                        <label class="form-label">Masukkan Kode Presensi <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control text-center fs-4 fw-bold" name="kode_presensi" id="kode_presensi"
-                            placeholder="ABCD12" maxlength="10" style="letter-spacing: 0.5em;" required autocomplete="off" value="<?php echo isset($_POST['kode_presensi']) ? htmlspecialchars($_POST['kode_presensi']) : ''; ?>">
-                        <small class="text-muted">Masukkan kode yang diberikan oleh guru (minimal 3 karakter)</small>
+                <?php if (count($active_sessions) > 0): ?>
+                    <?php foreach ($active_sessions as $session): ?>
+                        <div class="presensi-lesson-item mb-3 pb-3 border-bottom">
+                            <div class="row align-items-center">
+                                <div class="col-md-4">
+                                    <h6 class="mb-1 fw-bold"><?php echo htmlspecialchars($session['nama_pelajaran']); ?></h6>
+                                    <small class="text-muted">
+                                        <i class="bi bi-person"></i> <?php echo htmlspecialchars($session['nama_guru']); ?><br>
+                                        <i class="bi bi-clock"></i> <?php echo date('d/m/Y H:i', strtotime($session['waktu_mulai'])); ?> - <?php echo date('H:i', strtotime($session['waktu_selesai'])); ?>
+                                    </small>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <?php 
+                                    $status_waktu = $session['status_waktu'] ?? 'selesai';
+                                    $status_label = $status_waktu == 'berlangsung' ? 'BERLANGSUNG' : 'SELESAI';
+                                    $status_class = $status_waktu == 'berlangsung' ? 'success' : 'secondary';
+                                    ?>
+                                    <span class="badge bg-<?php echo $status_class; ?>"><?php echo $status_label; ?></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <?php if ($session['sudah_presensi'] > 0): ?>
+                                        <div class="alert alert-success mb-0 py-2">
+                                            <i class="bi bi-check-circle"></i> Anda sudah melakukan presensi
+                                        </div>
+                                    <?php else: ?>
+                                        <form method="POST" class="presensi-form-inline" onsubmit="return validatePresensiInline(this)">
+                                            <input type="hidden" name="action" value="presensi">
+                                            <div class="input-group">
+                                                <input type="text" 
+                                                    class="form-control form-control-sm" 
+                                                    name="kode_presensi" 
+                                                    placeholder="Masukkan kode presensi" 
+                                                    maxlength="10" 
+                                                    required 
+                                                    autocomplete="off"
+                                                    style="text-transform: uppercase;">
+                                                <button type="submit" class="btn btn-primary btn-sm" type="submit">
+                                                    <i class="bi bi-check-circle"></i> Presensi
+                                                </button>
+                                            </div>
+                                        </form>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="text-center py-4">
+                        <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                        <p class="text-muted mt-2">Tidak ada pelajaran yang sedang berlangsung</p>
+                        <?php if (!$sekolah_id): ?>
+                            <small class="text-danger">Anda belum terdaftar di sekolah</small>
+                        <?php endif; ?>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100" id="btnPresensi">
-                        <i class="bi bi-check-circle"></i> Presensi
-                    </button>
-                </form>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -228,7 +273,7 @@ $conn->close();
                                             ?>">
                                                 <?php 
                                                 $status_labels = [
-                                                    'hadir' => 'Hadir',
+                                                    'hadir' => 'Sukses',
                                                     'terlambat' => 'Terlambat',
                                                     'tidak_hadir' => 'Tidak Hadir'
                                                 ];
@@ -254,19 +299,20 @@ $conn->close();
 </div>
 
 <script>
-function validatePresensi() {
-    const kode = document.getElementById('kode_presensi').value.trim().toUpperCase();
+function validatePresensiInline(form) {
+    const kodeInput = form.querySelector('input[name="kode_presensi"]');
+    const kode = kodeInput.value.trim().toUpperCase();
+    const btn = form.querySelector('button[type="submit"]');
+    
     if (!kode || kode.length < 3) {
         showError('Kode presensi minimal 3 karakter!');
         return false;
     }
     
     // Disable button to prevent double submit
-    const btn = document.getElementById('btnPresensi');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Memproses...';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
     
-    // Allow form to submit normally
     return true;
 }
 
@@ -277,26 +323,17 @@ $(document).ready(function() {
     });
     <?php endif; ?>
     
-    // Auto uppercase kode presensi
-    $('#kode_presensi').on('input', function() {
+    // Auto uppercase kode presensi pada semua form inline
+    $('.presensi-form-inline input[name="kode_presensi"]').on('input', function() {
         this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
     });
     
-    // Clear form after successful presensi
+    // Reload page setelah success untuk update status
     <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
-    $('#kode_presensi').val('');
-    // Re-enable button in case of redirect
-    $('#btnPresensi').prop('disabled', false).html('<i class="bi bi-check-circle"></i> Presensi');
+    setTimeout(function() {
+        window.location.href = 'presensi.php';
+    }, 2000);
     <?php endif; ?>
-    
-    // Prevent double submit
-    $('#presensiForm').on('submit', function(e) {
-        const btn = $('#btnPresensi');
-        if (btn.prop('disabled')) {
-            e.preventDefault();
-            return false;
-        }
-    });
 });
 </script>
 
