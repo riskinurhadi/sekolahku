@@ -1,9 +1,10 @@
 <?php
 $page_title = 'Kerjakan Soal';
 require_once '../../config/session.php';
+require_once '../../config/database.php';
 requireRole(['siswa']);
-require_once '../../includes/header.php';
 
+// Handle redirects BEFORE header output
 $conn = getConnection();
 $siswa_id = $_SESSION['user_id'];
 $soal_id = $_GET['id'] ?? 0;
@@ -19,6 +20,7 @@ $soal = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 if (!$soal) {
+    $conn->close();
     header('Location: soal_saya.php');
     exit();
 }
@@ -31,9 +33,17 @@ $hasil_exist = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 if ($hasil_exist) {
+    $conn->close();
     header('Location: hasil.php?soal_id=' . $soal_id);
     exit();
 }
+
+// Re-establish connection if needed
+if (!isset($conn) || !$conn || $conn->ping() === false) {
+    $conn = getConnection();
+}
+
+require_once '../../includes/header.php';
 
 // Get item soal
 $stmt = $conn->prepare("SELECT * FROM item_soal WHERE soal_id = ? ORDER BY urutan ASC");
@@ -145,14 +155,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->execute();
     $stmt->close();
     
+    // Close connection before redirect
     $conn->close();
     
     // Redirect dengan parameter success
     header('Location: hasil.php?soal_id=' . $soal_id . '&success=1');
     exit();
 }
-
-$conn->close();
 ?>
 
 <div class="page-header">
