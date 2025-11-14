@@ -74,9 +74,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                     
                     if ($stmt->execute()) {
                         $stmt->close();
+                        $conn->close();
                         // Redirect dengan parameter success
                         header('Location: presensi.php?success=1');
-                        $conn->close();
                         exit();
                     } else {
                         $message = 'error:Gagal melakukan presensi! Error: ' . $conn->error;
@@ -96,7 +96,16 @@ if (isset($_GET['success']) && $_GET['success'] == 1) {
 }
 
 // Now include header AFTER handling POST
+// Pastikan tidak ada output sebelum ini
+if (ob_get_level()) {
+    ob_end_clean();
+}
 require_once '../../includes/header.php';
+
+// Pastikan koneksi database masih aktif (jika belum ditutup)
+if (!isset($conn) || !$conn || $conn->ping() === false) {
+    $conn = getConnection();
+}
 
 // Get active sessions untuk ditampilkan di halaman presensi
 $active_sessions = [];
@@ -203,7 +212,7 @@ $conn->close();
                                             <i class="bi bi-check-circle"></i> Anda sudah melakukan presensi
                                         </div>
                                     <?php else: ?>
-                                        <form method="POST" class="presensi-form-inline" onsubmit="return validatePresensiInline(this)">
+                                        <form method="POST" action="presensi.php" class="presensi-form-inline" onsubmit="return validatePresensiInline(this)">
                                             <input type="hidden" name="action" value="presensi">
                                             <div class="input-group">
                                                 <input type="text" 
@@ -214,7 +223,7 @@ $conn->close();
                                                     required 
                                                     autocomplete="off"
                                                     style="text-transform: uppercase;">
-                                                <button type="submit" class="btn btn-primary btn-sm" type="submit">
+                                                <button type="submit" class="btn btn-primary btn-sm">
                                                     <i class="bi bi-check-circle"></i> Presensi
                                                 </button>
                                             </div>
@@ -304,15 +313,29 @@ function validatePresensiInline(form) {
     const kode = kodeInput.value.trim().toUpperCase();
     const btn = form.querySelector('button[type="submit"]');
     
+    // Update input value to uppercase
+    kodeInput.value = kode;
+    
     if (!kode || kode.length < 3) {
-        showError('Kode presensi minimal 3 karakter!');
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Kode presensi minimal 3 karakter!',
+                timer: 2000
+            });
+        } else {
+            alert('Kode presensi minimal 3 karakter!');
+        }
         return false;
     }
     
     // Disable button to prevent double submit
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+    const originalHtml = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Memproses...';
     
+    // Allow form to submit normally
     return true;
 }
 
