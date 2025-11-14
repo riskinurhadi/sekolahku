@@ -20,7 +20,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $result = $check_stmt->get_result();
             
             if ($result->num_rows > 0) {
-                // Delete related data first (jawaban, hasil_ujian, etc.)
+                // Get item_soal IDs first to delete pilihan_jawaban
+                $get_items = $conn->prepare("SELECT id FROM item_soal WHERE soal_id = ?");
+                $get_items->bind_param("i", $id);
+                $get_items->execute();
+                $items_result = $get_items->get_result();
+                $item_ids = [];
+                while ($row = $items_result->fetch_assoc()) {
+                    $item_ids[] = $row['id'];
+                }
+                $get_items->close();
+                
+                // Delete pilihan_jawaban (related to item_soal)
+                if (!empty($item_ids)) {
+                    if (count($item_ids) == 1) {
+                        $delete_pilihan = $conn->prepare("DELETE FROM pilihan_jawaban WHERE item_soal_id = ?");
+                        $delete_pilihan->bind_param("i", $item_ids[0]);
+                    } else {
+                        $placeholders = str_repeat('?,', count($item_ids) - 1) . '?';
+                        $delete_pilihan = $conn->prepare("DELETE FROM pilihan_jawaban WHERE item_soal_id IN ($placeholders)");
+                        $delete_pilihan->bind_param(str_repeat('i', count($item_ids)), ...$item_ids);
+                    }
+                    $delete_pilihan->execute();
+                    $delete_pilihan->close();
+                }
+                
                 // Delete jawaban siswa
                 $delete_jawaban = $conn->prepare("DELETE FROM jawaban_siswa WHERE soal_id = ?");
                 $delete_jawaban->bind_param("i", $id);
@@ -33,11 +57,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $delete_hasil->execute();
                 $delete_hasil->close();
                 
-                // Delete pertanyaan
-                $delete_pertanyaan = $conn->prepare("DELETE FROM pertanyaan WHERE soal_id = ?");
-                $delete_pertanyaan->bind_param("i", $id);
-                $delete_pertanyaan->execute();
-                $delete_pertanyaan->close();
+                // Delete item_soal
+                $delete_item = $conn->prepare("DELETE FROM item_soal WHERE soal_id = ?");
+                $delete_item->bind_param("i", $id);
+                $delete_item->execute();
+                $delete_item->close();
                 
                 // Finally delete soal
                 $stmt = $conn->prepare("DELETE FROM soal WHERE id = ? AND guru_id = ?");
@@ -227,7 +251,7 @@ $conn->close();
 function confirmDeleteSoal(id, judul) {
     Swal.fire({
         title: 'Apakah Anda yakin?',
-        html: 'Soal <strong>"' + judul + '"</strong> akan dihapus secara permanen!<br><br>Semua data terkait juga akan ikut terhapus:<br>• Pertanyaan<br>• Jawaban siswa<br>• Hasil ujian',
+        html: 'Soal <strong>"' + judul + '"</strong> akan dihapus secara permanen!<br><br>Semua data terkait juga akan ikut terhapus:<br>• Item soal & pertanyaan<br>• Pilihan jawaban<br>• Jawaban siswa<br>• Hasil ujian',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#ef4444',
