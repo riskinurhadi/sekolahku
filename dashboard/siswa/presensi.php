@@ -30,7 +30,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     } else {
         // Cari sesi dengan kode tersebut yang masih aktif (lebih fleksibel - masih bisa presensi sampai waktu selesai)
         // Pastikan mengambil created_at dan updated_at untuk logika penentuan status
-        $stmt = $conn->prepare("SELECT sp.*, mp.nama_pelajaran 
+        // Explicitly select updated_at untuk memastikan nilainya terambil
+        $stmt = $conn->prepare("SELECT sp.id, sp.mata_pelajaran_id, sp.guru_id, sp.kode_presensi, 
+            sp.waktu_mulai, sp.waktu_selesai, sp.status, 
+            sp.created_at, sp.updated_at, 
+            mp.nama_pelajaran 
             FROM sesi_pelajaran sp 
             JOIN mata_pelajaran mp ON sp.mata_pelajaran_id = mp.id 
             WHERE sp.kode_presensi = ? AND sp.status = 'aktif' 
@@ -60,21 +64,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                 $message = 'error:' . $error_msg;
             } else {
                 // Cek apakah kode masih valid (dalam 30 menit)
-                $waktu_sekarang = new DateTime();
+                // Gunakan waktu dari database untuk konsistensi timezone
+                $waktu_sekarang_db = $conn->query("SELECT NOW() as waktu_sekarang")->fetch_assoc()['waktu_sekarang'];
                 
                 // Gunakan updated_at karena saat regenerate kode, updated_at akan berubah
-                $waktu_kode_dibuat = new DateTime($sesi['updated_at'] ?? $sesi['created_at']);
+                // Jika updated_at sama dengan created_at, berarti belum pernah di-regenerate
+                $waktu_kode_dibuat = $sesi['updated_at'] ?? $sesi['created_at'];
                 
-                // Hitung selisih dalam menit dari waktu kode dibuat/di-regenerate
-                $selisih_menit = ($waktu_sekarang->getTimestamp() - $waktu_kode_dibuat->getTimestamp()) / 60;
+                // Hitung selisih dalam menit menggunakan query SQL untuk akurasi
+                $stmt_selisih = $conn->prepare("SELECT TIMESTAMPDIFF(MINUTE, ?, ?) as selisih_menit");
+                $stmt_selisih->bind_param("ss", $waktu_kode_dibuat, $waktu_sekarang_db);
+                $stmt_selisih->execute();
+                $result_selisih = $stmt_selisih->get_result()->fetch_assoc();
+                $selisih_menit = $result_selisih['selisih_menit'] ?? 0;
+                $stmt_selisih->close();
                 
+                // Debug: log untuk troubleshooting
+                error_log("Presensi Debug - Kode: $kode_presensi, Waktu kode: $waktu_kode_dibuat, Waktu sekarang: $waktu_sekarang_db, Selisih: $selisih_menit menit");
+                
+                // Jika selisih negatif (waktu kode di masa depan), berarti ada masalah timezone, anggap valid
                 // Jika lebih dari 30 menit, kode sudah kadaluarsa
+                if ($selisih_menit < 0) {
+                    // Waktu kode di masa depan, mungkin masalah timezone, anggap valid
+                    $selisih_menit = 0;
+                }
+                
                 if ($selisih_menit > 30) {
-                    $error_msg = 'yahh kode sudah kadaluarsa';
+                    $error_msg = 'yahh kode sudah kadaluarsa (selisih: ' . round($selisih_menit, 2) . ' menit)';
                     // Jika request via AJAX, return JSON
                     if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
                         header('Content-Type: application/json');
-                        echo json_encode(['success' => false, 'expired' => true, 'message' => $error_msg]);
+                        echo json_encode(['success' => false, 'expired' => true, 'message' => $error_msg, 'debug' => [
+                            'waktu_kode' => $waktu_kode_dibuat,
+                            'waktu_sekarang' => $waktu_sekarang_db,
+                            'selisih_menit' => $selisih_menit
+                        ]]);
                         exit();
                     }
                     $message = 'expired:' . $error_msg;
