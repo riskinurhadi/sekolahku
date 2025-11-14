@@ -65,14 +65,15 @@ if ($table_check && $table_check->num_rows > 0) {
     }
     
     // Filter berdasarkan target role
-    $query .= " AND (ia.target_role = 'semua' OR ia.target_role = ?";
-    $params[] = $user_role;
-    $types .= "s";
-    
-    // Include pesan yang ditujukan khusus untuk user ini (target_user_id tidak null)
-    $query .= " OR (ia.target_user_id = ? AND ia.target_user_id IS NOT NULL))";
+    // Jika target_user_id tidak null, berarti pesan spesifik untuk user tersebut
+    // Jika target_user_id null, filter berdasarkan target_role
+    $query .= " AND ((ia.target_user_id IS NOT NULL AND ia.target_user_id = ?)";
     $params[] = $user_id;
     $types .= "i";
+    
+    $query .= " OR (ia.target_user_id IS NULL AND (ia.target_role = 'semua' OR ia.target_role = ?)))";
+    $params[] = $user_role;
+    $types .= "s";
     
     $query .= " ORDER BY 
         CASE ia.prioritas

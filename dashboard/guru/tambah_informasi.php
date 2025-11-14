@@ -30,9 +30,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     $prioritas = $_POST['prioritas'] ?? 'normal';
     $status = $_POST['status'] ?? 'draft';
     
-    // Jika target_role adalah spesifik, ubah menjadi null dan gunakan target_user_id
+    // Jika target_role adalah spesifik, set target_role menjadi 'semua' dan gunakan target_user_id
+    // (karena target_role adalah ENUM yang tidak bisa NULL, kita gunakan 'semua' sebagai default)
     if ($target_role == 'spesifik') {
-        $target_role = null; // Akan di-handle khusus dengan target_user_id
+        $target_role = 'semua'; // Default, tapi akan di-filter berdasarkan target_user_id
     }
     
     // Validasi
@@ -44,24 +45,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
         $conn->close();
         header('Location: tambah_informasi.php?error=1&msg=' . urlencode('Isi informasi tidak boleh kosong!'));
         exit;
-    } elseif ($target_role === null && !$target_user_id) {
+    } elseif ($_POST['target_role'] == 'spesifik' && !$target_user_id) {
         $conn->close();
         header('Location: tambah_informasi.php?error=1&msg=' . urlencode('Silakan pilih user target!'));
         exit;
     } else {
         // Insert informasi akademik
-        // Jika target_role null (spesifik), set target_role menjadi NULL di database
-        if ($target_role === null) {
-            $stmt = $conn->prepare("INSERT INTO informasi_akademik 
-                (judul, isi, pengirim_id, sekolah_id, target_role, target_user_id, prioritas, status) 
-                VALUES (?, ?, ?, ?, NULL, ?, ?, ?)");
-            $stmt->bind_param("ssiisss", $judul, $isi, $user_id, $sekolah_id, $target_user_id, $prioritas, $status);
-        } else {
-            $stmt = $conn->prepare("INSERT INTO informasi_akademik 
-                (judul, isi, pengirim_id, sekolah_id, target_role, target_user_id, prioritas, status) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("ssisssss", $judul, $isi, $user_id, $sekolah_id, $target_role, $target_user_id, $prioritas, $status);
-        }
+        $stmt = $conn->prepare("INSERT INTO informasi_akademik 
+            (judul, isi, pengirim_id, sekolah_id, target_role, target_user_id, prioritas, status) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssisssss", $judul, $isi, $user_id, $sekolah_id, $target_role, $target_user_id, $prioritas, $status);
         
         if ($stmt->execute()) {
             $stmt->close();
