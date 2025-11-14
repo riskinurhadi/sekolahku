@@ -103,35 +103,7 @@ if (isset($_GET['success']) && $_GET['success'] == 1) {
 // Now include header AFTER handling POST
 require_once '../../includes/header.php';
 
-// Get active sessions for this school
-$active_sessions = [];
-if ($sekolah_id) {
-    // Get sessions that are active and within time range, or just active (more flexible)
-    // Check if table exists first
-    $table_check = $conn->query("SHOW TABLES LIKE 'sesi_pelajaran'");
-    if ($table_check && $table_check->num_rows > 0) {
-        $stmt = $conn->prepare("SELECT sp.*, mp.nama_pelajaran, u.nama_lengkap as nama_guru,
-            (SELECT COUNT(*) FROM presensi WHERE sesi_pelajaran_id = sp.id) as jumlah_presensi,
-            CASE 
-                WHEN NOW() < sp.waktu_mulai THEN 'belum_mulai'
-                WHEN NOW() BETWEEN sp.waktu_mulai AND sp.waktu_selesai THEN 'berlangsung'
-                ELSE 'selesai'
-            END as status_waktu
-            FROM sesi_pelajaran sp 
-            JOIN mata_pelajaran mp ON sp.mata_pelajaran_id = mp.id 
-            JOIN users u ON sp.guru_id = u.id
-            WHERE sp.status = 'aktif' 
-            AND NOW() <= sp.waktu_selesai
-            AND mp.sekolah_id = ?
-            ORDER BY sp.waktu_mulai DESC");
-        if ($stmt) {
-            $stmt->bind_param("i", $sekolah_id);
-            $stmt->execute();
-            $active_sessions = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-            $stmt->close();
-        }
-    }
-}
+// Tidak perlu get active sessions lagi karena sudah dipindahkan ke halaman guru
 
 // Get my presensi history
 $my_presensi = [];
@@ -176,7 +148,7 @@ $conn->close();
 
 <!-- Form Input Kode Presensi -->
 <div class="row mb-4">
-    <div class="col-md-6">
+    <div class="col-md-8 mx-auto">
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0"><i class="bi bi-key"></i> Input Kode Presensi</h5>
@@ -194,54 +166,6 @@ $conn->close();
                         <i class="bi bi-check-circle"></i> Presensi
                     </button>
                 </form>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Pelajaran Aktif -->
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Pelajaran Sedang Berlangsung</h5>
-            </div>
-            <div class="card-body">
-                <?php if (count($active_sessions) > 0): ?>
-                    <?php foreach ($active_sessions as $session): ?>
-                        <div class="card mb-2 border-<?php echo ($session['status_waktu'] ?? '') == 'berlangsung' ? 'success' : 'warning'; ?>">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h6 class="card-title mb-0"><?php echo htmlspecialchars($session['nama_pelajaran']); ?></h6>
-                                    <span class="badge bg-<?php echo ($session['status_waktu'] ?? '') == 'berlangsung' ? 'success' : 'warning'; ?>">
-                                        <?php 
-                                        $status_labels = [
-                                            'belum_mulai' => 'Belum Mulai',
-                                            'berlangsung' => 'Berlangsung',
-                                            'selesai' => 'Selesai'
-                                        ];
-                                        echo $status_labels[$session['status_waktu']] ?? 'Aktif';
-                                        ?>
-                                    </span>
-                                </div>
-                                <p class="card-text mb-1">
-                                    <small class="text-muted">
-                                        <i class="bi bi-person"></i> <?php echo htmlspecialchars($session['nama_guru']); ?><br>
-                                        <i class="bi bi-clock"></i> <?php echo date('d/m/Y H:i', strtotime($session['waktu_mulai'])); ?> - <?php echo date('H:i', strtotime($session['waktu_selesai'])); ?><br>
-                                        <i class="bi bi-people"></i> <?php echo $session['jumlah_presensi']; ?> siswa sudah presensi<br>
-                                        <i class="bi bi-key"></i> Kode: <strong><?php echo htmlspecialchars($session['kode_presensi']); ?></strong>
-                                    </small>
-                                </p>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <div class="text-center py-4">
-                        <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
-                        <p class="text-muted mt-2">Tidak ada pelajaran yang sedang berlangsung</p>
-                        <?php if (!$sekolah_id): ?>
-                            <small class="text-danger">Anda belum terdaftar di sekolah</small>
-                        <?php endif; ?>
-                    </div>
-                <?php endif; ?>
             </div>
         </div>
     </div>

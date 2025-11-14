@@ -797,6 +797,58 @@ body {
     animation: fadeIn 0.3s ease;
 }
 
+/* Lesson Card Styling - Sesuai Gambar */
+.lesson-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.lesson-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+.lesson-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 12px;
+}
+
+.lesson-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #64748b;
+}
+
+.detail-item i {
+    width: 18px;
+    text-align: center;
+    color: #94a3b8;
+}
+
+.detail-item strong {
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.lesson-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
 /* Card Styles */
 .card {
     border: none;
