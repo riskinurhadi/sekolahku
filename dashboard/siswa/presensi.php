@@ -172,6 +172,8 @@ $active_sessions = [];
 if ($sekolah_id) {
     $table_check = $conn->query("SHOW TABLES LIKE 'sesi_pelajaran'");
     if ($table_check && $table_check->num_rows > 0) {
+        // Query untuk menampilkan sesi yang aktif dan belum selesai
+        // Termasuk sesi yang belum dimulai atau sedang berlangsung
         $stmt = $conn->prepare("SELECT sp.*, mp.nama_pelajaran, u.nama_lengkap as nama_guru,
             (SELECT COUNT(*) FROM presensi WHERE sesi_pelajaran_id = sp.id) as jumlah_presensi,
             CASE 
@@ -186,7 +188,13 @@ if ($sekolah_id) {
             WHERE sp.status = 'aktif' 
             AND NOW() <= sp.waktu_selesai
             AND mp.sekolah_id = ?
-            ORDER BY sp.waktu_mulai DESC");
+            ORDER BY 
+                CASE 
+                    WHEN NOW() BETWEEN sp.waktu_mulai AND sp.waktu_selesai THEN 1
+                    WHEN NOW() < sp.waktu_mulai THEN 2
+                    ELSE 3
+                END,
+                sp.waktu_mulai DESC");
         if ($stmt) {
             $stmt->bind_param("ii", $siswa_id, $sekolah_id);
             $stmt->execute();
@@ -326,7 +334,11 @@ $conn->close();
                         <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
                         <p class="text-muted mt-2">Tidak ada pelajaran yang sedang berlangsung</p>
                         <?php if (!$sekolah_id): ?>
-                            <small class="text-danger">Anda belum terdaftar di sekolah</small>
+                            <small class="text-danger d-block mt-2">Anda belum terdaftar di sekolah</small>
+                        <?php else: ?>
+                            <small class="text-muted d-block mt-2">
+                                Pastikan guru sudah memulai pelajaran dan pelajaran masih aktif
+                            </small>
                         <?php endif; ?>
                     </div>
                 <?php endif; ?>
