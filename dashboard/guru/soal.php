@@ -2,13 +2,13 @@
 $page_title = 'Kelola Soal';
 require_once '../../config/session.php';
 requireRole(['guru']);
-require_once '../../includes/header.php';
+require_once '../../config/database.php';
 
 $conn = getConnection();
 $guru_id = $_SESSION['user_id'];
 $message = '';
 
-// Handle form submission
+// Handle form submission BEFORE header output
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['action'])) {
         if ($_POST['action'] == 'delete') {
@@ -68,22 +68,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $stmt->bind_param("ii", $id, $guru_id);
                 
                 if ($stmt->execute()) {
-                    $message = 'success:Soal berhasil dihapus!';
+                    $stmt->close();
+                    $conn->close();
+                    header('Location: soal.php?success=1&msg=' . urlencode('Soal berhasil dihapus!'));
+                    exit;
                 } else {
-                    $message = 'error:Gagal menghapus soal!';
+                    $stmt->close();
+                    $conn->close();
+                    header('Location: soal.php?error=1&msg=' . urlencode('Gagal menghapus soal!'));
+                    exit;
                 }
-                $stmt->close();
             } else {
-                $message = 'error:Soal tidak ditemukan atau tidak memiliki akses!';
-            }
-            $check_stmt->close();
-            
-            // Redirect to prevent resubmission
-            if (strpos($message, 'success') === 0) {
-                header('Location: soal.php?success=1&msg=' . urlencode('Soal berhasil dihapus!'));
-                exit;
-            } else {
-                header('Location: soal.php?error=1&msg=' . urlencode(explode(':', $message)[1]));
+                $check_stmt->close();
+                $conn->close();
+                header('Location: soal.php?error=1&msg=' . urlencode('Soal tidak ditemukan atau tidak memiliki akses!'));
                 exit;
             }
         } elseif ($_POST['action'] == 'update_status') {
@@ -93,14 +91,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt->bind_param("sii", $status, $id, $guru_id);
             
             if ($stmt->execute()) {
-                $message = 'success:Status soal berhasil diupdate!';
+                $stmt->close();
+                $conn->close();
+                header('Location: soal.php?success=1&msg=' . urlencode('Status soal berhasil diupdate!'));
+                exit;
             } else {
-                $message = 'error:Gagal mengupdate status!';
+                $stmt->close();
+                $conn->close();
+                header('Location: soal.php?error=1&msg=' . urlencode('Gagal mengupdate status!'));
+                exit;
             }
-            $stmt->close();
         }
     }
 }
+
+// Now include header after POST handling
+require_once '../../includes/header.php';
 
 // Check for success/error from redirect
 if (isset($_GET['success']) && $_GET['success'] == 1) {
