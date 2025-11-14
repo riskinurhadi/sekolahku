@@ -2,8 +2,8 @@
 $page_title = 'Hasil Ujian';
 require_once '../../config/session.php';
 requireRole(['siswa']);
-require_once '../../includes/header.php';
 
+// Handle redirect BEFORE header output
 $conn = getConnection();
 $siswa_id = $_SESSION['user_id'];
 $soal_id = $_GET['soal_id'] ?? 0;
@@ -20,8 +20,17 @@ $hasil = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 if (!$hasil) {
+    $conn->close();
     header('Location: soal_saya.php');
     exit();
+}
+
+// Now include header AFTER handling redirect
+require_once '../../includes/header.php';
+
+// Pastikan koneksi database masih aktif
+if (!isset($conn) || !$conn || $conn->ping() === false) {
+    $conn = getConnection();
 }
 
 // Get item soal and jawaban
