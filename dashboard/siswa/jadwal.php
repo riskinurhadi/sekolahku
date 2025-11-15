@@ -191,7 +191,7 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                 </div>
             </div>
         </div>
-    <?php endfor; ?>
+    <?php } ?>
 </div>
 
 <!-- Summary Card -->
