@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <!-- Custom CSS -->
     <link rel="stylesheet" href="../assets/css/style.css">
 </head>
-<body>
+<body class="login-page">
     <div class="login-container">
         <div class="login-card">
             <!-- Left Panel: System Info & Logo -->
