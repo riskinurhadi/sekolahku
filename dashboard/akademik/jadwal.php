@@ -63,23 +63,35 @@ $week_start = date('Y-m-d', strtotime('monday this week', strtotime($filter_date
 $week_end = date('Y-m-d', strtotime('sunday this week', strtotime($filter_date)));
 
 // Get all classes for dropdown
-$kelas = $conn->query("SELECT * FROM kelas WHERE sekolah_id = $sekolah_id ORDER BY tingkat ASC, nama_kelas ASC")->fetch_all(MYSQLI_ASSOC);
+$stmt = $conn->prepare("SELECT * FROM kelas WHERE sekolah_id = ? ORDER BY tingkat ASC, nama_kelas ASC");
+$stmt->bind_param("i", $sekolah_id);
+$stmt->execute();
+$kelas = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
 
 // Get all mata pelajaran for dropdown
-$mata_pelajaran = $conn->query("SELECT mp.*, u.nama_lengkap as nama_guru 
+$stmt = $conn->prepare("SELECT mp.*, u.nama_lengkap as nama_guru, u.spesialisasi
     FROM mata_pelajaran mp 
     JOIN users u ON mp.guru_id = u.id 
-    WHERE mp.sekolah_id = $sekolah_id 
-    ORDER BY mp.nama_pelajaran ASC")->fetch_all(MYSQLI_ASSOC);
+    WHERE mp.sekolah_id = ? 
+    ORDER BY mp.nama_pelajaran ASC");
+$stmt->bind_param("i", $sekolah_id);
+$stmt->execute();
+$mata_pelajaran = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
 
 // Get jadwal for selected week
-$jadwal = $conn->query("SELECT jp.*, mp.nama_pelajaran, mp.kode_pelajaran, u.nama_lengkap as nama_guru, k.nama_kelas
+$stmt = $conn->prepare("SELECT jp.*, mp.nama_pelajaran, mp.kode_pelajaran, u.nama_lengkap as nama_guru, k.nama_kelas
     FROM jadwal_pelajaran jp
     JOIN mata_pelajaran mp ON jp.mata_pelajaran_id = mp.id
     JOIN users u ON mp.guru_id = u.id
     JOIN kelas k ON jp.kelas_id = k.id
-    WHERE jp.sekolah_id = $sekolah_id AND jp.tanggal BETWEEN '$week_start' AND '$week_end'
-    ORDER BY jp.tanggal ASC, jp.jam_mulai ASC")->fetch_all(MYSQLI_ASSOC);
+    WHERE jp.sekolah_id = ? AND jp.tanggal BETWEEN ? AND ?
+    ORDER BY jp.tanggal ASC, jp.jam_mulai ASC");
+$stmt->bind_param("iss", $sekolah_id, $week_start, $week_end);
+$stmt->execute();
+$jadwal = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
 
 // Group jadwal by date
 $jadwal_by_date = [];
@@ -255,12 +267,31 @@ $conn->close();
                         <label class="form-label">Mata Pelajaran <span class="text-danger">*</span></label>
                         <select class="form-select" name="mata_pelajaran_id" id="mataPelajaranId" required>
                             <option value="">Pilih Mata Pelajaran</option>
-                            <?php foreach ($mata_pelajaran as $mp): ?>
-                                <option value="<?php echo $mp['id']; ?>" data-guru="<?php echo htmlspecialchars($mp['nama_guru']); ?>">
-                                    <?php echo htmlspecialchars($mp['nama_pelajaran']); ?> - <?php echo htmlspecialchars($mp['nama_guru']); ?>
-                                </option>
-                            <?php endforeach; ?>
+                            <?php if (empty($mata_pelajaran)): ?>
+                                <option value="" disabled>Tidak ada mata pelajaran tersedia. Silakan tambahkan mata pelajaran terlebih dahulu.</option>
+                            <?php else: ?>
+                                <?php foreach ($mata_pelajaran as $mp): ?>
+                                    <option value="<?php echo $mp['id']; ?>" data-guru="<?php echo htmlspecialchars($mp['nama_guru']); ?>">
+                                        <?php echo htmlspecialchars($mp['nama_pelajaran']); ?> 
+                                        <?php if ($mp['kode_pelajaran']): ?>
+                                            (<?php echo htmlspecialchars($mp['kode_pelajaran']); ?>)
+                                        <?php endif; ?>
+                                        - <?php echo htmlspecialchars($mp['nama_guru']); ?>
+                                        <?php if ($mp['spesialisasi']): ?>
+                                            [<?php echo htmlspecialchars($mp['spesialisasi']); ?>]
+                                        <?php endif; ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </select>
+                        <?php if (empty($mata_pelajaran)): ?>
+                            <small class="text-danger">
+                                <i class="bi bi-exclamation-triangle"></i> Tidak ada mata pelajaran yang tersedia. 
+                                Pastikan guru sudah membuat mata pelajaran di menu "Mata Pelajaran".
+                            </small>
+                        <?php else: ?>
+                            <small class="text-muted">Pilih mata pelajaran yang akan dijadwalkan</small>
+                        <?php endif; ?>
                     </div>
                     
                     <div class="mb-3">
