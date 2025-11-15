@@ -208,51 +208,6 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     </div>
 </div>
 
-<!-- Summary Card -->
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="dashboard-card">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Ringkasan Minggu Ini</h5>
-            </div>
-            <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-md-3">
-                        <div class="p-3">
-                            <h3 class="text-primary mb-0"><?php echo count($jadwal); ?></h3>
-                            <small class="text-muted">Total Jadwal</small>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="p-3">
-                            <h3 class="text-success mb-0">
-                                <?php echo count(array_filter($jadwal, function($j) { return $j['status'] == 'berlangsung'; })); ?>
-                            </h3>
-                            <small class="text-muted">Berlangsung</small>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="p-3">
-                            <h3 class="text-info mb-0">
-                                <?php echo count(array_filter($jadwal, function($j) { return $j['status'] == 'selesai'; })); ?>
-                            </h3>
-                            <small class="text-muted">Selesai</small>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="p-3">
-                            <h3 class="text-secondary mb-0">
-                                <?php echo count(array_filter($jadwal, function($j) { return $j['status'] == 'terjadwal'; })); ?>
-                            </h3>
-                            <small class="text-muted">Terjadwal</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <?php endif; ?>
 
 <script>

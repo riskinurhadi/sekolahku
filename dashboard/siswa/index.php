@@ -8,6 +8,14 @@ $conn = getConnection();
 $siswa_id = $_SESSION['user_id'];
 $sekolah_id = $_SESSION['sekolah_id'];
 
+// Get siswa info including kelas_id
+$stmt = $conn->prepare("SELECT kelas_id FROM users WHERE id = ?");
+$stmt->bind_param("i", $siswa_id);
+$stmt->execute();
+$siswa_info = $stmt->get_result()->fetch_assoc();
+$kelas_id = $siswa_info['kelas_id'] ?? null;
+$stmt->close();
+
 // Get statistics
 $stats = [
     'total_soal_aktif' => 0,
@@ -36,6 +44,25 @@ $stmt->execute();
 $result = $stmt->get_result()->fetch_assoc();
 $stats['rata_rata_nilai'] = $result['avg'] ? number_format($result['avg'], 2) : 0;
 $stmt->close();
+
+// Get jadwal minggu ini untuk ringkasan
+$week_start = date('Y-m-d', strtotime('monday this week'));
+$week_end = date('Y-m-d', strtotime('sunday this week'));
+$jadwal_minggu_ini = [];
+
+if ($kelas_id) {
+    $stmt = $conn->prepare("SELECT jp.*, mp.nama_pelajaran, mp.kode_pelajaran, u.nama_lengkap as nama_guru, k.nama_kelas
+        FROM jadwal_pelajaran jp
+        JOIN mata_pelajaran mp ON jp.mata_pelajaran_id = mp.id
+        JOIN users u ON mp.guru_id = u.id
+        JOIN kelas k ON jp.kelas_id = k.id
+        WHERE jp.kelas_id = ? AND jp.tanggal BETWEEN ? AND ?
+        ORDER BY jp.tanggal ASC, jp.jam_mulai ASC");
+    $stmt->bind_param("iss", $kelas_id, $week_start, $week_end);
+    $stmt->execute();
+    $jadwal_minggu_ini = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+}
 
 // Get active soal
 $active_soal = $conn->query("SELECT s.*, mp.nama_pelajaran, 
@@ -100,8 +127,56 @@ $conn->close();
     </div>
 </div>
 
+<!-- Ringkasan Jadwal Minggu Ini -->
+<?php if ($kelas_id): ?>
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="dashboard-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Ringkasan Jadwal Minggu Ini</h5>
+                <a href="jadwal.php" class="text-decoration-none">Lihat Detail <i class="bi bi-arrow-right"></i></a>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="p-3">
+                            <h3 class="text-primary mb-0"><?php echo count($jadwal_minggu_ini); ?></h3>
+                            <small class="text-muted">Total Jadwal</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3">
+                            <h3 class="text-success mb-0">
+                                <?php echo count(array_filter($jadwal_minggu_ini, function($j) { return $j['status'] == 'berlangsung'; })); ?>
+                            </h3>
+                            <small class="text-muted">Berlangsung</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3">
+                            <h3 class="text-info mb-0">
+                                <?php echo count(array_filter($jadwal_minggu_ini, function($j) { return $j['status'] == 'selesai'; })); ?>
+                            </h3>
+                            <small class="text-muted">Selesai</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3">
+                            <h3 class="text-secondary mb-0">
+                                <?php echo count(array_filter($jadwal_minggu_ini, function($j) { return $j['status'] == 'terjadwal'; })); ?>
+                            </h3>
+                            <small class="text-muted">Terjadwal</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <!-- Active Soal -->
-<div class="row">
+<div class="row mt-4">
     <div class="col-12">
         <div class="dashboard-card">
             <div class="card-header d-flex justify-content-between align-items-center">
