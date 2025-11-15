@@ -66,38 +66,61 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body>
     <div class="login-container">
         <div class="login-card">
-            <h2><i class="bi bi-shield-lock"></i> Portal Sekolah</h2>
-            
-            <?php if ($error): ?>
-                <div class="alert alert-danger" role="alert">
-                    <i class="bi bi-exclamation-triangle"></i> <?php echo htmlspecialchars($error); ?>
+            <!-- Left Panel: System Info & Logo -->
+            <div class="login-left-panel">
+                <div class="login-logo-section">
+                    <div class="login-logo-wrapper">
+                        <div class="login-logo-icon">
+                            <i class="bi bi-book-fill"></i>
+                        </div>
+                        <div class="login-logo-icon-secondary">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                    </div>
+                    <h1 class="login-system-title">Sistem Informasi</h1>
+                    <h2 class="login-system-subtitle">Portal Sekolah</h2>
+                    <p class="login-system-description">
+                        Akses ke dasbor admin untuk mengelola konten, berita, dan informasi penting lainnya dengan mudah.
+                    </p>
                 </div>
-            <?php endif; ?>
+            </div>
             
-            <form method="POST" action="">
-                <div class="mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-person"></i></span>
-                        <input type="text" class="form-control" id="username" name="username" required autofocus>
+            <!-- Right Panel: Login Form -->
+            <div class="login-right-panel">
+                <div class="login-form-wrapper">
+                    <h2 class="login-form-title">Login Admin</h2>
+                    <p class="login-form-subtitle">Selamat datang, silakan masuk.</p>
+                    
+                    <?php if ($error): ?>
+                        <div class="alert alert-danger" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i> <?php echo htmlspecialchars($error); ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <form method="POST" action="">
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input type="text" class="form-control" id="username" name="username" placeholder="Username" required autofocus>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">
+                            Login
+                        </button>
+                    </form>
+                    
+                    <div class="login-footer">
+                        <small>© 2025 Portal Sekolah</small>
                     </div>
                 </div>
-                
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                    </div>
-                </div>
-                
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="bi bi-box-arrow-in-right"></i> Login
-                </button>
-            </form>
-            
-            <div class="mt-4 text-center text-muted">
-                <small>Default: username: <strong>developer</strong>, password: <strong>admin123</strong></small>
             </div>
         </div>
     </div>
