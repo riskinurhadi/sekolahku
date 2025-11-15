@@ -10,6 +10,14 @@ $guru_id = $_SESSION['user_id'];
 $sekolah_id = $_SESSION['sekolah_id'];
 $message = '';
 
+// Get guru info including spesialisasi
+$stmt = $conn->prepare("SELECT spesialisasi FROM users WHERE id = ?");
+$stmt->bind_param("i", $guru_id);
+$stmt->execute();
+$guru_info = $stmt->get_result()->fetch_assoc();
+$spesialisasi = $guru_info['spesialisasi'] ?? '';
+$stmt->close();
+
 // Handle form submission - Update status jadwal
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['action']) && $_POST['action'] == 'update_status') {
@@ -40,22 +48,51 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 // Get jadwal pelajaran hari ini untuk guru ini
 $today = date('Y-m-d');
-$jadwal_hari_ini = $conn->query("SELECT jp.*, mp.nama_pelajaran, mp.kode_pelajaran, k.nama_kelas
+$stmt = $conn->prepare("SELECT jp.*, mp.nama_pelajaran, mp.kode_pelajaran, k.nama_kelas
     FROM jadwal_pelajaran jp
     JOIN mata_pelajaran mp ON jp.mata_pelajaran_id = mp.id
     JOIN kelas k ON jp.kelas_id = k.id
-    WHERE mp.guru_id = $guru_id AND jp.tanggal = '$today'
-    ORDER BY jp.jam_mulai ASC")->fetch_all(MYSQLI_ASSOC);
+    WHERE mp.guru_id = ? AND jp.tanggal = ?
+    ORDER BY jp.jam_mulai ASC");
+$stmt->bind_param("is", $guru_id, $today);
+$stmt->execute();
+$jadwal_hari_ini = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
 
 // Get jadwal minggu ini
-$week_start = date('Y-m-d');
-$week_end = date('Y-m-d', strtotime('+7 days'));
-$jadwal_minggu_ini = $conn->query("SELECT jp.*, mp.nama_pelajaran, mp.kode_pelajaran, k.nama_kelas
+$week_start = date('Y-m-d', strtotime('monday this week'));
+$week_end = date('Y-m-d', strtotime('sunday this week'));
+$stmt = $conn->prepare("SELECT jp.*, mp.nama_pelajaran, mp.kode_pelajaran, k.nama_kelas
     FROM jadwal_pelajaran jp
     JOIN mata_pelajaran mp ON jp.mata_pelajaran_id = mp.id
     JOIN kelas k ON jp.kelas_id = k.id
-    WHERE mp.guru_id = $guru_id AND jp.tanggal BETWEEN '$week_start' AND '$week_end'
-    ORDER BY jp.tanggal ASC, jp.jam_mulai ASC")->fetch_all(MYSQLI_ASSOC);
+    WHERE mp.guru_id = ? AND jp.tanggal BETWEEN ? AND ?
+    ORDER BY jp.tanggal ASC, jp.jam_mulai ASC");
+$stmt->bind_param("iss", $guru_id, $week_start, $week_end);
+$stmt->execute();
+$jadwal_minggu_ini = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+
+// Get statistics per mata pelajaran
+$stats_per_pelajaran = [];
+foreach ($jadwal_minggu_ini as $j) {
+    $pelajaran = $j['nama_pelajaran'];
+    if (!isset($stats_per_pelajaran[$pelajaran])) {
+        $stats_per_pelajaran[$pelajaran] = [
+            'total' => 0,
+            'terjadwal' => 0,
+            'berlangsung' => 0,
+            'selesai' => 0,
+            'dibatalkan' => 0,
+            'kelas' => []
+        ];
+    }
+    $stats_per_pelajaran[$pelajaran]['total']++;
+    $stats_per_pelajaran[$pelajaran][$j['status']]++;
+    if (!in_array($j['nama_kelas'], $stats_per_pelajaran[$pelajaran]['kelas'])) {
+        $stats_per_pelajaran[$pelajaran]['kelas'][] = $j['nama_kelas'];
+    }
+}
 
 $conn->close();
 ?>
@@ -75,7 +112,12 @@ $conn->close();
 
 <div class="page-header">
     <h2><i class="bi bi-calendar-week"></i> Jadwal Pelajaran</h2>
-    <p>Lihat dan kelola jadwal pelajaran Anda. Ubah status dari terjadwal menjadi berlangsung saat memulai pelajaran.</p>
+    <p>
+        <?php if ($spesialisasi): ?>
+            Jadwal mengajar untuk <strong><?php echo htmlspecialchars($spesialisasi); ?></strong>. 
+        <?php endif; ?>
+        Lihat dan kelola jadwal pelajaran Anda. Ubah status dari terjadwal menjadi berlangsung saat memulai pelajaran.
+    </p>
 </div>
 
 <!-- Jadwal Hari Ini -->
@@ -164,6 +206,61 @@ $conn->close();
         <?php endif; ?>
     </div>
 </div>
+
+<!-- Statistik Per Mata Pelajaran -->
+<?php if (!empty($stats_per_pelajaran)): ?>
+<div class="row mb-4">
+    <?php foreach ($stats_per_pelajaran as $pelajaran => $stats): ?>
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="dashboard-card">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0"><i class="bi bi-book"></i> <?php echo htmlspecialchars($pelajaran); ?></h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-2">
+                            <div class="p-2">
+                                <h4 class="text-primary mb-0"><?php echo $stats['total']; ?></h4>
+                                <small class="text-muted">Total</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <div class="p-2">
+                                <h4 class="text-info mb-0"><?php echo count($stats['kelas']); ?></h4>
+                                <small class="text-muted">Kelas</small>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="my-2">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <small class="text-muted d-block">Terjadwal</small>
+                            <strong class="text-secondary"><?php echo $stats['terjadwal']; ?></strong>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-muted d-block">Berlangsung</small>
+                            <strong class="text-success"><?php echo $stats['berlangsung']; ?></strong>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-muted d-block">Selesai</small>
+                            <strong class="text-info"><?php echo $stats['selesai']; ?></strong>
+                        </div>
+                    </div>
+                    <?php if (!empty($stats['kelas'])): ?>
+                        <hr class="my-2">
+                        <div>
+                            <small class="text-muted d-block mb-1">Kelas yang diajar:</small>
+                            <?php foreach ($stats['kelas'] as $kelas): ?>
+                                <span class="badge bg-secondary me-1"><?php echo htmlspecialchars($kelas); ?></span>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    <?php endforeach; ?>
+</div>
+<?php endif; ?>
 
 <!-- Jadwal Minggu Ini -->
 <div class="dashboard-card">

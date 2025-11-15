@@ -17,22 +17,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $nama_lengkap = $_POST['nama_lengkap'];
             $email = $_POST['email'] ?? '';
             $role = $_POST['role'] ?? 'guru';
+            $spesialisasi = $_POST['spesialisasi'] ?? '';
             
             // Validasi role hanya boleh guru atau akademik
             if (!in_array($role, ['guru', 'akademik'])) {
                 $role = 'guru';
             }
             
-            $stmt = $conn->prepare("INSERT INTO users (username, password, nama_lengkap, email, role, sekolah_id) VALUES (?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("sssssi", $username, $password, $nama_lengkap, $email, $role, $sekolah_id);
-            
-            if ($stmt->execute()) {
-                $role_text = $role == 'akademik' ? 'Akademik' : 'Guru';
-                $message = 'success:' . $role_text . ' berhasil ditambahkan!';
+            // Jika role adalah guru, spesialisasi wajib diisi
+            if ($role == 'guru' && empty($spesialisasi)) {
+                $message = 'error:Spesialisasi wajib diisi untuk guru!';
             } else {
-                $message = 'error:Gagal menambahkan user!';
+                $stmt = $conn->prepare("INSERT INTO users (username, password, nama_lengkap, email, role, sekolah_id, spesialisasi) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                $stmt->bind_param("sssssis", $username, $password, $nama_lengkap, $email, $role, $sekolah_id, $spesialisasi);
+                
+                if ($stmt->execute()) {
+                    $role_text = $role == 'akademik' ? 'Akademik' : 'Guru';
+                    $message = 'success:' . $role_text . ' berhasil ditambahkan!';
+                } else {
+                    $message = 'error:Gagal menambahkan user!';
+                }
+                $stmt->close();
             }
-            $stmt->close();
         } elseif ($_POST['action'] == 'delete') {
             $id = $_POST['id'];
             $stmt = $conn->prepare("DELETE FROM users WHERE id = ? AND role IN ('guru', 'akademik') AND sekolah_id = ?");
@@ -94,6 +100,7 @@ $conn->close();
                                 <th>Username</th>
                                 <th>Nama Lengkap</th>
                                 <th>Role</th>
+                                <th>Spesialisasi</th>
                                 <th>Email</th>
                                 <th>Tanggal Dibuat</th>
                                 <th>Aksi</th>
@@ -118,6 +125,13 @@ $conn->close();
                                         $badge_text = $role_text[$teacher['role']] ?? ucfirst($teacher['role']);
                                         ?>
                                         <span class="badge <?php echo $badge_class; ?>"><?php echo $badge_text; ?></span>
+                                    </td>
+                                    <td>
+                                        <?php if ($teacher['spesialisasi']): ?>
+                                            <span class="badge bg-info"><?php echo htmlspecialchars($teacher['spesialisasi']); ?></span>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
                                     </td>
                                     <td><?php echo htmlspecialchars($teacher['email'] ?? '-'); ?></td>
                                     <td><?php echo date('d/m/Y', strtotime($teacher['created_at'])); ?></td>
@@ -168,11 +182,33 @@ $conn->close();
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Role <span class="text-danger">*</span></label>
-                            <select class="form-select" name="role" required>
+                            <select class="form-select" name="role" id="roleSelect" required onchange="toggleSpesialisasi()">
                                 <option value="guru">Guru</option>
                                 <option value="akademik">Akademik</option>
                             </select>
                             <small class="text-muted">Pilih role untuk user ini</small>
+                        </div>
+                        <div class="col-md-6 mb-3" id="spesialisasiField">
+                            <label class="form-label">Spesialisasi <span class="text-danger">*</span></label>
+                            <select class="form-select" name="spesialisasi" id="spesialisasiSelect">
+                                <option value="">Pilih Spesialisasi</option>
+                                <option value="Guru Matematika">Guru Matematika</option>
+                                <option value="Guru Bahasa Indonesia">Guru Bahasa Indonesia</option>
+                                <option value="Guru Bahasa Inggris">Guru Bahasa Inggris</option>
+                                <option value="Guru Fisika">Guru Fisika</option>
+                                <option value="Guru Kimia">Guru Kimia</option>
+                                <option value="Guru Biologi">Guru Biologi</option>
+                                <option value="Guru Sejarah">Guru Sejarah</option>
+                                <option value="Guru Geografi">Guru Geografi</option>
+                                <option value="Guru Ekonomi">Guru Ekonomi</option>
+                                <option value="Guru Sosiologi">Guru Sosiologi</option>
+                                <option value="Guru Pendidikan Agama">Guru Pendidikan Agama</option>
+                                <option value="Guru Pendidikan Jasmani">Guru Pendidikan Jasmani</option>
+                                <option value="Guru Seni Budaya">Guru Seni Budaya</option>
+                                <option value="Guru Teknologi Informasi">Guru Teknologi Informasi</option>
+                                <option value="Guru Lainnya">Guru Lainnya</option>
+                            </select>
+                            <small class="text-muted">Pilih spesialisasi mata pelajaran</small>
                         </div>
                         <div class="col-md-12 mb-3">
                             <label class="form-label">Email</label>
@@ -192,6 +228,26 @@ $conn->close();
 </div>
 
 <script>
+function toggleSpesialisasi() {
+    var role = document.getElementById('roleSelect').value;
+    var spesialisasiField = document.getElementById('spesialisasiField');
+    var spesialisasiSelect = document.getElementById('spesialisasiSelect');
+    
+    if (role === 'guru') {
+        spesialisasiField.style.display = 'block';
+        spesialisasiSelect.required = true;
+    } else {
+        spesialisasiField.style.display = 'none';
+        spesialisasiSelect.required = false;
+        spesialisasiSelect.value = '';
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    toggleSpesialisasi();
+});
+
 $(document).ready(function() {
     $('#teachersTable').DataTable({
         language: {

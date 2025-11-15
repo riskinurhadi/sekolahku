@@ -54,6 +54,10 @@ ALTER TABLE users ADD COLUMN kelas_id INT NULL AFTER sekolah_id;
 ALTER TABLE users ADD FOREIGN KEY (kelas_id) REFERENCES kelas(id) ON DELETE SET NULL;
 ALTER TABLE users ADD INDEX idx_kelas (kelas_id);
 
+-- Tambah kolom spesialisasi di users (untuk guru)
+ALTER TABLE users ADD COLUMN spesialisasi VARCHAR(100) NULL AFTER kelas_id;
+ALTER TABLE users ADD INDEX idx_spesialisasi (spesialisasi);
+
 -- Tabel Mata Pelajaran
 CREATE TABLE mata_pelajaran (
     id INT PRIMARY KEY AUTO_INCREMENT,
