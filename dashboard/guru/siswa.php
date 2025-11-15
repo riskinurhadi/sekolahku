@@ -16,9 +16,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
             $nama_lengkap = $_POST['nama_lengkap'];
             $email = $_POST['email'] ?? '';
+            $kelas_id = $_POST['kelas_id'] ?? null;
             
-            $stmt = $conn->prepare("INSERT INTO users (username, password, nama_lengkap, email, role, sekolah_id) VALUES (?, ?, ?, ?, 'siswa', ?)");
-            $stmt->bind_param("ssssi", $username, $password, $nama_lengkap, $email, $sekolah_id);
+            $stmt = $conn->prepare("INSERT INTO users (username, password, nama_lengkap, email, role, sekolah_id, kelas_id) VALUES (?, ?, ?, ?, 'siswa', ?, ?)");
+            $stmt->bind_param("ssssii", $username, $password, $nama_lengkap, $email, $sekolah_id, $kelas_id);
             
             if ($stmt->execute()) {
                 $message = 'success:Siswa berhasil ditambahkan!';
@@ -41,12 +42,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-// Get all students
-$stmt = $conn->prepare("SELECT * FROM users WHERE role = 'siswa' AND sekolah_id = ? ORDER BY created_at DESC");
-$stmt->bind_param("i", $sekolah_id);
-$stmt->execute();
-$students = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
+// Get all classes
+$kelas = $conn->query("SELECT * FROM kelas WHERE sekolah_id = $sekolah_id ORDER BY tingkat ASC, nama_kelas ASC")->fetch_all(MYSQLI_ASSOC);
+
+// Get all students with kelas info
+$students = $conn->query("SELECT u.*, k.nama_kelas 
+    FROM users u 
+    LEFT JOIN kelas k ON u.kelas_id = k.id 
+    WHERE u.role = 'siswa' AND u.sekolah_id = $sekolah_id 
+    ORDER BY k.tingkat ASC, k.nama_kelas ASC, u.nama_lengkap ASC")->fetch_all(MYSQLI_ASSOC);
+
 $conn->close();
 ?>
 
@@ -86,6 +91,7 @@ $conn->close();
                             <tr>
                                 <th>Username</th>
                                 <th>Nama Lengkap</th>
+                                <th>Kelas</th>
                                 <th>Email</th>
                                 <th>Tanggal Dibuat</th>
                                 <th>Aksi</th>
@@ -96,6 +102,13 @@ $conn->close();
                                 <tr>
                                     <td><strong><?php echo htmlspecialchars($student['username']); ?></strong></td>
                                     <td><?php echo htmlspecialchars($student['nama_lengkap']); ?></td>
+                                    <td>
+                                        <?php if ($student['nama_kelas']): ?>
+                                            <span class="badge bg-primary"><?php echo htmlspecialchars($student['nama_kelas']); ?></span>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td><?php echo htmlspecialchars($student['email'] ?? '-'); ?></td>
                                     <td><?php echo date('d/m/Y', strtotime($student['created_at'])); ?></td>
                                     <td>
@@ -144,6 +157,15 @@ $conn->close();
                             <input type="text" class="form-control" name="nama_lengkap" required>
                         </div>
                         <div class="col-md-6 mb-3">
+                            <label class="form-label">Kelas <span class="text-danger">*</span></label>
+                            <select class="form-select" name="kelas_id" required>
+                                <option value="">Pilih Kelas</option>
+                                <?php foreach ($kelas as $k): ?>
+                                    <option value="<?php echo $k['id']; ?>"><?php echo htmlspecialchars($k['nama_kelas']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-12 mb-3">
                             <label class="form-label">Email</label>
                             <input type="email" class="form-control" name="email">
                         </div>

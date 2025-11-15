@@ -54,10 +54,11 @@ $stats['total_mata_pelajaran'] = $stmt->get_result()->fetch_assoc()['total'];
 $stmt->close();
 
 // Get jadwal hari ini
-$jadwal_hari_ini = $conn->query("SELECT jp.*, mp.nama_pelajaran, mp.kode_pelajaran, u.nama_lengkap as nama_guru
+$jadwal_hari_ini = $conn->query("SELECT jp.*, mp.nama_pelajaran, mp.kode_pelajaran, u.nama_lengkap as nama_guru, k.nama_kelas
     FROM jadwal_pelajaran jp
     JOIN mata_pelajaran mp ON jp.mata_pelajaran_id = mp.id
     JOIN users u ON mp.guru_id = u.id
+    JOIN kelas k ON jp.kelas_id = k.id
     WHERE jp.sekolah_id = $sekolah_id AND jp.tanggal = '$today'
     ORDER BY jp.jam_mulai ASC
     LIMIT 10")->fetch_all(MYSQLI_ASSOC);
@@ -138,6 +139,7 @@ $conn->close();
                     <thead>
                         <tr>
                             <th>Jam</th>
+                            <th>Kelas</th>
                             <th>Mata Pelajaran</th>
                             <th>Guru</th>
                             <th>Ruangan</th>
@@ -150,6 +152,9 @@ $conn->close();
                                 <td>
                                     <strong><?php echo date('H:i', strtotime($jadwal['jam_mulai'])); ?></strong> - 
                                     <?php echo date('H:i', strtotime($jadwal['jam_selesai'])); ?>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary"><?php echo htmlspecialchars($jadwal['nama_kelas']); ?></span>
                                 </td>
                                 <td>
                                     <strong><?php echo htmlspecialchars($jadwal['nama_pelajaran']); ?></strong>

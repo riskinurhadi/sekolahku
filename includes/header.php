@@ -122,6 +122,11 @@ if ($table_check && $table_check->num_rows > 0) {
                         </a>
                     </li>
                     <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/kepala_sekolah/kelas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'kelas.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-building"></i> Kelas
+                        </a>
+                    </li>
+                    <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/kepala_sekolah/informasi_akademik.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'informasi_akademik.php' || basename($_SERVER['PHP_SELF']) == 'detail_informasi.php' ? 'active' : ''; ?>">
                             <i class="bi bi-megaphone"></i> Informasi Akademik
                         </a>

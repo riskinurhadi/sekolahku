@@ -35,6 +35,25 @@ CREATE TABLE sekolah (
 -- Update foreign key untuk sekolah_id di users
 ALTER TABLE users ADD FOREIGN KEY (sekolah_id) REFERENCES sekolah(id) ON DELETE SET NULL;
 
+-- Tabel Kelas
+CREATE TABLE kelas (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nama_kelas VARCHAR(50) NOT NULL,
+    tingkat INT NOT NULL COMMENT '10, 11, atau 12',
+    sekolah_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (sekolah_id) REFERENCES sekolah(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_kelas_sekolah (nama_kelas, sekolah_id),
+    INDEX idx_sekolah (sekolah_id),
+    INDEX idx_tingkat (tingkat)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Tambah kolom kelas_id di users (untuk siswa)
+ALTER TABLE users ADD COLUMN kelas_id INT NULL AFTER sekolah_id;
+ALTER TABLE users ADD FOREIGN KEY (kelas_id) REFERENCES kelas(id) ON DELETE SET NULL;
+ALTER TABLE users ADD INDEX idx_kelas (kelas_id);
+
 -- Tabel Mata Pelajaran
 CREATE TABLE mata_pelajaran (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -137,6 +156,7 @@ CREATE TABLE jadwal_pelajaran (
     id INT PRIMARY KEY AUTO_INCREMENT,
     mata_pelajaran_id INT NOT NULL,
     sekolah_id INT NOT NULL,
+    kelas_id INT NOT NULL,
     tanggal DATE NOT NULL,
     jam_mulai TIME NOT NULL,
     jam_selesai TIME NOT NULL,
@@ -147,9 +167,11 @@ CREATE TABLE jadwal_pelajaran (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (mata_pelajaran_id) REFERENCES mata_pelajaran(id) ON DELETE CASCADE,
     FOREIGN KEY (sekolah_id) REFERENCES sekolah(id) ON DELETE CASCADE,
+    FOREIGN KEY (kelas_id) REFERENCES kelas(id) ON DELETE CASCADE,
     INDEX idx_tanggal (tanggal),
     INDEX idx_mata_pelajaran (mata_pelajaran_id),
     INDEX idx_sekolah (sekolah_id),
+    INDEX idx_kelas (kelas_id),
     INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

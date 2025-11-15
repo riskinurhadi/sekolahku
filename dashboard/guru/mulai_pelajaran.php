@@ -40,18 +40,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 // Get jadwal pelajaran hari ini untuk guru ini
 $today = date('Y-m-d');
-$jadwal_hari_ini = $conn->query("SELECT jp.*, mp.nama_pelajaran, mp.kode_pelajaran
+$jadwal_hari_ini = $conn->query("SELECT jp.*, mp.nama_pelajaran, mp.kode_pelajaran, k.nama_kelas
     FROM jadwal_pelajaran jp
     JOIN mata_pelajaran mp ON jp.mata_pelajaran_id = mp.id
+    JOIN kelas k ON jp.kelas_id = k.id
     WHERE mp.guru_id = $guru_id AND jp.tanggal = '$today'
     ORDER BY jp.jam_mulai ASC")->fetch_all(MYSQLI_ASSOC);
 
 // Get jadwal minggu ini
 $week_start = date('Y-m-d');
 $week_end = date('Y-m-d', strtotime('+7 days'));
-$jadwal_minggu_ini = $conn->query("SELECT jp.*, mp.nama_pelajaran, mp.kode_pelajaran
+$jadwal_minggu_ini = $conn->query("SELECT jp.*, mp.nama_pelajaran, mp.kode_pelajaran, k.nama_kelas
     FROM jadwal_pelajaran jp
     JOIN mata_pelajaran mp ON jp.mata_pelajaran_id = mp.id
+    JOIN kelas k ON jp.kelas_id = k.id
     WHERE mp.guru_id = $guru_id AND jp.tanggal BETWEEN '$week_start' AND '$week_end'
     ORDER BY jp.tanggal ASC, jp.jam_mulai ASC")->fetch_all(MYSQLI_ASSOC);
 
@@ -101,6 +103,9 @@ $conn->close();
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <div>
                                         <h6 class="mb-1"><?php echo htmlspecialchars($jadwal['nama_pelajaran']); ?></h6>
+                                        <small class="text-muted d-block mb-1">
+                                            <i class="bi bi-people"></i> <strong>Kelas:</strong> <?php echo htmlspecialchars($jadwal['nama_kelas']); ?>
+                                        </small>
                                         <small class="text-muted">
                                             <i class="bi bi-clock"></i> 
                                             <?php echo date('H:i', strtotime($jadwal['jam_mulai'])); ?> - 
@@ -179,6 +184,7 @@ $conn->close();
                         <tr>
                             <th>Tanggal</th>
                             <th>Jam</th>
+                            <th>Kelas</th>
                             <th>Mata Pelajaran</th>
                             <th>Ruangan</th>
                             <th>Status</th>
@@ -192,6 +198,9 @@ $conn->close();
                                 <td>
                                     <strong><?php echo date('H:i', strtotime($jadwal['jam_mulai'])); ?></strong> - 
                                     <?php echo date('H:i', strtotime($jadwal['jam_selesai'])); ?>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary"><?php echo htmlspecialchars($jadwal['nama_kelas']); ?></span>
                                 </td>
                                 <td><?php echo htmlspecialchars($jadwal['nama_pelajaran']); ?></td>
                                 <td><?php echo htmlspecialchars($jadwal['ruangan'] ?? '-'); ?></td>

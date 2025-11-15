@@ -13,6 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['action'])) {
         if ($_POST['action'] == 'add' || $_POST['action'] == 'edit') {
             $mata_pelajaran_id = $_POST['mata_pelajaran_id'];
+            $kelas_id = $_POST['kelas_id'];
             $tanggal = $_POST['tanggal'];
             $jam_mulai = $_POST['jam_mulai'];
             $jam_selesai = $_POST['jam_selesai'];
@@ -21,8 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $status = $_POST['status'] ?? 'terjadwal';
             
             if ($_POST['action'] == 'add') {
-                $stmt = $conn->prepare("INSERT INTO jadwal_pelajaran (mata_pelajaran_id, sekolah_id, tanggal, jam_mulai, jam_selesai, ruangan, status, keterangan) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-                $stmt->bind_param("iissssss", $mata_pelajaran_id, $sekolah_id, $tanggal, $jam_mulai, $jam_selesai, $ruangan, $status, $keterangan);
+                $stmt = $conn->prepare("INSERT INTO jadwal_pelajaran (mata_pelajaran_id, sekolah_id, kelas_id, tanggal, jam_mulai, jam_selesai, ruangan, status, keterangan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->bind_param("iiissssss", $mata_pelajaran_id, $sekolah_id, $kelas_id, $tanggal, $jam_mulai, $jam_selesai, $ruangan, $status, $keterangan);
                 
                 if ($stmt->execute()) {
                     $message = 'success:Jadwal pelajaran berhasil ditambahkan!';
@@ -31,8 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
             } else {
                 $id = $_POST['id'];
-                $stmt = $conn->prepare("UPDATE jadwal_pelajaran SET mata_pelajaran_id = ?, tanggal = ?, jam_mulai = ?, jam_selesai = ?, ruangan = ?, status = ?, keterangan = ? WHERE id = ? AND sekolah_id = ?");
-                $stmt->bind_param("issssssii", $mata_pelajaran_id, $tanggal, $jam_mulai, $jam_selesai, $ruangan, $status, $keterangan, $id, $sekolah_id);
+                $stmt = $conn->prepare("UPDATE jadwal_pelajaran SET mata_pelajaran_id = ?, kelas_id = ?, tanggal = ?, jam_mulai = ?, jam_selesai = ?, ruangan = ?, status = ?, keterangan = ? WHERE id = ? AND sekolah_id = ?");
+                $stmt->bind_param("iissssssii", $mata_pelajaran_id, $kelas_id, $tanggal, $jam_mulai, $jam_selesai, $ruangan, $status, $keterangan, $id, $sekolah_id);
                 
                 if ($stmt->execute()) {
                     $message = 'success:Jadwal pelajaran berhasil diupdate!';
@@ -61,6 +62,9 @@ $filter_date = $_GET['tanggal'] ?? date('Y-m-d');
 $week_start = date('Y-m-d', strtotime('monday this week', strtotime($filter_date)));
 $week_end = date('Y-m-d', strtotime('sunday this week', strtotime($filter_date)));
 
+// Get all classes for dropdown
+$kelas = $conn->query("SELECT * FROM kelas WHERE sekolah_id = $sekolah_id ORDER BY tingkat ASC, nama_kelas ASC")->fetch_all(MYSQLI_ASSOC);
+
 // Get all mata pelajaran for dropdown
 $mata_pelajaran = $conn->query("SELECT mp.*, u.nama_lengkap as nama_guru 
     FROM mata_pelajaran mp 
@@ -69,10 +73,11 @@ $mata_pelajaran = $conn->query("SELECT mp.*, u.nama_lengkap as nama_guru
     ORDER BY mp.nama_pelajaran ASC")->fetch_all(MYSQLI_ASSOC);
 
 // Get jadwal for selected week
-$jadwal = $conn->query("SELECT jp.*, mp.nama_pelajaran, mp.kode_pelajaran, u.nama_lengkap as nama_guru
+$jadwal = $conn->query("SELECT jp.*, mp.nama_pelajaran, mp.kode_pelajaran, u.nama_lengkap as nama_guru, k.nama_kelas
     FROM jadwal_pelajaran jp
     JOIN mata_pelajaran mp ON jp.mata_pelajaran_id = mp.id
     JOIN users u ON mp.guru_id = u.id
+    JOIN kelas k ON jp.kelas_id = k.id
     WHERE jp.sekolah_id = $sekolah_id AND jp.tanggal BETWEEN '$week_start' AND '$week_end'
     ORDER BY jp.tanggal ASC, jp.jam_mulai ASC")->fetch_all(MYSQLI_ASSOC);
 
@@ -188,6 +193,9 @@ $conn->close();
                                     </div>
                                     <h6 class="mb-1"><?php echo htmlspecialchars($j['nama_pelajaran']); ?></h6>
                                     <small class="text-muted d-block mb-1">
+                                        <i class="bi bi-people"></i> <strong>Kelas:</strong> <?php echo htmlspecialchars($j['nama_kelas']); ?>
+                                    </small>
+                                    <small class="text-muted d-block mb-1">
                                         <i class="bi bi-person"></i> <?php echo htmlspecialchars($j['nama_guru']); ?>
                                     </small>
                                     <?php if ($j['ruangan']): ?>
@@ -232,6 +240,16 @@ $conn->close();
                 <div class="modal-body">
                     <input type="hidden" name="action" id="formAction" value="add">
                     <input type="hidden" name="id" id="formId">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Kelas <span class="text-danger">*</span></label>
+                        <select class="form-select" name="kelas_id" id="kelasId" required>
+                            <option value="">Pilih Kelas</option>
+                            <?php foreach ($kelas as $k): ?>
+                                <option value="<?php echo $k['id']; ?>"><?php echo htmlspecialchars($k['nama_kelas']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                     
                     <div class="mb-3">
                         <label class="form-label">Mata Pelajaran <span class="text-danger">*</span></label>
@@ -295,6 +313,7 @@ function editJadwal(jadwal) {
     document.getElementById('modalTitle').textContent = 'Edit Jadwal Pelajaran';
     document.getElementById('formAction').value = 'edit';
     document.getElementById('formId').value = jadwal.id;
+    document.getElementById('kelasId').value = jadwal.kelas_id;
     document.getElementById('mataPelajaranId').value = jadwal.mata_pelajaran_id;
     document.getElementById('tanggal').value = jadwal.tanggal;
     document.getElementById('jamMulai').value = jadwal.jam_mulai;
