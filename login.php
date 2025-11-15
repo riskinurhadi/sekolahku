@@ -58,15 +58,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="../assets/css/style.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="assets/css/style.css?v=<?php echo time(); ?>">
     <style>
-        /* Force login page styles - Inline to ensure they load */
+        /* Login page styles - Matching dashboard color scheme */
         body.login-page {
             margin: 0 !important;
             padding: 0 !important;
             overflow-x: hidden;
-            background: #e5e7eb !important;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa !important;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
         
         body.login-page .login-container {
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
-            background: #e5e7eb !important;
+            background: #f5f7fa !important;
             padding: 20px !important;
             width: 100% !important;
             box-sizing: border-box !important;
@@ -94,9 +94,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             margin: 0 auto !important;
         }
         
+        /* Left Panel - Purple/Indigo gradient matching dashboard */
         .login-left-panel {
             flex: 1 !important;
-            background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%) !important;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #4338ca 100%) !important;
             padding: 60px 50px !important;
             display: flex !important;
             align-items: center !important;
@@ -120,24 +121,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             margin-bottom: 50px !important;
         }
         
+        /* Logo Kemenag - Purple to match dashboard */
         .logo-kemenag-shape {
             width: 100px !important;
             height: 100px !important;
-            background: #10b981 !important;
+            background: #6366f1 !important;
             clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%) !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3) !important;
         }
         
+        .logo-kemenag-inner .bi-book-fill {
+            color: #fbbf24 !important;
+        }
+        
+        .logo-kemenag-inner .bi-star-fill {
+            color: #fbbf24 !important;
+        }
+        
+        /* Logo Way Kanan - Keep blue but adjust */
         .logo-waykanan-shape {
             width: 100px !important;
             height: 100px !important;
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
             border-radius: 50% !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3) !important;
         }
         
         .login-system-title {
@@ -155,22 +168,58 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         
         .login-form-title {
-            color: #1f2937 !important;
+            color: #1e293b !important;
             font-weight: 700 !important;
             font-size: 32px !important;
             margin-bottom: 8px !important;
         }
         
+        .login-form-subtitle {
+            color: #64748b !important;
+            font-size: 15px !important;
+            margin-bottom: 35px !important;
+        }
+        
+        /* Input focus - Purple to match dashboard */
+        .login-form .input-group:focus-within .input-group-text {
+            border-color: #6366f1 !important;
+            background: #eef2ff !important;
+            color: #6366f1 !important;
+        }
+        
+        .login-form .form-control:focus {
+            border-color: #6366f1 !important;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+            outline: none !important;
+        }
+        
+        /* Button - Purple gradient matching dashboard */
         .btn-login {
             width: 100% !important;
             padding: 14px 20px !important;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
             border: none !important;
             border-radius: 10px !important;
             color: #ffffff !important;
             font-weight: 600 !important;
             font-size: 16px !important;
             cursor: pointer !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .btn-login:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%) !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3) !important;
+        }
+        
+        .login-footer {
+            margin-top: 35px !important;
+            padding-top: 20px !important;
+            border-top: 1px solid #e9ecef !important;
+            text-align: center !important;
+            color: #64748b !important;
+            font-size: 13px !important;
         }
     </style>
 </head>
