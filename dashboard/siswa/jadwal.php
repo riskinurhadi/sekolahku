@@ -16,14 +16,9 @@ $siswa_info = $stmt->get_result()->fetch_assoc();
 $kelas_id = $siswa_info['kelas_id'] ?? null;
 $stmt->close();
 
-// Get filter date (default: today)
-$filter_date = $_GET['tanggal'] ?? date('Y-m-d');
-// Validate date format
-if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $filter_date)) {
-    $filter_date = date('Y-m-d');
-}
-$week_start = date('Y-m-d', strtotime('monday this week', strtotime($filter_date)));
-$week_end = date('Y-m-d', strtotime('sunday this week', strtotime($filter_date)));
+// Always show this week's schedule
+$week_start = date('Y-m-d', strtotime('monday this week'));
+$week_end = date('Y-m-d', strtotime('sunday this week'));
 
 // Get jadwal for selected week based on siswa's kelas
 if ($kelas_id) {
@@ -80,42 +75,17 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     </div>
 <?php else: ?>
 
-<!-- Filter Week -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="dashboard-card">
-            <div class="card-body">
-                <form method="GET" class="row g-3 align-items-end">
-                    <div class="col-md-4">
-                        <label class="form-label">Pilih Tanggal</label>
-                        <input type="date" class="form-control" name="tanggal" value="<?php echo htmlspecialchars($filter_date); ?>" required>
-                    </div>
-                    <div class="col-md-4">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-search"></i> Tampilkan Minggu Ini
-                        </button>
-                        <a href="?tanggal=<?php echo date('Y-m-d'); ?>" class="btn btn-secondary">
-                            <i class="bi bi-calendar-day"></i> Minggu Ini
-                        </a>
-                    </div>
-                    <div class="col-md-4 text-end">
-                        <small class="text-muted">
-                            <i class="bi bi-calendar-range"></i> 
-                            <?php echo date('d/m/Y', strtotime($week_start)); ?> - <?php echo date('d/m/Y', strtotime($week_end)); ?>
-                        </small>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Weekly Schedule Table -->
 <div class="row">
     <div class="col-12">
         <div class="dashboard-card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-calendar-week"></i> Jadwal Pelajaran Minggu Ini</h5>
+                <h5 class="mb-0">
+                    <i class="bi bi-calendar-week"></i> Jadwal Pelajaran Minggu Ini
+                    <small class="text-muted ms-2">
+                        (<?php echo date('d/m/Y', strtotime($week_start)); ?> - <?php echo date('d/m/Y', strtotime($week_end)); ?>)
+                    </small>
+                </h5>
             </div>
             <div class="card-body">
                 <?php if (empty($jadwal)): ?>
