@@ -37,6 +37,9 @@ function redirectByRole($role) {
         case 'siswa':
             header('Location: ../dashboard/siswa/index.php');
             break;
+        case 'akademik':
+            header('Location: ../dashboard/akademik/index.php');
+            break;
         default:
             header('Location: ../login.php');
     }

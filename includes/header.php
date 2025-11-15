@@ -156,6 +156,14 @@ if ($table_check && $table_check->num_rows > 0) {
                     </li>
                 <?php endif; ?>
                 
+                <?php if ($_SESSION['user_role'] == 'akademik'): ?>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/akademik/jadwal.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'jadwal.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-calendar-week"></i> Jadwal Pelajaran
+                        </a>
+                    </li>
+                <?php endif; ?>
+                
                 <?php if ($_SESSION['user_role'] == 'siswa'): ?>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/siswa/presensi.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'presensi.php' ? 'active' : ''; ?>">

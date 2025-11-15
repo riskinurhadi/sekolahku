@@ -10,7 +10,7 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL,
     nama_lengkap VARCHAR(100) NOT NULL,
     email VARCHAR(100),
-    role ENUM('developer', 'kepala_sekolah', 'guru', 'siswa') NOT NULL,
+    role ENUM('developer', 'kepala_sekolah', 'guru', 'siswa', 'akademik') NOT NULL,
     sekolah_id INT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -130,6 +130,27 @@ CREATE TABLE hasil_ujian (
     UNIQUE KEY unique_soal_siswa (soal_id, siswa_id),
     INDEX idx_soal (soal_id),
     INDEX idx_siswa (siswa_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Tabel Jadwal Pelajaran
+CREATE TABLE jadwal_pelajaran (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    mata_pelajaran_id INT NOT NULL,
+    sekolah_id INT NOT NULL,
+    tanggal DATE NOT NULL,
+    jam_mulai TIME NOT NULL,
+    jam_selesai TIME NOT NULL,
+    ruangan VARCHAR(50),
+    status ENUM('terjadwal', 'berlangsung', 'selesai', 'dibatalkan') DEFAULT 'terjadwal',
+    keterangan TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (mata_pelajaran_id) REFERENCES mata_pelajaran(id) ON DELETE CASCADE,
+    FOREIGN KEY (sekolah_id) REFERENCES sekolah(id) ON DELETE CASCADE,
+    INDEX idx_tanggal (tanggal),
+    INDEX idx_mata_pelajaran (mata_pelajaran_id),
+    INDEX idx_sekolah (sekolah_id),
+    INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Insert default developer account
