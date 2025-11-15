@@ -58,7 +58,121 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/style.css?v=<?php echo time(); ?>">
+    <style>
+        /* Force login page styles - Inline to ensure they load */
+        body.login-page {
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow-x: hidden;
+            background: #e5e7eb !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        body.login-page .login-container {
+            min-height: 100vh !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: #e5e7eb !important;
+            padding: 20px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            margin: 0 !important;
+        }
+        
+        body.login-page .login-card {
+            background: #ffffff !important;
+            border-radius: 16px !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+            width: 100% !important;
+            max-width: 1100px !important;
+            display: flex !important;
+            flex-direction: row !important;
+            overflow: hidden !important;
+            min-height: 650px !important;
+            margin: 0 auto !important;
+        }
+        
+        .login-left-panel {
+            flex: 1 !important;
+            background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%) !important;
+            padding: 60px 50px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        
+        .login-right-panel {
+            flex: 1 !important;
+            background: #ffffff !important;
+            padding: 60px 50px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        
+        .login-logo-wrapper {
+            display: flex !important;
+            align-items: flex-start !important;
+            justify-content: center !important;
+            gap: 30px !important;
+            margin-bottom: 50px !important;
+        }
+        
+        .logo-kemenag-shape {
+            width: 100px !important;
+            height: 100px !important;
+            background: #10b981 !important;
+            clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        
+        .logo-waykanan-shape {
+            width: 100px !important;
+            height: 100px !important;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        
+        .login-system-title {
+            font-size: 36px !important;
+            font-weight: 700 !important;
+            color: #ffffff !important;
+            margin-bottom: 8px !important;
+        }
+        
+        .login-system-subtitle {
+            font-size: 28px !important;
+            font-weight: 600 !important;
+            color: #ffffff !important;
+            margin-bottom: 35px !important;
+        }
+        
+        .login-form-title {
+            color: #1f2937 !important;
+            font-weight: 700 !important;
+            font-size: 32px !important;
+            margin-bottom: 8px !important;
+        }
+        
+        .btn-login {
+            width: 100% !important;
+            padding: 14px 20px !important;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+            border: none !important;
+            border-radius: 10px !important;
+            color: #ffffff !important;
+            font-weight: 600 !important;
+            font-size: 16px !important;
+            cursor: pointer !important;
+        }
+    </style>
 </head>
 <body class="login-page">
     <div class="login-container">
