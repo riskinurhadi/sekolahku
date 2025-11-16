@@ -151,7 +151,7 @@ $conn->close();
 
 <!-- Slider Section -->
 <?php if (!empty($sliders)): ?>
-<div class="slider-container mb-4" style="position: relative; height: 400px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+<div class="slider-container mb-4" style="position: relative; height: 280px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
     <div id="sliderCarousel" class="carousel slide h-100" data-bs-ride="carousel" data-bs-interval="5000">
         <div class="carousel-indicators">
             <?php foreach ($sliders as $index => $slider): ?>
