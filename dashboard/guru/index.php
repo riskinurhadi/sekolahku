@@ -167,10 +167,10 @@ $conn->close();
 <div class="row mb-4">
     <!-- Statistik Per Mata Pelajaran -->
     <?php if (!empty($stats_per_pelajaran)): ?>
-        <div class="col-lg-8 mb-3">
+        <div class="col-lg-6 mb-3">
             <div class="row">
                 <?php foreach ($stats_per_pelajaran as $pelajaran => $stats): ?>
-                    <div class="col-md-6 mb-3">
+                    <div class="col-12 mb-3">
                         <div class="dashboard-card">
                             <div class="card-header bg-primary text-white">
                                 <h6 class="mb-0"><i class="bi bi-book"></i> <?php echo htmlspecialchars($pelajaran); ?></h6>
@@ -223,7 +223,7 @@ $conn->close();
     <?php endif; ?>
     
     <!-- History Pembelajaran -->
-    <div class="col-lg-4 mb-3">
+    <div class="col-lg-6 mb-3">
         <div class="dashboard-card">
             <div class="card-header bg-info text-white">
                 <h6 class="mb-0"><i class="bi bi-clock-history"></i> History Pembelajaran</h6>
