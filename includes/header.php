@@ -93,7 +93,7 @@ if ($table_check && $table_check->num_rows > 0) {
             <ul class="list-unstyled components">
                 <li>
                     <a href="<?php echo getBasePath(); ?>dashboard/<?php echo $_SESSION['user_role']; ?>/index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">
-                        <i class="bi bi-house-door"></i> Home
+                        <i class="bi bi-house-door"></i> Beranda
                     </a>
                 </li>
                 
@@ -136,22 +136,22 @@ if ($table_check && $table_check->num_rows > 0) {
                 <?php if ($_SESSION['user_role'] == 'guru'): ?>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/guru/siswa.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'siswa.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-people"></i> Students
+                            <i class="bi bi-people"></i> Siswa
                         </a>
                     </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/guru/mata_pelajaran.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'mata_pelajaran.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-book"></i> Subject
+                            <i class="bi bi-book"></i> Mata Pelajaran
                         </a>
                     </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/guru/mulai_pelajaran.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'mulai_pelajaran.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-play-circle"></i> Routine
+                            <i class="bi bi-play-circle"></i> Jadwal Pelajaran
                         </a>
                     </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/guru/soal.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'soal.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-file-earmark-text"></i> Exam
+                            <i class="bi bi-file-earmark-text"></i> Soal
                         </a>
                     </li>
                     <li>
@@ -177,17 +177,17 @@ if ($table_check && $table_check->num_rows > 0) {
                     </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/siswa/presensi.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'presensi.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-clipboard-check"></i> Attendance
+                            <i class="bi bi-clipboard-check"></i> Presensi
                         </a>
                     </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/siswa/soal_saya.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'soal_saya.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-file-earmark-text"></i> Exam
+                            <i class="bi bi-file-earmark-text"></i> Soal
                         </a>
                     </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/siswa/hasil.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'hasil.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-clipboard-check"></i> Notice
+                            <i class="bi bi-check-circle"></i> Hasil
                         </a>
                     </li>
                     <li>
@@ -197,7 +197,7 @@ if ($table_check && $table_check->num_rows > 0) {
                     </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/siswa/profil.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'profil.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-person-circle"></i> Account
+                            <i class="bi bi-person-circle"></i> Profil
                         </a>
                     </li>
                 <?php endif; ?>
@@ -206,7 +206,7 @@ if ($table_check && $table_check->num_rows > 0) {
             <!-- Logout Button -->
             <div class="sidebar-footer">
                 <a href="https://sekolahku.rnara.my.id/logout.php" class="sidebar-logout-btn">
-                    <i class="bi bi-box-arrow-right"></i> Logout
+                    <i class="bi bi-box-arrow-right"></i> Keluar
                 </a>
             </div>
         </nav>
@@ -222,12 +222,12 @@ if ($table_check && $table_check->num_rows > 0) {
                 <div class="search-section">
                     <div class="search-wrapper">
                         <i class="bi bi-search search-icon"></i>
-                        <input type="text" class="search-input" placeholder="What do you want to find?">
+                        <input type="text" class="search-input" placeholder="Cari sesuatu...">
                     </div>
                 </div>
                 <div class="user-profile-section">
                     <div class="header-icons">
-                        <a href="#" class="icon-btn" title="Notifications">
+                        <a href="#" class="icon-btn" title="Notifikasi">
                             <i class="bi bi-bell"></i>
                             <span class="badge">3</span>
                         </a>
