@@ -20,7 +20,7 @@ $stmt->close();
 $week_start = date('Y-m-d', strtotime('monday this week'));
 $week_end = date('Y-m-d', strtotime('sunday this week'));
 
-// Get jadwal for selected week based on siswa's kelas
+// Get jadwal for selected week based on siswa's kelas - OPTIMIZED: Single query with JOINs
 if ($kelas_id) {
     $stmt = $conn->prepare("SELECT jp.*, mp.id as mata_pelajaran_id, mp.nama_pelajaran, mp.kode_pelajaran, u.nama_lengkap as nama_guru, k.nama_kelas
         FROM jadwal_pelajaran jp
@@ -34,42 +34,97 @@ if ($kelas_id) {
     $jadwal = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $stmt->close();
     
-    // Check presensi status for each jadwal
-    $jadwal_ids = array_column($jadwal, 'id');
+    // OPTIMIZED: Get all sesi and presensi in batch queries (not N+1 queries)
     $presensi_status = [];
-    if (!empty($jadwal_ids)) {
-        // Get presensi status and active sesi for each jadwal
-        foreach ($jadwal as $j) {
-            $tanggal = $j['tanggal'];
-            $jam_mulai = $j['jam_mulai'];
-            $mata_pelajaran_id = $j['mata_pelajaran_id'];
-            
-            // Check if there's an active sesi for this jadwal
-            $stmt = $conn->prepare("SELECT sp.id as sesi_id, sp.kode_presensi, sp.status as sesi_status,
+    if (!empty($jadwal)) {
+        $jadwal_ids = array_column($jadwal, 'id');
+        $mata_pelajaran_ids = array_unique(array_column($jadwal, 'mata_pelajaran_id'));
+        
+        // Build condition for batch query sesi_pelajaran
+        // Get all active sesi that match any of the jadwal (by mata_pelajaran_id, tanggal, jam_mulai)
+        $sesi_map = [];
+        
+        // Use IN clause for batch query instead of loop
+        if (!empty($mata_pelajaran_ids)) {
+            $placeholders = implode(',', array_fill(0, count($mata_pelajaran_ids), '?'));
+            $query = "SELECT sp.id as sesi_id, sp.mata_pelajaran_id, sp.kode_presensi, sp.status as sesi_status,
+                DATE(sp.waktu_mulai) as sesi_tanggal, TIME(sp.waktu_mulai) as sesi_jam_mulai,
                 CASE 
                     WHEN NOW() < sp.waktu_mulai THEN 'belum_mulai'
                     WHEN NOW() BETWEEN sp.waktu_mulai AND sp.waktu_selesai THEN 'berlangsung'
                     ELSE 'selesai'
                 END as status_waktu
                 FROM sesi_pelajaran sp
-                WHERE sp.mata_pelajaran_id = ? 
-                AND DATE(sp.waktu_mulai) = ? 
-                AND TIME(sp.waktu_mulai) = ? 
+                WHERE sp.mata_pelajaran_id IN ($placeholders)
+                AND DATE(sp.waktu_mulai) BETWEEN ? AND ?
                 AND sp.status = 'aktif'
-                ORDER BY sp.created_at DESC LIMIT 1");
-            $stmt->bind_param("iss", $mata_pelajaran_id, $tanggal, $jam_mulai);
-            $stmt->execute();
-            $sesi = $stmt->get_result()->fetch_assoc();
-            $stmt->close();
+                ORDER BY sp.created_at DESC";
             
-            // Check if siswa already presensi for this sesi
-            $sudah_presensi = false;
-            if ($sesi) {
-                $stmt = $conn->prepare("SELECT id FROM presensi WHERE sesi_pelajaran_id = ? AND siswa_id = ?");
-                $stmt->bind_param("ii", $sesi['sesi_id'], $siswa_id);
+            $types = str_repeat('i', count($mata_pelajaran_ids)) . 'ss';
+            $params = array_merge($mata_pelajaran_ids, [$week_start, $week_end]);
+            
+            $stmt = $conn->prepare($query);
+            if ($stmt) {
+                // Use call_user_func_array for dynamic parameter binding with references
+                $bind_params = [$types];
+                foreach ($params as &$param) {
+                    $bind_params[] = &$param;
+                }
+                call_user_func_array([$stmt, 'bind_param'], $bind_params);
                 $stmt->execute();
-                $sudah_presensi = $stmt->get_result()->num_rows > 0;
+                $all_sesi = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 $stmt->close();
+                
+                // Map sesi by mata_pelajaran_id + tanggal + jam_mulai for quick lookup
+                foreach ($all_sesi as $sesi) {
+                    $key = $sesi['mata_pelajaran_id'] . '|' . $sesi['sesi_tanggal'] . '|' . $sesi['sesi_jam_mulai'];
+                    if (!isset($sesi_map[$key]) || $sesi['sesi_id'] > $sesi_map[$key]['sesi_id']) {
+                        $sesi_map[$key] = $sesi;
+                    }
+                }
+            }
+        }
+        
+        // Get all presensi for this siswa in one query
+        $presensi_sesi_ids = [];
+        foreach ($sesi_map as $sesi) {
+            if (isset($sesi['sesi_id'])) {
+                $presensi_sesi_ids[] = $sesi['sesi_id'];
+            }
+        }
+        $presensi_sesi_map = [];
+        if (!empty($presensi_sesi_ids)) {
+            $placeholders = implode(',', array_fill(0, count($presensi_sesi_ids), '?'));
+            $query = "SELECT sesi_pelajaran_id FROM presensi WHERE sesi_pelajaran_id IN ($placeholders) AND siswa_id = ?";
+            $stmt = $conn->prepare($query);
+            if ($stmt) {
+                $types = str_repeat('i', count($presensi_sesi_ids)) . 'i';
+                $params = array_merge($presensi_sesi_ids, [$siswa_id]);
+                // Use call_user_func_array for dynamic parameter binding with references
+                $bind_params = [$types];
+                foreach ($params as &$param) {
+                    $bind_params[] = &$param;
+                }
+                call_user_func_array([$stmt, 'bind_param'], $bind_params);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                while ($row = $result->fetch_assoc()) {
+                    $presensi_sesi_map[$row['sesi_pelajaran_id']] = true;
+                }
+                $stmt->close();
+            }
+        }
+        
+        // Build presensi_status array by matching jadwal with sesi
+        foreach ($jadwal as $j) {
+            // Create matching key: mata_pelajaran_id|tanggal|jam_mulai (format jam_mulai from TIME() function)
+            $jam_mulai_formatted = date('H:i:s', strtotime($j['jam_mulai'])); // Ensure consistent format
+            $key = $j['mata_pelajaran_id'] . '|' . $j['tanggal'] . '|' . $jam_mulai_formatted;
+            $sesi = $sesi_map[$key] ?? null;
+            
+            $sudah_presensi = false;
+            if ($sesi && isset($sesi['sesi_id'])) {
+                $sudah_presensi = isset($presensi_sesi_map[$sesi['sesi_id']]);
             }
             
             $presensi_status[$j['id']] = [
