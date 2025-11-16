@@ -140,11 +140,6 @@ if ($table_check && $table_check->num_rows > 0) {
                         </a>
                     </li>
                     <li>
-                        <a href="<?php echo getBasePath(); ?>dashboard/guru/mata_pelajaran.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'mata_pelajaran.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-book"></i> Mata Pelajaran
-                        </a>
-                    </li>
-                    <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/guru/mulai_pelajaran.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'mulai_pelajaran.php' ? 'active' : ''; ?>">
                             <i class="bi bi-play-circle"></i> Jadwal Pelajaran
                         </a>
@@ -162,6 +157,11 @@ if ($table_check && $table_check->num_rows > 0) {
                 <?php endif; ?>
                 
                 <?php if ($_SESSION['user_role'] == 'akademik'): ?>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/akademik/mata_pelajaran.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'mata_pelajaran.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-book"></i> Mata Pelajaran
+                        </a>
+                    </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/akademik/jadwal.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'jadwal.php' ? 'active' : ''; ?>">
                             <i class="bi bi-calendar-week"></i> Jadwal Pelajaran
