@@ -45,12 +45,17 @@ $result = $stmt->get_result()->fetch_assoc();
 $stats['rata_rata_nilai'] = $result['avg'] ? number_format($result['avg'], 2) : 0;
 $stmt->close();
 
-// Get jadwal minggu ini untuk ringkasan
+// Get jadwal minggu ini dan besok untuk ringkasan
 $week_start = date('Y-m-d', strtotime('monday this week'));
-$week_end = date('Y-m-d', strtotime('sunday this week'));
+$week_end = date('Y-m-d', strtotime('sunday next week')); // 2 weeks
+$today = date('Y-m-d');
+$tomorrow = date('Y-m-d', strtotime('+1 day'));
 $jadwal_minggu_ini = [];
+$jadwal_hari_ini = [];
+$jadwal_besok = [];
 
 if ($kelas_id) {
+    // Get jadwal 2 minggu ke depan
     $stmt = $conn->prepare("SELECT jp.*, mp.nama_pelajaran, mp.kode_pelajaran, u.nama_lengkap as nama_guru, k.nama_kelas
         FROM jadwal_pelajaran jp
         JOIN mata_pelajaran mp ON jp.mata_pelajaran_id = mp.id
@@ -62,7 +67,56 @@ if ($kelas_id) {
     $stmt->execute();
     $jadwal_minggu_ini = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $stmt->close();
+    
+    // Filter jadwal hari ini
+    $jadwal_hari_ini = array_filter($jadwal_minggu_ini, function($j) use ($today) {
+        return $j['tanggal'] == $today;
+    });
+    
+    // Filter jadwal besok
+    $jadwal_besok = array_filter($jadwal_minggu_ini, function($j) use ($tomorrow) {
+        return $j['tanggal'] == $tomorrow;
+    });
 }
+
+// Get presensi minggu ini
+$presensi_stats = [
+    'total' => 0,
+    'hadir' => 0,
+    'terlambat' => 0,
+    'tidak_hadir' => 0,
+    'persentase' => 0
+];
+if ($kelas_id) {
+    $stmt = $conn->prepare("SELECT p.status, COUNT(*) as total
+        FROM presensi p
+        JOIN sesi_pelajaran sp ON p.sesi_pelajaran_id = sp.id
+        WHERE p.siswa_id = ? AND DATE(sp.waktu_mulai) BETWEEN ? AND ?
+        GROUP BY p.status");
+    $stmt->bind_param("iss", $siswa_id, $week_start, date('Y-m-d', strtotime('sunday this week')));
+    $stmt->execute();
+    $presensi_result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+    
+    foreach ($presensi_result as $p) {
+        $presensi_stats['total'] += $p['total'];
+        $presensi_stats[$p['status']] = $p['total'];
+    }
+    
+    if ($presensi_stats['total'] > 0) {
+        $hadir_total = $presensi_stats['hadir'] + $presensi_stats['terlambat'];
+        $presensi_stats['persentase'] = round(($hadir_total / $presensi_stats['total']) * 100, 1);
+    }
+}
+
+// Get hasil ujian terbaru
+$hasil_terbaru = $conn->query("SELECT hu.*, s.judul, mp.nama_pelajaran, mp.kode_pelajaran
+    FROM hasil_ujian hu
+    JOIN soal s ON hu.soal_id = s.id
+    JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id
+    WHERE hu.siswa_id = $siswa_id AND hu.status = 'selesai'
+    ORDER BY hu.waktu_selesai DESC
+    LIMIT 5")->fetch_all(MYSQLI_ASSOC);
 
 // Get active soal
 $active_soal = $conn->query("SELECT s.*, mp.nama_pelajaran, 
@@ -126,6 +180,227 @@ $conn->close();
         </div>
     </div>
 </div>
+
+<!-- Jadwal Hari Ini & Besok -->
+<?php if ($kelas_id): ?>
+<div class="row mt-4">
+    <?php if (!empty($jadwal_hari_ini)): ?>
+        <div class="col-lg-<?php echo !empty($jadwal_besok) ? '6' : '12'; ?> mb-4">
+            <div class="dashboard-card border-primary border-2">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar-day"></i> Jadwal Hari Ini
+                        <small class="ms-2"><?php echo date('d/m/Y'); ?></small>
+                    </h5>
+                </div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    <?php foreach ($jadwal_hari_ini as $j): ?>
+                        <div class="mb-3 pb-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h6 class="mb-1">
+                                        <i class="bi bi-book"></i> <?php echo htmlspecialchars($j['nama_pelajaran']); ?>
+                                    </h6>
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock"></i> 
+                                        <?php echo date('H:i', strtotime($j['jam_mulai'])); ?> - 
+                                        <?php echo date('H:i', strtotime($j['jam_selesai'])); ?>
+                                    </small>
+                                </div>
+                                <span class="badge bg-<?php 
+                                    echo $j['status'] == 'berlangsung' ? 'success' : 
+                                        ($j['status'] == 'selesai' ? 'info' : 'secondary'); 
+                                ?>">
+                                    <?php 
+                                    $status_text = [
+                                        'terjadwal' => 'Terjadwal',
+                                        'berlangsung' => 'Berlangsung',
+                                        'selesai' => 'Selesai'
+                                    ];
+                                    echo $status_text[$j['status']] ?? ucfirst($j['status']);
+                                    ?>
+                                </span>
+                            </div>
+                            <div class="d-flex gap-3">
+                                <small class="text-muted">
+                                    <i class="bi bi-person"></i> <?php echo htmlspecialchars($j['nama_guru']); ?>
+                                </small>
+                                <?php if ($j['ruangan']): ?>
+                                    <small class="text-muted">
+                                        <i class="bi bi-door-open"></i> <?php echo htmlspecialchars($j['ruangan']); ?>
+                                    </small>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+    
+    <?php if (!empty($jadwal_besok)): ?>
+        <div class="col-lg-<?php echo !empty($jadwal_hari_ini) ? '6' : '12'; ?> mb-4">
+            <div class="dashboard-card border-info border-2">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar-check"></i> Jadwal Besok
+                        <small class="ms-2"><?php echo date('d/m/Y', strtotime('+1 day')); ?></small>
+                    </h5>
+                </div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    <?php foreach ($jadwal_besok as $j): ?>
+                        <div class="mb-3 pb-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h6 class="mb-1">
+                                        <i class="bi bi-book"></i> <?php echo htmlspecialchars($j['nama_pelajaran']); ?>
+                                    </h6>
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock"></i> 
+                                        <?php echo date('H:i', strtotime($j['jam_mulai'])); ?> - 
+                                        <?php echo date('H:i', strtotime($j['jam_selesai'])); ?>
+                                    </small>
+                                </div>
+                                <span class="badge bg-secondary">Terjadwal</span>
+                            </div>
+                            <div class="d-flex gap-3">
+                                <small class="text-muted">
+                                    <i class="bi bi-person"></i> <?php echo htmlspecialchars($j['nama_guru']); ?>
+                                </small>
+                                <?php if ($j['ruangan']): ?>
+                                    <small class="text-muted">
+                                        <i class="bi bi-door-open"></i> <?php echo htmlspecialchars($j['ruangan']); ?>
+                                    </small>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+</div>
+<?php endif; ?>
+
+<!-- Presensi Minggu Ini & Hasil Terbaru -->
+<?php if ($kelas_id): ?>
+<div class="row mt-4">
+    <!-- Presensi Minggu Ini -->
+    <div class="col-lg-4 mb-4">
+        <div class="dashboard-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-clipboard-check"></i> Presensi Minggu Ini</h5>
+                <a href="presensi.php" class="text-decoration-none small">Lihat Detail <i class="bi bi-arrow-right"></i></a>
+            </div>
+            <div class="card-body">
+                <?php if ($presensi_stats['total'] > 0): ?>
+                    <div class="text-center mb-3">
+                        <div class="mb-2">
+                            <h2 class="text-primary mb-0"><?php echo $presensi_stats['persentase']; ?>%</h2>
+                            <small class="text-muted">Kehadiran</small>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: <?php echo $presensi_stats['persentase']; ?>%" 
+                                 aria-valuenow="<?php echo $presensi_stats['persentase']; ?>" 
+                                 aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="p-2">
+                                <h4 class="text-success mb-0"><?php echo $presensi_stats['hadir']; ?></h4>
+                                <small class="text-muted">Hadir</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2">
+                                <h4 class="text-warning mb-0"><?php echo $presensi_stats['terlambat']; ?></h4>
+                                <small class="text-muted">Terlambat</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2">
+                                <h4 class="text-danger mb-0"><?php echo $presensi_stats['tidak_hadir']; ?></h4>
+                                <small class="text-muted">Tidak Hadir</small>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="text-center">
+                        <small class="text-muted">Total: <?php echo $presensi_stats['total']; ?> sesi</small>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center py-4">
+                        <i class="bi bi-clipboard-check text-muted" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                        <p class="text-muted mt-2 mb-0">Belum ada data presensi minggu ini</p>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Hasil Terbaru -->
+    <div class="col-lg-8 mb-4">
+        <div class="dashboard-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-trophy"></i> Hasil Terbaru</h5>
+                <a href="hasil.php" class="text-decoration-none">Lihat Semua <i class="bi bi-arrow-right"></i></a>
+            </div>
+            <div class="card-body">
+                <?php if (count($hasil_terbaru) > 0): ?>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Mata Pelajaran</th>
+                                    <th>Judul Soal</th>
+                                    <th>Nilai</th>
+                                    <th>Tanggal</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($hasil_terbaru as $hasil): ?>
+                                    <tr>
+                                        <td>
+                                            <strong><?php echo htmlspecialchars($hasil['nama_pelajaran']); ?></strong>
+                                        </td>
+                                        <td><?php echo htmlspecialchars($hasil['judul']); ?></td>
+                                        <td>
+                                            <?php 
+                                            $nilai = number_format($hasil['nilai'], 1);
+                                            $badge_class = $nilai >= 75 ? 'success' : ($nilai >= 60 ? 'warning' : 'danger');
+                                            ?>
+                                            <span class="badge bg-<?php echo $badge_class; ?> fs-6">
+                                                <?php echo $nilai; ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small><?php echo date('d/m/Y', strtotime($hasil['waktu_selesai'])); ?></small>
+                                        </td>
+                                        <td>
+                                            <a href="hasil.php?soal_id=<?php echo $hasil['soal_id']; ?>" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye"></i> Detail
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center py-4">
+                        <i class="bi bi-trophy text-muted" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                        <p class="text-muted mt-2 mb-0">Belum ada hasil ujian</p>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 <!-- Ringkasan Jadwal Minggu Ini -->
 <?php if ($kelas_id): ?>
