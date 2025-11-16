@@ -225,63 +225,26 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                                                     <i class="bi bi-check-circle"></i> Sudah Presensi
                                                 </span>
                                             <?php elseif ($sesi && ($sesi['status_waktu'] == 'berlangsung' || $sesi['status_waktu'] == 'belum_mulai')): ?>
-                                                <button type="button" class="btn btn-sm btn-primary" 
-                                                        data-bs-toggle="modal" 
-                                                        data-bs-target="#presensiModal<?php echo $j['id']; ?>">
-                                                    <i class="bi bi-key"></i> Input Kode
-                                                </button>
+                                                <form class="d-inline presensi-form-inline" data-jadwal-id="<?php echo $j['id']; ?>">
+                                                    <div class="input-group input-group-sm" style="width: 200px;">
+                                                        <input type="text" 
+                                                               class="form-control form-control-sm kode-presensi-input" 
+                                                               name="kode_presensi" 
+                                                               placeholder="Kode" 
+                                                               maxlength="10" 
+                                                               required
+                                                               autocomplete="off"
+                                                               style="text-transform: uppercase; font-size: 0.875rem;">
+                                                        <button type="submit" class="btn btn-primary btn-sm btn-submit-presensi">
+                                                            <i class="bi bi-send"></i> Kirim
+                                                        </button>
+                                                    </div>
+                                                </form>
                                             <?php else: ?>
                                                 <span class="text-muted small">-</span>
                                             <?php endif; ?>
                                         </td>
                                     </tr>
-                                    
-                                    <!-- Modal Presensi -->
-                                    <?php if ($sesi && !$sudah_presensi): ?>
-                                    <div class="modal fade" id="presensiModal<?php echo $j['id']; ?>" tabindex="-1" aria-labelledby="presensiModalLabel<?php echo $j['id']; ?>" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="presensiModalLabel<?php echo $j['id']; ?>">
-                                                        <i class="bi bi-key"></i> Input Kode Presensi
-                                                    </h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Mata Pelajaran</label>
-                                                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($j['nama_pelajaran']); ?>" readonly>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Guru</label>
-                                                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($j['nama_guru']); ?>" readonly>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label for="kodePresensi<?php echo $j['id']; ?>" class="form-label">Kode Presensi <span class="text-danger">*</span></label>
-                                                        <input type="text" 
-                                                               class="form-control kode-presensi-input" 
-                                                               id="kodePresensi<?php echo $j['id']; ?>"
-                                                               name="kode_presensi" 
-                                                               placeholder="Masukkan kode presensi" 
-                                                               maxlength="10" 
-                                                               required
-                                                               autocomplete="off"
-                                                               style="text-transform: uppercase; letter-spacing: 2px; font-weight: bold; text-align: center; font-size: 1.2rem;">
-                                                        <small class="form-text text-muted">Masukkan kode yang diberikan oleh guru</small>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                                    <button type="button" class="btn btn-primary btn-submit-presensi" 
-                                                            data-jadwal-id="<?php echo $j['id']; ?>"
-                                                            data-jadwal-nama="<?php echo htmlspecialchars($j['nama_pelajaran']); ?>">
-                                                        <i class="bi bi-check-circle"></i> Submit Presensi
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <?php endif; ?>
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
@@ -317,13 +280,16 @@ $(document).ready(function() {
     });
     
     // Handle submit presensi
-    $('.btn-submit-presensi').on('click', function() {
-        const btn = $(this);
-        const jadwalId = btn.data('jadwal-id');
-        const jadwalNama = btn.data('jadwal-nama');
-        const modal = btn.closest('.modal');
-        const kodeInput = modal.find('.kode-presensi-input');
+    $('.presensi-form-inline').on('submit', function(e) {
+        e.preventDefault();
+        
+        const form = $(this);
+        const btn = form.find('.btn-submit-presensi');
+        const kodeInput = form.find('.kode-presensi-input');
         const kode = kodeInput.val().trim().toUpperCase();
+        
+        // Update input value
+        kodeInput.val(kode);
         
         // Validation
         if (!kode || kode.length < 3) {
@@ -333,13 +299,14 @@ $(document).ready(function() {
                 text: 'Kode presensi minimal 3 karakter!',
                 timer: 2000
             });
-            return;
+            return false;
         }
         
-        // Disable button
+        // Disable button and input
         btn.prop('disabled', true);
+        kodeInput.prop('disabled', true);
         const originalHtml = btn.html();
-        btn.html('<span class="spinner-border spinner-border-sm"></span> Memproses...');
+        btn.html('<span class="spinner-border spinner-border-sm"></span>');
         
         // Submit presensi
         const formData = new FormData();
@@ -359,12 +326,12 @@ $(document).ready(function() {
                     text: data.message || 'Presensi berhasil!',
                     timer: 2000
                 }).then(() => {
-                    // Close modal and reload page
-                    bootstrap.Modal.getInstance(modal[0]).hide();
+                    // Reload page to update status
                     window.location.reload();
                 });
             } else {
                 btn.prop('disabled', false);
+                kodeInput.prop('disabled', false);
                 btn.html(originalHtml);
                 
                 Swal.fire({
@@ -378,6 +345,7 @@ $(document).ready(function() {
         .catch(error => {
             console.error('Error:', error);
             btn.prop('disabled', false);
+            kodeInput.prop('disabled', false);
             btn.html(originalHtml);
             
             Swal.fire({
@@ -386,6 +354,8 @@ $(document).ready(function() {
                 text: 'Terjadi kesalahan saat melakukan presensi'
             });
         });
+        
+        return false;
     });
 });
 </script>
