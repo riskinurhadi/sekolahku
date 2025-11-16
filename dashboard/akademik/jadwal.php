@@ -143,102 +143,106 @@ $conn->close();
 </div>
 
 <!-- Jadwal Per Hari -->
-<div class="row">
-    <?php
-    $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-    for ($i = 0; $i < 7; $i++):
-        $current_date = date('Y-m-d', strtotime($week_start . " +$i days"));
-        $day_name = $days[$i];
-        $is_today = $current_date == date('Y-m-d');
-        $day_jadwal = $jadwal_by_date[$current_date] ?? [];
-    ?>
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="dashboard-card <?php echo $is_today ? 'border-primary' : ''; ?>">
-                <div class="card-header <?php echo $is_today ? 'bg-primary text-white' : ''; ?>">
-                    <h5 class="mb-0">
-                        <i class="bi bi-calendar-day"></i> <?php echo $day_name; ?>
-                        <?php if ($is_today): ?>
-                            <span class="badge bg-light text-primary ms-2">Hari Ini</span>
-                        <?php endif; ?>
-                    </h5>
-                    <small><?php echo date('d/m/Y', strtotime($current_date)); ?></small>
-                </div>
-                <div class="card-body" style="min-height: 300px; max-height: 500px; overflow-y: auto;">
-                    <?php if (empty($day_jadwal)): ?>
-                        <div class="text-center text-muted py-4">
-                            <i class="bi bi-calendar-x" style="font-size: 2rem;"></i>
-                            <p class="mt-2 mb-0">Tidak ada jadwal</p>
-                        </div>
-                    <?php else: ?>
-                        <?php foreach ($day_jadwal as $j): ?>
-                            <div class="card mb-2 border-start border-3 border-<?php 
-                                echo $j['status'] == 'berlangsung' ? 'success' : 
-                                    ($j['status'] == 'selesai' ? 'info' : 
-                                    ($j['status'] == 'dibatalkan' ? 'warning' : 'secondary')); 
-                            ?>">
-                                <div class="card-body p-3">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div>
-                                            <strong><?php echo date('H:i', strtotime($j['jam_mulai'])); ?> - <?php echo date('H:i', strtotime($j['jam_selesai'])); ?></strong>
-                                        </div>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-link text-dark" type="button" data-bs-toggle="dropdown">
-                                                <i class="bi bi-three-dots-vertical"></i>
-                                            </button>
-                                            <ul class="dropdown-menu">
-                                                <li>
-                                                    <a class="dropdown-item" href="#" onclick="editJadwal(<?php echo htmlspecialchars(json_encode($j)); ?>)">
-                                                        <i class="bi bi-pencil"></i> Edit
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <form method="POST" onsubmit="return confirm('Yakin ingin menghapus jadwal ini?');">
-                                                        <input type="hidden" name="action" value="delete">
-                                                        <input type="hidden" name="id" value="<?php echo $j['id']; ?>">
-                                                        <button type="submit" class="dropdown-item text-danger">
-                                                            <i class="bi bi-trash"></i> Hapus
-                                                        </button>
-                                                    </form>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    <h6 class="mb-1"><?php echo htmlspecialchars($j['nama_pelajaran']); ?></h6>
-                                    <small class="text-muted d-block mb-1">
-                                        <i class="bi bi-people"></i> <strong>Kelas:</strong> <?php echo htmlspecialchars($j['nama_kelas']); ?>
-                                    </small>
-                                    <small class="text-muted d-block mb-1">
-                                        <i class="bi bi-person"></i> <?php echo htmlspecialchars($j['nama_guru']); ?>
-                                    </small>
-                                    <?php if ($j['ruangan']): ?>
-                                        <small class="text-muted d-block mb-1">
-                                            <i class="bi bi-door-open"></i> <?php echo htmlspecialchars($j['ruangan']); ?>
-                                        </small>
-                                    <?php endif; ?>
-                                    <span class="badge bg-<?php 
-                                        echo $j['status'] == 'berlangsung' ? 'success' : 
-                                            ($j['status'] == 'selesai' ? 'info' : 
-                                            ($j['status'] == 'dibatalkan' ? 'warning' : 'secondary')); 
-                                    ?>">
-                                        <?php 
-                                        $status_text = [
-                                            'terjadwal' => 'Terjadwal',
-                                            'berlangsung' => 'Berlangsung',
-                                            'selesai' => 'Selesai',
-                                            'dibatalkan' => 'Dibatalkan'
-                                        ];
-                                        echo $status_text[$j['status']] ?? ucfirst($j['status']);
-                                        ?>
-                                    </span>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
+<?php
+$days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+for ($i = 0; $i < 7; $i++):
+    $current_date = date('Y-m-d', strtotime($week_start . " +$i days"));
+    $day_name = $days[$i];
+    $is_today = $current_date == date('Y-m-d');
+    $day_jadwal = $jadwal_by_date[$current_date] ?? [];
+?>
+    <div class="dashboard-card mb-4">
+        <div class="card-header <?php echo $is_today ? 'bg-primary text-white' : 'bg-light'; ?>">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-calendar-day"></i> <?php echo $day_name; ?>
+                    <span class="ms-2" style="font-size: 0.9rem; font-weight: normal;"><?php echo date('d/m/Y', strtotime($current_date)); ?></span>
+                    <?php if ($is_today): ?>
+                        <span class="badge bg-light text-primary ms-2">Hari Ini</span>
                     <?php endif; ?>
-                </div>
+                </h5>
+                <span class="badge <?php echo $is_today ? 'bg-light text-primary' : 'bg-secondary'; ?>">
+                    <?php echo count($day_jadwal); ?> Jadwal
+                </span>
             </div>
         </div>
-    <?php endfor; ?>
-</div>
+        <div class="card-body p-0">
+            <?php if (empty($day_jadwal)): ?>
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-calendar-x" style="font-size: 3rem; opacity: 0.3;"></i>
+                    <p class="mt-3 mb-0">Tidak ada jadwal untuk hari ini</p>
+                </div>
+            <?php else: ?>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 120px;">Waktu</th>
+                                <th>Mata Pelajaran</th>
+                                <th>Kelas</th>
+                                <th>Guru</th>
+                                <th>Ruangan</th>
+                                <th style="width: 100px;">Status</th>
+                                <th style="width: 100px;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($day_jadwal as $j): ?>
+                                <tr>
+                                    <td>
+                                        <strong><?php echo date('H:i', strtotime($j['jam_mulai'])); ?> - <?php echo date('H:i', strtotime($j['jam_selesai'])); ?></strong>
+                                    </td>
+                                    <td>
+                                        <strong><?php echo htmlspecialchars($j['nama_pelajaran']); ?></strong>
+                                        <?php if ($j['kode_pelajaran']): ?>
+                                            <br><small class="text-muted"><?php echo htmlspecialchars($j['kode_pelajaran']); ?></small>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($j['nama_kelas']); ?></td>
+                                    <td><?php echo htmlspecialchars($j['nama_guru']); ?></td>
+                                    <td><?php echo $j['ruangan'] ? htmlspecialchars($j['ruangan']) : '-'; ?></td>
+                                    <td>
+                                        <span class="badge bg-<?php 
+                                            echo $j['status'] == 'berlangsung' ? 'success' : 
+                                                ($j['status'] == 'selesai' ? 'info' : 
+                                                ($j['status'] == 'dibatalkan' ? 'warning' : 'secondary')); 
+                                        ?>">
+                                            <?php 
+                                            $status_text = [
+                                                'terjadwal' => 'Terjadwal',
+                                                'berlangsung' => 'Berlangsung',
+                                                'selesai' => 'Selesai',
+                                                'dibatalkan' => 'Dibatalkan'
+                                            ];
+                                            echo $status_text[$j['status']] ?? ucfirst($j['status']);
+                                            ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                    onclick="editJadwal(<?php echo htmlspecialchars(json_encode($j)); ?>)" 
+                                                    title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <form method="POST" style="display: inline;" onsubmit="event.preventDefault(); confirmDelete('jadwal ini').then(result => { if(result) this.submit(); }); return false;">
+                                                <input type="hidden" name="action" value="delete">
+                                                <input type="hidden" name="id" value="<?php echo $j['id']; ?>">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+<?php endfor; ?>
 
 <!-- Modal Tambah/Edit Jadwal -->
 <div class="modal fade" id="addJadwalModal" tabindex="-1">
