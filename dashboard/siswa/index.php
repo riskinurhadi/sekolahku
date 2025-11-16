@@ -238,47 +238,98 @@ $conn->close();
         </div>
     <?php endif; ?>
     
+</div>
+<?php endif; ?>
+
+<!-- Jadwal Besok & Ringkasan Jadwal Minggu Ini -->
+<?php if ($kelas_id): ?>
+<div class="row mt-4">
+    <!-- Jadwal Besok -->
     <?php if (!empty($jadwal_besok)): ?>
-        <div class="col-lg-<?php echo !empty($jadwal_hari_ini) ? '6' : '12'; ?> mb-4">
-            <div class="dashboard-card border-info border-2">
+        <div class="col-lg-6 mb-4">
+            <div class="dashboard-card">
                 <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">
-                        <i class="bi bi-calendar-check"></i> Jadwal Besok
-                        <small class="ms-2"><?php echo date('d/m/Y', strtotime('+1 day')); ?></small>
-                    </h5>
+                    <h6 class="mb-0"><i class="bi bi-calendar-check"></i> Jadwal Besok</h6>
                 </div>
-                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
-                    <?php foreach ($jadwal_besok as $j): ?>
-                        <div class="mb-3 pb-3 border-bottom">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <h6 class="mb-1">
-                                        <i class="bi bi-book"></i> <?php echo htmlspecialchars($j['nama_pelajaran']); ?>
-                                    </h6>
-                                    <small class="text-muted">
-                                        <i class="bi bi-clock"></i> 
-                                        <?php echo date('H:i', strtotime($j['jam_mulai'])); ?> - 
-                                        <?php echo date('H:i', strtotime($j['jam_selesai'])); ?>
-                                    </small>
+                <div class="card-body">
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        <?php 
+                        $icon_styles = [
+                            ['gradient' => 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', 'icon' => 'book'],
+                            ['gradient' => 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 'icon' => 'journal-bookmark'],
+                            ['gradient' => 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', 'icon' => 'book-half'],
+                            ['gradient' => 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', 'icon' => 'journal-text']
+                        ];
+                        $index = 0;
+                        foreach ($jadwal_besok as $j): 
+                            $style = $icon_styles[$index % count($icon_styles)];
+                            $index++;
+                        ?>
+                            <div class="history-task-item mb-2 p-3 bg-white rounded border" style="border-color: #e2e8f0 !important; transition: all 0.2s ease;">
+                                <div class="d-flex align-items-start">
+                                    <div class="history-icon-wrapper me-3 flex-shrink-0" style="width: 48px; height: 48px; border-radius: 12px; background: <?php echo $style['gradient']; ?>; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+                                        <i class="bi bi-<?php echo $style['icon']; ?> text-white fs-5"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1 fw-semibold" style="color: #1e293b; font-size: 15px; line-height: 1.3;">
+                                            <?php echo htmlspecialchars($j['nama_pelajaran']); ?>
+                                        </h6>
+                                        <p class="mb-0 text-muted" style="font-size: 13px; line-height: 1.5; color: #64748b;">
+                                            <?php echo date('H:i', strtotime($j['jam_mulai'])); ?> - <?php echo date('H:i', strtotime($j['jam_selesai'])); ?>
+                                        </p>
+                                    </div>
                                 </div>
-                                <span class="badge bg-secondary">Terjadwal</span>
                             </div>
-                            <div class="d-flex gap-3">
-                                <small class="text-muted">
-                                    <i class="bi bi-person"></i> <?php echo htmlspecialchars($j['nama_guru']); ?>
-                                </small>
-                                <?php if ($j['ruangan']): ?>
-                                    <small class="text-muted">
-                                        <i class="bi bi-door-open"></i> <?php echo htmlspecialchars($j['ruangan']); ?>
-                                    </small>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
             </div>
         </div>
     <?php endif; ?>
+    
+    <!-- Ringkasan Jadwal Minggu Ini -->
+    <div class="col-lg-<?php echo !empty($jadwal_besok) ? '6' : '12'; ?> mb-4">
+        <div class="dashboard-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0"><i class="bi bi-bar-chart"></i> Ringkasan Jadwal Minggu Ini</h6>
+                <a href="jadwal.php" class="text-decoration-none small">Lihat Detail <i class="bi bi-arrow-right"></i></a>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <div class="p-2">
+                            <h4 class="text-primary mb-0"><?php echo count($jadwal_minggu_ini); ?></h4>
+                            <small class="text-muted">Total Jadwal</small>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="p-2">
+                            <h4 class="text-success mb-0">
+                                <?php echo count(array_filter($jadwal_minggu_ini, function($j) { return $j['status'] == 'berlangsung'; })); ?>
+                            </h4>
+                            <small class="text-muted">Berlangsung</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-2">
+                            <h4 class="text-info mb-0">
+                                <?php echo count(array_filter($jadwal_minggu_ini, function($j) { return $j['status'] == 'selesai'; })); ?>
+                            </h4>
+                            <small class="text-muted">Selesai</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-2">
+                            <h4 class="text-secondary mb-0">
+                                <?php echo count(array_filter($jadwal_minggu_ini, function($j) { return $j['status'] == 'terjadwal'; })); ?>
+                            </h4>
+                            <small class="text-muted">Terjadwal</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <?php endif; ?>
 
@@ -402,53 +453,6 @@ $conn->close();
 </div>
 <?php endif; ?>
 
-<!-- Ringkasan Jadwal Minggu Ini -->
-<?php if ($kelas_id): ?>
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="dashboard-card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Ringkasan Jadwal Minggu Ini</h5>
-                <a href="jadwal.php" class="text-decoration-none">Lihat Detail <i class="bi bi-arrow-right"></i></a>
-            </div>
-            <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-md-3">
-                        <div class="p-3">
-                            <h3 class="text-primary mb-0"><?php echo count($jadwal_minggu_ini); ?></h3>
-                            <small class="text-muted">Total Jadwal</small>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="p-3">
-                            <h3 class="text-success mb-0">
-                                <?php echo count(array_filter($jadwal_minggu_ini, function($j) { return $j['status'] == 'berlangsung'; })); ?>
-                            </h3>
-                            <small class="text-muted">Berlangsung</small>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="p-3">
-                            <h3 class="text-info mb-0">
-                                <?php echo count(array_filter($jadwal_minggu_ini, function($j) { return $j['status'] == 'selesai'; })); ?>
-                            </h3>
-                            <small class="text-muted">Selesai</small>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="p-3">
-                            <h3 class="text-secondary mb-0">
-                                <?php echo count(array_filter($jadwal_minggu_ini, function($j) { return $j['status'] == 'terjadwal'; })); ?>
-                            </h3>
-                            <small class="text-muted">Terjadwal</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<?php endif; ?>
 
 <!-- Active Soal -->
 <div class="row mt-4">
