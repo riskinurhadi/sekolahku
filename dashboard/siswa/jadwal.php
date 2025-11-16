@@ -140,7 +140,7 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                         <p class="mt-3 mb-0">Tidak ada jadwal untuk minggu ini</p>
                     </div>
                 <?php else: ?>
-                    <div class="jadwal-table-wrapper">
+                    <div class="table-responsive">
                         <table class="table table-hover" id="jadwalTable">
                             <thead>
                                 <tr>
@@ -225,7 +225,7 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                                                     <i class="bi bi-check-circle"></i> Sudah Presensi
                                                 </span>
                                             <?php elseif ($show_form): ?>
-                                                <form class="d-inline presensi-form-inline" data-jadwal-id="<?php echo $j['id']; ?>" style="min-width: 180px;">
+                                                <form class="d-inline presensi-form-inline" data-jadwal-id="<?php echo $j['id']; ?>">
                                                     <div class="input-group input-group-sm">
                                                         <input type="text" 
                                                                class="form-control form-control-sm kode-presensi-input" 
@@ -234,9 +234,9 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                                                                maxlength="10" 
                                                                required
                                                                autocomplete="off"
-                                                               style="text-transform: uppercase; font-size: 0.8rem; width: 100px;">
-                                                        <button type="submit" class="btn btn-primary btn-sm btn-submit-presensi" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
-                                                            <i class="bi bi-send"></i>
+                                                               style="text-transform: uppercase;">
+                                                        <button type="submit" class="btn btn-primary btn-sm btn-submit-presensi">
+                                                            <i class="bi bi-send"></i> Kirim
                                                         </button>
                                                     </div>
                                                 </form>
@@ -259,83 +259,47 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 <?php endif; ?>
 
 <style>
-/* Force horizontal scroll untuk tabel jadwal - hanya di dalam wrapper */
-.jadwal-table-wrapper {
-    overflow-x: auto !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-    width: 100%;
-    max-width: 100%;
+/* Sticky Header untuk tabel jadwal */
+.table-responsive {
     position: relative;
-    display: block;
-    max-height: calc(100vh - 300px); /* Limit height untuk scroll vertical */
+    max-height: calc(100vh - 300px);
+    overflow-y: auto;
 }
 
-.jadwal-table-wrapper table#jadwalTable {
-    min-width: 1100px !important;
-    width: 100% !important;
+.table-responsive table#jadwalTable {
+    width: 100%;
     margin-bottom: 0;
-    border-collapse: separate;
-    border-spacing: 0;
 }
 
 /* Fixed/Sticky Header */
-.jadwal-table-wrapper table#jadwalTable thead {
+.table-responsive table#jadwalTable thead {
     position: sticky;
     top: 0;
     z-index: 10;
     background: #ffffff;
 }
 
-.jadwal-table-wrapper table#jadwalTable thead th {
+.table-responsive table#jadwalTable thead th {
     background: #f8f9fa !important;
     font-weight: 600;
-    border-bottom: 2px solid #dee2e6;
-    padding: 0.5rem 0.75rem !important; /* Padding lebih rapat */
-    white-space: nowrap;
     position: sticky;
     top: 0;
     z-index: 11;
     box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
 }
 
-/* Compact table cells - padding lebih rapat */
-.jadwal-table-wrapper table#jadwalTable tbody td {
-    padding: 0.5rem 0.75rem !important; /* Padding lebih rapat dari default */
-    vertical-align: middle;
-    font-size: 0.875rem; /* Sedikit lebih kecil */
-}
-
-/* Compact badges and elements inside table */
-.jadwal-table-wrapper table#jadwalTable tbody .badge {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    font-weight: 500;
-}
-
-/* Compact form inside table */
-.jadwal-table-wrapper table#jadwalTable tbody .input-group-sm {
-    font-size: 0.875rem;
-}
-
-.jadwal-table-wrapper table#jadwalTable tbody .btn-sm {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-}
-
 /* ============================================
    CUSTOM UKURAN CARD JADWAL - EDIT DI SINI
    ============================================ */
    
-/* Ukuran padding di dalam card (saat ini 1rem = 16px, bisa diubah ke 24px, 32px, dll) */
+/* Ukuran padding di dalam card */
 .dashboard-card .card-body {
     overflow-x: hidden !important;
     overflow-y: visible;
     width: 100%;
     max-width: 100%;
     /* CUSTOM: Ubah padding di sini untuk mengatur ruang dalam card */
-    /* Uncomment dan ubah nilai di bawah ini, atau ubah inline style di HTML (line 136) */
-    padding: 0.5rem !important;  /* Saat ini: 1rem (16px). Ubah ke: 24px, 32px, 1.5rem, dll */
+    padding: 24px !important;  /* Default: 24px. Ubah ke: 16px, 20px, 32px, dll */
 }
 
 .dashboard-card {
