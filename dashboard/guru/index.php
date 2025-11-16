@@ -83,6 +83,32 @@ foreach ($jadwal_minggu_ini as $j) {
     }
 }
 
+// Get history pembelajaran selesai (dari jadwal_pelajaran dan sesi_pelajaran)
+$history_pelajaran = [];
+// Get dari jadwal_pelajaran yang selesai
+$stmt = $conn->prepare("SELECT jp.*, mp.nama_pelajaran, mp.kode_pelajaran, k.nama_kelas,
+    sp.id as sesi_id,
+    sp.kode_presensi, sp.waktu_mulai as sesi_waktu_mulai, sp.waktu_selesai as sesi_waktu_selesai,
+    CASE 
+        WHEN sp.id IS NOT NULL THEN (SELECT COUNT(*) FROM presensi WHERE sesi_pelajaran_id = sp.id)
+        ELSE 0
+    END as total_presensi
+    FROM jadwal_pelajaran jp
+    JOIN mata_pelajaran mp ON jp.mata_pelajaran_id = mp.id
+    JOIN kelas k ON jp.kelas_id = k.id
+    LEFT JOIN sesi_pelajaran sp ON sp.mata_pelajaran_id = mp.id 
+        AND sp.guru_id = ? 
+        AND DATE(sp.waktu_mulai) = jp.tanggal 
+        AND TIME(sp.waktu_mulai) = jp.jam_mulai
+        AND sp.status = 'selesai'
+    WHERE mp.guru_id = ? AND jp.status = 'selesai'
+    ORDER BY jp.tanggal DESC, jp.jam_mulai DESC
+    LIMIT 10");
+$stmt->bind_param("ii", $guru_id, $guru_id);
+$stmt->execute();
+$history_pelajaran = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+
 $conn->close();
 ?>
 
@@ -137,60 +163,129 @@ $conn->close();
     </div>
 </div>
 
-<!-- Statistik Per Mata Pelajaran -->
-<?php if (!empty($stats_per_pelajaran)): ?>
+<!-- Statistik Per Mata Pelajaran dan History -->
 <div class="row mb-4">
-    <?php foreach ($stats_per_pelajaran as $pelajaran => $stats): ?>
-        <div class="col-md-6 col-lg-4 mb-3">
-            <div class="dashboard-card">
-                <div class="card-header bg-primary text-white">
-                    <h6 class="mb-0"><i class="bi bi-book"></i> <?php echo htmlspecialchars($pelajaran); ?></h6>
-                </div>
-                <div class="card-body">
-                    <div class="row text-center">
-                        <div class="col-6 mb-2">
-                            <div class="p-2">
-                                <h4 class="text-primary mb-0"><?php echo $stats['total']; ?></h4>
-                                <small class="text-muted">Total</small>
+    <!-- Statistik Per Mata Pelajaran -->
+    <?php if (!empty($stats_per_pelajaran)): ?>
+        <div class="col-lg-8 mb-3">
+            <div class="row">
+                <?php foreach ($stats_per_pelajaran as $pelajaran => $stats): ?>
+                    <div class="col-md-6 mb-3">
+                        <div class="dashboard-card">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0"><i class="bi bi-book"></i> <?php echo htmlspecialchars($pelajaran); ?></h6>
                             </div>
-                        </div>
-                        <div class="col-6 mb-2">
-                            <div class="p-2">
-                                <h4 class="text-info mb-0"><?php echo count($stats['kelas']); ?></h4>
-                                <small class="text-muted">Kelas</small>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-6 mb-2">
+                                        <div class="p-2">
+                                            <h4 class="text-primary mb-0"><?php echo $stats['total']; ?></h4>
+                                            <small class="text-muted">Total</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 mb-2">
+                                        <div class="p-2">
+                                            <h4 class="text-info mb-0"><?php echo count($stats['kelas']); ?></h4>
+                                            <small class="text-muted">Kelas</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr class="my-2">
+                                <div class="row text-center">
+                                    <div class="col-4">
+                                        <small class="text-muted d-block">Terjadwal</small>
+                                        <strong class="text-secondary"><?php echo $stats['terjadwal']; ?></strong>
+                                    </div>
+                                    <div class="col-4">
+                                        <small class="text-muted d-block">Berlangsung</small>
+                                        <strong class="text-success"><?php echo $stats['berlangsung']; ?></strong>
+                                    </div>
+                                    <div class="col-4">
+                                        <small class="text-muted d-block">Selesai</small>
+                                        <strong class="text-info"><?php echo $stats['selesai']; ?></strong>
+                                    </div>
+                                </div>
+                                <?php if (!empty($stats['kelas'])): ?>
+                                    <hr class="my-2">
+                                    <div>
+                                        <small class="text-muted d-block mb-1">Kelas yang diajar:</small>
+                                        <?php foreach ($stats['kelas'] as $kelas): ?>
+                                            <span class="badge bg-secondary me-1"><?php echo htmlspecialchars($kelas); ?></span>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
-                    <hr class="my-2">
-                    <div class="row text-center">
-                        <div class="col-4">
-                            <small class="text-muted d-block">Terjadwal</small>
-                            <strong class="text-secondary"><?php echo $stats['terjadwal']; ?></strong>
-                        </div>
-                        <div class="col-4">
-                            <small class="text-muted d-block">Berlangsung</small>
-                            <strong class="text-success"><?php echo $stats['berlangsung']; ?></strong>
-                        </div>
-                        <div class="col-4">
-                            <small class="text-muted d-block">Selesai</small>
-                            <strong class="text-info"><?php echo $stats['selesai']; ?></strong>
-                        </div>
-                    </div>
-                    <?php if (!empty($stats['kelas'])): ?>
-                        <hr class="my-2">
-                        <div>
-                            <small class="text-muted d-block mb-1">Kelas yang diajar:</small>
-                            <?php foreach ($stats['kelas'] as $kelas): ?>
-                                <span class="badge bg-secondary me-1"><?php echo htmlspecialchars($kelas); ?></span>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
-                </div>
+                <?php endforeach; ?>
             </div>
         </div>
-    <?php endforeach; ?>
+    <?php endif; ?>
+    
+    <!-- History Pembelajaran -->
+    <div class="col-lg-4 mb-3">
+        <div class="dashboard-card">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0"><i class="bi bi-clock-history"></i> History Pembelajaran</h6>
+            </div>
+            <div class="card-body">
+                <?php if (!empty($history_pelajaran)): ?>
+                    <div class="history-list" style="max-height: 600px; overflow-y: auto;">
+                        <?php foreach ($history_pelajaran as $history): ?>
+                            <div class="history-item mb-3 pb-3 border-bottom">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <h6 class="mb-1 text-primary">
+                                            <i class="bi bi-book"></i> <?php echo htmlspecialchars($history['nama_pelajaran']); ?>
+                                        </h6>
+                                        <small class="text-muted">
+                                            <i class="bi bi-people"></i> <?php echo htmlspecialchars($history['nama_kelas']); ?>
+                                        </small>
+                                    </div>
+                                    <span class="badge bg-info">Selesai</span>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted d-block">
+                                        <i class="bi bi-calendar"></i> 
+                                        <?php echo date('d/m/Y', strtotime($history['tanggal'])); ?>
+                                    </small>
+                                    <small class="text-muted d-block">
+                                        <i class="bi bi-clock"></i> 
+                                        <?php echo date('H:i', strtotime($history['jam_mulai'])); ?> - 
+                                        <?php echo date('H:i', strtotime($history['jam_selesai'])); ?>
+                                    </small>
+                                    <?php if ($history['kode_presensi']): ?>
+                                        <small class="text-muted d-block">
+                                            <i class="bi bi-key"></i> Kode: <?php echo htmlspecialchars($history['kode_presensi']); ?>
+                                        </small>
+                                        <?php if ($history['total_presensi']): ?>
+                                            <small class="text-success d-block">
+                                                <i class="bi bi-check-circle"></i> 
+                                                <?php echo $history['total_presensi']; ?> siswa hadir
+                                            </small>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                    <?php if ($history['sesi_waktu_selesai']): ?>
+                                        <small class="text-muted d-block">
+                                            <i class="bi bi-check2-circle"></i> 
+                                            Selesai: <?php echo date('d/m/Y H:i', strtotime($history['sesi_waktu_selesai'])); ?>
+                                        </small>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center py-4">
+                        <i class="bi bi-inbox fs-1 text-muted"></i>
+                        <p class="text-muted mt-2 mb-0">Belum ada history pembelajaran</p>
+                        <small class="text-muted">History akan muncul setelah Anda mengakhiri pembelajaran</small>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
 </div>
-<?php endif; ?>
 
 <!-- Recent Soal -->
 <div class="row">

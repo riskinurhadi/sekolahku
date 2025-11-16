@@ -61,6 +61,28 @@ $stmt->bind_param("si", $status, $jadwal_id);
 
 if ($stmt->execute()) {
     $stmt->close();
+    
+    // Jika status diubah menjadi 'selesai', update sesi_pelajaran yang aktif untuk jadwal ini
+    if ($status === 'selesai') {
+        // Cari sesi_pelajaran yang terkait dengan jadwal ini
+        // Match berdasarkan mata_pelajaran_id, guru_id, tanggal, dan jam_mulai
+        $tanggal = $jadwal['tanggal'];
+        $jam_mulai = $jadwal['jam_mulai'];
+        $mata_pelajaran_id = $jadwal['mata_pelajaran_id'];
+        
+        // Update sesi_pelajaran yang aktif untuk jadwal ini
+        $update_sesi = $conn->prepare("UPDATE sesi_pelajaran 
+            SET status = 'selesai', waktu_selesai = NOW() 
+            WHERE mata_pelajaran_id = ? 
+            AND guru_id = ? 
+            AND DATE(waktu_mulai) = ? 
+            AND TIME(waktu_mulai) = ? 
+            AND status = 'aktif'");
+        $update_sesi->bind_param("iiss", $mata_pelajaran_id, $guru_id, $tanggal, $jam_mulai);
+        $update_sesi->execute();
+        $update_sesi->close();
+    }
+    
     $conn->close();
     
     $status_text = [
