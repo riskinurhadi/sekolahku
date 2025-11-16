@@ -310,23 +310,23 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     /* margin-bottom: 24px; */
 }
 
-/* Ukuran padding kiri-kanan container card (saat ini 15px) */
+/* Ukuran padding kiri-kanan container card - DIPERLEBAR */
 .row > .col-12 {
-    padding-left: 30px !important;  /* CUSTOM: Ubah nilai ini untuk mengatur jarak kiri-kanan card */
-    padding-right: 30px !important;  /* CUSTOM: Contoh: 20px, 24px, 30px, dll */
+    padding-left: 15px !important;  /* CUSTOM: Ubah nilai ini untuk mengatur jarak kiri-kanan card */
+    padding-right: 15px !important;  /* CUSTOM: Contoh: 10px, 15px, 20px, 24px, 30px, dll */
     max-width: 100% !important;
     overflow-x: hidden !important;
     width: 100% !important;
     box-sizing: border-box !important;
 }
 
-/* Ukuran padding kiri-kanan halaman (saat ini 32px) */
+/* Ukuran padding kiri-kanan halaman - DIPERLEBAR */
 .container-fluid {
     overflow-x: hidden !important;
     max-width: 100% !important;
     width: 100% !important;
-    padding-left: 32px !important;   /* CUSTOM: Ubah nilai ini untuk mengatur jarak kiri-kanan seluruh halaman */
-    padding-right: 32px !important;  /* CUSTOM: Contoh: 24px, 40px, 48px, dll */
+    padding-left: 24px !important;   /* CUSTOM: Ubah nilai ini untuk mengatur jarak kiri-kanan seluruh halaman */
+    padding-right: 24px !important;  /* CUSTOM: Contoh: 16px, 20px, 24px, 32px, 40px, 48px, dll */
     box-sizing: border-box !important;
 }
 
