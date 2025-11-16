@@ -286,7 +286,7 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     max-width: 100%;
     /* CUSTOM: Ubah padding di sini untuk mengatur ruang dalam card */
     /* Uncomment dan ubah nilai di bawah ini, atau ubah inline style di HTML (line 136) */
-    padding: 1rem !important;  /* Saat ini: 1rem (16px). Ubah ke: 24px, 32px, 1.5rem, dll */
+    padding: 0.5rem !important;  /* Saat ini: 1rem (16px). Ubah ke: 24px, 32px, 1.5rem, dll */
 }
 
 .dashboard-card {
@@ -299,8 +299,8 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
 /* Ukuran padding kiri-kanan container card (saat ini 15px) */
 .row > .col-12 {
-    padding-left: 15px !important;  /* CUSTOM: Ubah nilai ini untuk mengatur jarak kiri-kanan card */
-    padding-right: 15px !important;  /* CUSTOM: Contoh: 20px, 24px, 30px, dll */
+    padding-left: 10px !important;  /* CUSTOM: Ubah nilai ini untuk mengatur jarak kiri-kanan card */
+    padding-right: 10px !important;  /* CUSTOM: Contoh: 20px, 24px, 30px, dll */
     max-width: 100% !important;
     overflow-x: hidden !important;
     width: 100% !important;
