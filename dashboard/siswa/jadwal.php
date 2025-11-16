@@ -315,33 +315,47 @@ $(document).ready(function() {
         
         fetch('submit_presensi.php', {
             method: 'POST',
-            body: formData
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
         })
         .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+            
             // Check if response is OK
             if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            // Check if response is JSON
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
                 return response.text().then(text => {
-                    console.error('Response is not JSON:', text);
-                    throw new Error('Response is not JSON');
+                    console.error('Response not OK:', text);
+                    throw new Error('Network response was not ok: ' + response.status);
                 });
             }
-            return response.json();
+            
+            // Try to parse as JSON
+            return response.text().then(text => {
+                console.log('Response text:', text);
+                try {
+                    const data = JSON.parse(text);
+                    return data;
+                } catch (e) {
+                    console.error('JSON parse error:', e);
+                    console.error('Response text:', text);
+                    throw new Error('Invalid JSON response: ' + text.substring(0, 100));
+                }
+            });
         })
         .then(data => {
-            console.log('Response data:', data);
+            console.log('Parsed data:', data);
             
-            if (data.success) {
+            if (data && data.success) {
                 Swal.fire({
                     icon: 'success',
                     title: 'Berhasil!',
                     text: data.message || 'Presensi berhasil!',
                     timer: 2000,
-                    showConfirmButton: false
+                    showConfirmButton: false,
+                    allowOutsideClick: false
                 }).then(() => {
                     // Reload page to update status
                     window.location.reload();
@@ -351,17 +365,18 @@ $(document).ready(function() {
                 kodeInput.prop('disabled', false);
                 btn.html(originalHtml);
                 
+                const errorMessage = (data && data.message) ? data.message : 'Gagal melakukan presensi';
                 Swal.fire({
-                    icon: data.expired ? 'error' : 'error',
-                    title: data.expired ? 'Kode Kadaluarsa' : 'Error',
-                    text: data.message || 'Gagal melakukan presensi',
+                    icon: (data && data.expired) ? 'error' : 'error',
+                    title: (data && data.expired) ? 'Kode Kadaluarsa' : 'Error',
+                    text: errorMessage,
                     timer: 3000
                 });
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            console.error('Error details:', error.message);
+            console.error('Fetch error:', error);
+            console.error('Error stack:', error.stack);
             btn.prop('disabled', false);
             kodeInput.prop('disabled', false);
             btn.html(originalHtml);
@@ -369,7 +384,7 @@ $(document).ready(function() {
             Swal.fire({
                 icon: 'error',
                 title: 'Error!',
-                text: 'Terjadi kesalahan saat melakukan presensi: ' + error.message,
+                text: 'Terjadi kesalahan saat melakukan presensi: ' + (error.message || 'Unknown error'),
                 timer: 3000
             });
         });

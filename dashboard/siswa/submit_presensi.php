@@ -1,8 +1,7 @@
 <?php
 // AJAX endpoint untuk submit presensi siswa
-// Start output buffering
+// Start output buffering first to prevent any output
 ob_start();
-header('Content-Type: application/json');
 
 require_once '../../config/session.php';
 require_once '../../config/database.php';
@@ -22,16 +21,19 @@ if (!$sekolah_id) {
     $sekolah_id = $user['sekolah_id'] ?? null;
 }
 
+// Set JSON header after all includes
+header('Content-Type: application/json; charset=utf-8');
+
 // Only handle POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    ob_clean();
+    ob_end_clean();
     echo json_encode(['success' => false, 'message' => 'Method not allowed']);
     $conn->close();
     exit();
 }
 
 if (!isset($_POST['action']) || $_POST['action'] !== 'presensi') {
-    ob_clean();
+    ob_end_clean();
     echo json_encode(['success' => false, 'message' => 'Invalid action']);
     $conn->close();
     exit();
@@ -40,14 +42,14 @@ if (!isset($_POST['action']) || $_POST['action'] !== 'presensi') {
 $kode_presensi = strtoupper(trim($_POST['kode_presensi'] ?? ''));
 
 if (empty($kode_presensi)) {
-    ob_clean();
+    ob_end_clean();
     echo json_encode(['success' => false, 'message' => 'Kode presensi tidak boleh kosong!']);
     $conn->close();
     exit();
 }
 
 if (!$sekolah_id) {
-    ob_clean();
+    ob_end_clean();
     echo json_encode(['success' => false, 'message' => 'Anda belum terdaftar di sekolah!']);
     $conn->close();
     exit();
@@ -69,7 +71,7 @@ $sesi = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 if (!$sesi) {
-    ob_clean();
+    ob_end_clean();
     echo json_encode(['success' => false, 'message' => 'Kode presensi tidak valid atau sesi sudah berakhir!']);
     $conn->close();
     exit();
@@ -83,7 +85,7 @@ $existing = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 if ($existing) {
-    ob_clean();
+    ob_end_clean();
     echo json_encode(['success' => false, 'message' => 'Anda sudah melakukan presensi untuk sesi ini!']);
     $conn->close();
     exit();
@@ -109,7 +111,7 @@ if ($selisih_menit < 0) {
 }
 
 if ($selisih_menit > 30) {
-    ob_clean();
+    ob_end_clean();
     echo json_encode([
         'success' => false, 
         'expired' => true, 
@@ -134,16 +136,16 @@ $stmt->bind_param("iis", $sesi['id'], $siswa_id, $status);
 if ($stmt->execute()) {
     $stmt->close();
     $conn->close();
-    // Clear output buffer before sending JSON
-    ob_clean();
+    // End and clean output buffer before sending JSON
+    ob_end_clean();
     echo json_encode(['success' => true, 'message' => 'Presensi berhasil!']);
     exit();
 } else {
     $error_msg = $conn->error;
     $stmt->close();
     $conn->close();
-    // Clear output buffer before sending JSON
-    ob_clean();
+    // End and clean output buffer before sending JSON
+    ob_end_clean();
     echo json_encode(['success' => false, 'message' => 'Gagal melakukan presensi! Error: ' . $error_msg]);
     exit();
 }
