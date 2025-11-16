@@ -140,8 +140,8 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                         <p class="mt-3 mb-0">Tidak ada jadwal untuk minggu ini</p>
                     </div>
                 <?php else: ?>
-                    <div class="jadwal-table-wrapper" style="width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch; display: block; position: relative; max-width: 100%;">
-                        <table class="table table-hover" id="jadwalTable" style="width: 100% !important; min-width: 1100px !important; margin-bottom: 0; table-layout: auto;">
+                    <div class="jadwal-table-wrapper">
+                        <table class="table table-hover" id="jadwalTable">
                             <thead>
                                 <tr>
                                     <th>Tanggal</th>
@@ -262,16 +262,65 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 /* Force horizontal scroll untuk tabel jadwal - hanya di dalam wrapper */
 .jadwal-table-wrapper {
     overflow-x: auto !important;
+    overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
     width: 100%;
     max-width: 100%;
     position: relative;
     display: block;
+    max-height: calc(100vh - 300px); /* Limit height untuk scroll vertical */
 }
 
 .jadwal-table-wrapper table#jadwalTable {
     min-width: 1100px !important;
     width: 100% !important;
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+/* Fixed/Sticky Header */
+.jadwal-table-wrapper table#jadwalTable thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #ffffff;
+}
+
+.jadwal-table-wrapper table#jadwalTable thead th {
+    background: #f8f9fa !important;
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+    padding: 0.5rem 0.75rem !important; /* Padding lebih rapat */
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 11;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Compact table cells - padding lebih rapat */
+.jadwal-table-wrapper table#jadwalTable tbody td {
+    padding: 0.5rem 0.75rem !important; /* Padding lebih rapat dari default */
+    vertical-align: middle;
+    font-size: 0.875rem; /* Sedikit lebih kecil */
+}
+
+/* Compact badges and elements inside table */
+.jadwal-table-wrapper table#jadwalTable tbody .badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    font-weight: 500;
+}
+
+/* Compact form inside table */
+.jadwal-table-wrapper table#jadwalTable tbody .input-group-sm {
+    font-size: 0.875rem;
+}
+
+.jadwal-table-wrapper table#jadwalTable tbody .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
 }
 
 /* ============================================
@@ -317,22 +366,13 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     box-sizing: border-box !important;
 }
 
-/* Pastikan row dan col tidak melebihi container */
+/* Pastikan row tidak melebihi container */
 .row {
     margin-left: 0 !important;
     margin-right: 0 !important;
     max-width: 100% !important;
     overflow-x: hidden !important;
     width: 100% !important;
-}
-
-.row > .col-12 {
-    padding-left: 15px !important;
-    padding-right: 15px !important;
-    max-width: 100% !important;
-    overflow-x: hidden !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
 }
 
 /* Pastikan content area tidak overflow */
@@ -349,16 +389,6 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     overflow-x: hidden !important;
     max-width: 100% !important;
     width: 100% !important;
-    box-sizing: border-box !important;
-}
-
-/* Pastikan container-fluid tidak overflow */
-.container-fluid {
-    overflow-x: hidden !important;
-    max-width: 100% !important;
-    width: 100% !important;
-    padding-left: 32px !important;
-    padding-right: 32px !important;
     box-sizing: border-box !important;
 }
 
@@ -390,36 +420,7 @@ body {
         const $ = jQuery;
         
         $(document).ready(function() {
-            // Initialize DataTable
-            if ($.fn.DataTable && $('#jadwalTable').length) {
-                $('#jadwalTable').DataTable({
-                    language: {
-                        url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
-                    },
-                    responsive: false, // Disable responsive untuk memaksa horizontal scroll
-                    scrollX: true, // Enable horizontal scrolling
-                    scrollXInner: '100%',
-                    scrollCollapse: false,
-                    autoWidth: false,
-                    order: [[0, 'asc'], [2, 'asc']], // Sort by date, then time
-                    pageLength: 25,
-                    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
-                    dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
-                    columnDefs: [
-                        { orderable: true, targets: [0, 1, 2, 3, 4, 5, 6] },
-                        { orderable: false, targets: [7] }, // Aksi tidak bisa di-sort
-                        { width: '100px', targets: [0] }, // Tanggal
-                        { width: '80px', targets: [1] }, // Hari
-                        { width: '120px', targets: [2] }, // Jam
-                        { width: '150px', targets: [3] }, // Mata Pelajaran
-                        { width: '80px', targets: [4] }, // Kode
-                        { width: '120px', targets: [5] }, // Guru
-                        { width: '120px', targets: [6] }, // Ruangan
-                        { width: '120px', targets: [7] }, // Status
-                        { width: '200px', targets: [8] } // Aksi
-                    ]
-                });
-            }
+            // DataTables removed - using native table with fixed header
             
             // Auto uppercase kode presensi input using vanilla JS
             document.querySelectorAll('.kode-presensi-input').forEach(input => {
