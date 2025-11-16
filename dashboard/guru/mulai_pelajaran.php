@@ -18,51 +18,72 @@ $guru_info = $stmt->get_result()->fetch_assoc();
 $spesialisasi = $guru_info['spesialisasi'] ?? '';
 $stmt->close();
 
-// Handle form submission - Update status jadwal
+// Handle form submission - Generate and copy kode presensi
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (isset($_POST['action']) && $_POST['action'] == 'update_status') {
-        $jadwal_id = $_POST['jadwal_id'];
-        $status = $_POST['status'];
+    if (isset($_POST['action']) && $_POST['action'] == 'generate_kode') {
+        $jadwal_id = intval($_POST['jadwal_id']);
         
         // Verify that this jadwal belongs to a mata pelajaran taught by this guru
-        $stmt = $conn->prepare("UPDATE jadwal_pelajaran jp
+        $stmt = $conn->prepare("SELECT jp.*, mp.id as mata_pelajaran_id, mp.nama_pelajaran
+            FROM jadwal_pelajaran jp
             JOIN mata_pelajaran mp ON jp.mata_pelajaran_id = mp.id
-            SET jp.status = ?
             WHERE jp.id = ? AND mp.guru_id = ?");
-        $stmt->bind_param("sii", $status, $jadwal_id, $guru_id);
-        
-        if ($stmt->execute()) {
-            $status_text = [
-                'terjadwal' => 'Terjadwal',
-                'berlangsung' => 'Berlangsung',
-                'selesai' => 'Selesai',
-                'dibatalkan' => 'Dibatalkan'
-            ];
-            $message = 'success:Status jadwal berhasil diubah menjadi ' . ($status_text[$status] ?? $status) . '!';
-        } else {
-            $message = 'error:Gagal mengubah status jadwal!';
-        }
+        $stmt->bind_param("ii", $jadwal_id, $guru_id);
+        $stmt->execute();
+        $jadwal = $stmt->get_result()->fetch_assoc();
         $stmt->close();
+        
+        if ($jadwal) {
+            // Generate unique code (6 characters alphanumeric)
+            function generateKodePresensi($conn) {
+                $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Exclude confusing chars like 0, O, I, 1
+                do {
+                    $kode = '';
+                    for ($i = 0; $i < 6; $i++) {
+                        $kode .= $chars[rand(0, strlen($chars) - 1)];
+                    }
+                    // Check if code already exists
+                    $check = $conn->prepare("SELECT id FROM sesi_pelajaran WHERE kode_presensi = ?");
+                    $check->bind_param("s", $kode);
+                    $check->execute();
+                    $exists = $check->get_result()->num_rows > 0;
+                    $check->close();
+                } while ($exists);
+                return $kode;
+            }
+            
+            $kode_presensi = generateKodePresensi($conn);
+            
+            // Calculate waktu_mulai and waktu_selesai from jadwal
+            $tanggal = $jadwal['tanggal'];
+            $waktu_mulai = $tanggal . ' ' . $jadwal['jam_mulai'];
+            $waktu_selesai = $tanggal . ' ' . $jadwal['jam_selesai'];
+            
+            // Create sesi_pelajaran
+            $stmt = $conn->prepare("INSERT INTO sesi_pelajaran (mata_pelajaran_id, guru_id, kode_presensi, waktu_mulai, waktu_selesai, status) 
+                VALUES (?, ?, ?, ?, ?, 'aktif')");
+            $stmt->bind_param("iisss", $jadwal['mata_pelajaran_id'], $guru_id, $kode_presensi, $waktu_mulai, $waktu_selesai);
+            
+            if ($stmt->execute()) {
+                $stmt->close();
+                // Return JSON response for AJAX
+                header('Content-Type: application/json');
+                echo json_encode(['success' => true, 'kode' => $kode_presensi, 'message' => 'Kode presensi berhasil dibuat!']);
+                exit();
+            } else {
+                $message = 'error:Gagal membuat kode presensi!';
+            }
+            $stmt->close();
+        } else {
+            $message = 'error:Jadwal tidak ditemukan atau tidak memiliki akses!';
+        }
     }
 }
-
-// Get jadwal pelajaran hari ini untuk guru ini
-$today = date('Y-m-d');
-$stmt = $conn->prepare("SELECT jp.*, mp.nama_pelajaran, mp.kode_pelajaran, k.nama_kelas
-    FROM jadwal_pelajaran jp
-    JOIN mata_pelajaran mp ON jp.mata_pelajaran_id = mp.id
-    JOIN kelas k ON jp.kelas_id = k.id
-    WHERE mp.guru_id = ? AND jp.tanggal = ?
-    ORDER BY jp.jam_mulai ASC");
-$stmt->bind_param("is", $guru_id, $today);
-$stmt->execute();
-$jadwal_hari_ini = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
 
 // Get jadwal minggu ini
 $week_start = date('Y-m-d', strtotime('monday this week'));
 $week_end = date('Y-m-d', strtotime('sunday this week'));
-$stmt = $conn->prepare("SELECT jp.*, mp.nama_pelajaran, mp.kode_pelajaran, k.nama_kelas
+$stmt = $conn->prepare("SELECT jp.*, mp.id as mata_pelajaran_id, mp.nama_pelajaran, mp.kode_pelajaran, k.nama_kelas
     FROM jadwal_pelajaran jp
     JOIN mata_pelajaran mp ON jp.mata_pelajaran_id = mp.id
     JOIN kelas k ON jp.kelas_id = k.id
@@ -73,24 +94,29 @@ $stmt->execute();
 $jadwal_minggu_ini = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
-// Get statistics per mata pelajaran
-$stats_per_pelajaran = [];
-foreach ($jadwal_minggu_ini as $j) {
-    $pelajaran = $j['nama_pelajaran'];
-    if (!isset($stats_per_pelajaran[$pelajaran])) {
-        $stats_per_pelajaran[$pelajaran] = [
-            'total' => 0,
-            'terjadwal' => 0,
-            'berlangsung' => 0,
-            'selesai' => 0,
-            'dibatalkan' => 0,
-            'kelas' => []
-        ];
-    }
-    $stats_per_pelajaran[$pelajaran]['total']++;
-    $stats_per_pelajaran[$pelajaran][$j['status']]++;
-    if (!in_array($j['nama_kelas'], $stats_per_pelajaran[$pelajaran]['kelas'])) {
-        $stats_per_pelajaran[$pelajaran]['kelas'][] = $j['nama_kelas'];
+// Get existing sesi_pelajaran for each jadwal to check if code already exists
+$kode_presensi_map = [];
+foreach ($jadwal_minggu_ini as $jadwal) {
+    $tanggal = $jadwal['tanggal'];
+    $jam_mulai = $jadwal['jam_mulai'];
+    $mata_pelajaran_id = $jadwal['mata_pelajaran_id'] ?? null;
+    
+    if ($mata_pelajaran_id) {
+        // Try to find existing sesi_pelajaran that matches this jadwal
+        $stmt = $conn->prepare("SELECT kode_presensi FROM sesi_pelajaran 
+            WHERE mata_pelajaran_id = ? 
+            AND guru_id = ? 
+            AND DATE(waktu_mulai) = ? 
+            AND TIME(waktu_mulai) = ? 
+            AND status = 'aktif'
+            ORDER BY created_at DESC LIMIT 1");
+        $stmt->bind_param("iiss", $mata_pelajaran_id, $guru_id, $tanggal, $jam_mulai);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($row = $result->fetch_assoc()) {
+            $kode_presensi_map[$jadwal['id']] = $row['kode_presensi'];
+        }
+        $stmt->close();
     }
 }
 
@@ -116,151 +142,9 @@ $conn->close();
         <?php if ($spesialisasi): ?>
             Jadwal mengajar untuk <strong><?php echo htmlspecialchars($spesialisasi); ?></strong>. 
         <?php endif; ?>
-        Lihat dan kelola jadwal pelajaran Anda. Ubah status dari terjadwal menjadi berlangsung saat memulai pelajaran.
+        Lihat jadwal pelajaran Anda dan generate kode presensi untuk setiap jadwal.
     </p>
 </div>
-
-<!-- Jadwal Hari Ini -->
-<div class="dashboard-card mb-4">
-    <div class="card-header">
-        <h5><i class="bi bi-calendar-day"></i> Jadwal Pelajaran Hari Ini (<?php echo date('d/m/Y'); ?>)</h5>
-    </div>
-    <div class="card-body">
-        <?php if (empty($jadwal_hari_ini)): ?>
-            <div class="empty-state">
-                <i class="bi bi-calendar-x"></i>
-                <h5>Tidak Ada Jadwal</h5>
-                <p>Belum ada jadwal pelajaran untuk hari ini. Jadwal akan muncul setelah diatur oleh tim akademik.</p>
-            </div>
-        <?php else: ?>
-            <div class="row">
-                <?php foreach ($jadwal_hari_ini as $jadwal): ?>
-                    <div class="col-md-6 mb-3">
-                        <div class="card border-start border-3 border-<?php 
-                            echo $jadwal['status'] == 'berlangsung' ? 'success' : 
-                                ($jadwal['status'] == 'selesai' ? 'info' : 
-                                ($jadwal['status'] == 'dibatalkan' ? 'warning' : 'secondary')); 
-                        ?>">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <div>
-                                        <h6 class="mb-1"><?php echo htmlspecialchars($jadwal['nama_pelajaran']); ?></h6>
-                                        <small class="text-muted d-block mb-1">
-                                            <i class="bi bi-people"></i> <strong>Kelas:</strong> <?php echo htmlspecialchars($jadwal['nama_kelas']); ?>
-                                        </small>
-                                        <small class="text-muted">
-                                            <i class="bi bi-clock"></i> 
-                                            <?php echo date('H:i', strtotime($jadwal['jam_mulai'])); ?> - 
-                                            <?php echo date('H:i', strtotime($jadwal['jam_selesai'])); ?>
-                                        </small>
-                                    </div>
-                                    <span class="badge bg-<?php 
-                                        echo $jadwal['status'] == 'berlangsung' ? 'success' : 
-                                            ($jadwal['status'] == 'selesai' ? 'info' : 
-                                            ($jadwal['status'] == 'dibatalkan' ? 'warning' : 'secondary')); 
-                                    ?>">
-                                        <?php 
-                                        $status_text = [
-                                            'terjadwal' => 'Terjadwal',
-                                            'berlangsung' => 'Berlangsung',
-                                            'selesai' => 'Selesai',
-                                            'dibatalkan' => 'Dibatalkan'
-                                        ];
-                                        echo $status_text[$jadwal['status']] ?? ucfirst($jadwal['status']);
-                                        ?>
-                                    </span>
-                                </div>
-                                <?php if ($jadwal['ruangan']): ?>
-                                    <small class="text-muted d-block mb-2">
-                                        <i class="bi bi-door-open"></i> <?php echo htmlspecialchars($jadwal['ruangan']); ?>
-                                    </small>
-                                <?php endif; ?>
-                                <?php if ($jadwal['keterangan']): ?>
-                                    <p class="mb-2 small"><?php echo htmlspecialchars($jadwal['keterangan']); ?></p>
-                                <?php endif; ?>
-                                
-                                <?php if ($jadwal['status'] == 'terjadwal'): ?>
-                                    <form method="POST" style="display: inline;" onsubmit="return confirm('Mulai pelajaran ini sekarang? Status akan berubah menjadi berlangsung.');">
-                                        <input type="hidden" name="action" value="update_status">
-                                        <input type="hidden" name="jadwal_id" value="<?php echo $jadwal['id']; ?>">
-                                        <input type="hidden" name="status" value="berlangsung">
-                                        <button type="submit" class="btn btn-sm btn-success">
-                                            <i class="bi bi-play-circle"></i> Mulai Pelajaran
-                                        </button>
-                                    </form>
-                                <?php elseif ($jadwal['status'] == 'berlangsung'): ?>
-                                    <form method="POST" style="display: inline;" onsubmit="return confirm('Selesaikan pelajaran ini? Status akan berubah menjadi selesai.');">
-                                        <input type="hidden" name="action" value="update_status">
-                                        <input type="hidden" name="jadwal_id" value="<?php echo $jadwal['id']; ?>">
-                                        <input type="hidden" name="status" value="selesai">
-                                        <button type="submit" class="btn btn-sm btn-info">
-                                            <i class="bi bi-check-circle"></i> Selesaikan
-                                        </button>
-                                    </form>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-    </div>
-</div>
-
-<!-- Statistik Per Mata Pelajaran -->
-<?php if (!empty($stats_per_pelajaran)): ?>
-<div class="row mb-4">
-    <?php foreach ($stats_per_pelajaran as $pelajaran => $stats): ?>
-        <div class="col-md-6 col-lg-4 mb-3">
-            <div class="dashboard-card">
-                <div class="card-header bg-primary text-white">
-                    <h6 class="mb-0"><i class="bi bi-book"></i> <?php echo htmlspecialchars($pelajaran); ?></h6>
-                </div>
-                <div class="card-body">
-                    <div class="row text-center">
-                        <div class="col-6 mb-2">
-                            <div class="p-2">
-                                <h4 class="text-primary mb-0"><?php echo $stats['total']; ?></h4>
-                                <small class="text-muted">Total</small>
-                            </div>
-                        </div>
-                        <div class="col-6 mb-2">
-                            <div class="p-2">
-                                <h4 class="text-info mb-0"><?php echo count($stats['kelas']); ?></h4>
-                                <small class="text-muted">Kelas</small>
-                            </div>
-                        </div>
-                    </div>
-                    <hr class="my-2">
-                    <div class="row text-center">
-                        <div class="col-4">
-                            <small class="text-muted d-block">Terjadwal</small>
-                            <strong class="text-secondary"><?php echo $stats['terjadwal']; ?></strong>
-                        </div>
-                        <div class="col-4">
-                            <small class="text-muted d-block">Berlangsung</small>
-                            <strong class="text-success"><?php echo $stats['berlangsung']; ?></strong>
-                        </div>
-                        <div class="col-4">
-                            <small class="text-muted d-block">Selesai</small>
-                            <strong class="text-info"><?php echo $stats['selesai']; ?></strong>
-                        </div>
-                    </div>
-                    <?php if (!empty($stats['kelas'])): ?>
-                        <hr class="my-2">
-                        <div>
-                            <small class="text-muted d-block mb-1">Kelas yang diajar:</small>
-                            <?php foreach ($stats['kelas'] as $kelas): ?>
-                                <span class="badge bg-secondary me-1"><?php echo htmlspecialchars($kelas); ?></span>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-    <?php endforeach; ?>
-</div>
-<?php endif; ?>
 
 <!-- Jadwal Minggu Ini -->
 <div class="dashboard-card">
@@ -319,26 +203,17 @@ $conn->close();
                                     </span>
                                 </td>
                                 <td>
-                                    <?php if ($jadwal['status'] == 'terjadwal' && $jadwal['tanggal'] == $today): ?>
-                                        <form method="POST" style="display: inline;" onsubmit="return confirm('Mulai pelajaran ini sekarang?');">
-                                            <input type="hidden" name="action" value="update_status">
-                                            <input type="hidden" name="jadwal_id" value="<?php echo $jadwal['id']; ?>">
-                                            <input type="hidden" name="status" value="berlangsung">
-                                            <button type="submit" class="btn btn-sm btn-success">
-                                                <i class="bi bi-play-circle"></i> Mulai
-                                            </button>
-                                        </form>
-                                    <?php elseif ($jadwal['status'] == 'berlangsung' && $jadwal['tanggal'] == $today): ?>
-                                        <form method="POST" style="display: inline;" onsubmit="return confirm('Selesaikan pelajaran ini?');">
-                                            <input type="hidden" name="action" value="update_status">
-                                            <input type="hidden" name="jadwal_id" value="<?php echo $jadwal['id']; ?>">
-                                            <input type="hidden" name="status" value="selesai">
-                                            <button type="submit" class="btn btn-sm btn-info">
-                                                <i class="bi bi-check-circle"></i> Selesai
-                                            </button>
-                                        </form>
-                                    <?php else: ?>
-                                        <span class="text-muted">-</span>
+                                    <?php 
+                                    $existing_kode = isset($kode_presensi_map[$jadwal['id']]) ? $kode_presensi_map[$jadwal['id']] : null;
+                                    ?>
+                                    <button type="button" class="btn btn-sm btn-primary generate-kode-btn" 
+                                            data-jadwal-id="<?php echo $jadwal['id']; ?>"
+                                            data-kode="<?php echo $existing_kode ? htmlspecialchars($existing_kode) : ''; ?>">
+                                        <i class="bi bi-<?php echo $existing_kode ? 'clipboard-check' : 'key'; ?>"></i> 
+                                        <?php echo $existing_kode ? 'Copy Kode' : 'Generate & Copy'; ?>
+                                    </button>
+                                    <?php if ($existing_kode): ?>
+                                        <small class="d-block text-muted mt-1">Kode: <strong><?php echo htmlspecialchars($existing_kode); ?></strong></small>
                                     <?php endif; ?>
                                 </td>
                             </tr>
@@ -350,6 +225,94 @@ $conn->close();
     </div>
 </div>
 
+
+<script>
+// Handle generate and copy kode presensi
+document.addEventListener('DOMContentLoaded', function() {
+    const generateButtons = document.querySelectorAll('.generate-kode-btn');
+    
+    generateButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const jadwalId = this.getAttribute('data-jadwal-id');
+            const existingKode = this.getAttribute('data-kode');
+            
+            if (existingKode) {
+                // Just copy existing code
+                copyToClipboard(existingKode);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: 'Kode presensi berhasil disalin: ' + existingKode,
+                    timer: 2000
+                });
+            } else {
+                // Generate new code
+                const formData = new FormData();
+                formData.append('action', 'generate_kode');
+                formData.append('jadwal_id', jadwalId);
+                
+                fetch('<?php echo $_SERVER['PHP_SELF']; ?>', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        copyToClipboard(data.kode);
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: 'Kode presensi berhasil dibuat dan disalin: ' + data.kode,
+                            timer: 3000
+                        });
+                        // Update button and show code
+                        this.innerHTML = '<i class="bi bi-clipboard-check"></i> Copy Kode';
+                        this.setAttribute('data-kode', data.kode);
+                        // Add small text below button
+                        const small = document.createElement('small');
+                        small.className = 'd-block text-muted mt-1';
+                        small.innerHTML = 'Kode: <strong>' + data.kode + '</strong>';
+                        this.parentElement.appendChild(small);
+                        // Reload page after a short delay to update all buttons
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: data.message || 'Gagal membuat kode presensi'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Terjadi kesalahan saat membuat kode presensi'
+                    });
+                });
+            }
+        });
+    });
+    
+    function copyToClipboard(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
+        } catch (err) {
+            console.error('Failed to copy:', err);
+        }
+        document.body.removeChild(textarea);
+    }
+});
+</script>
 
 <?php require_once '../../includes/footer.php'; ?>
 
