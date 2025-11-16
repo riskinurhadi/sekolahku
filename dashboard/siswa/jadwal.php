@@ -181,14 +181,6 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 <div class="row">
     <div class="col-12">
         <div class="dashboard-card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="bi bi-calendar-week"></i> Jadwal Pelajaran (2 Minggu)
-                    <small class="text-muted ms-2">
-                        (<?php echo date('d/m/Y', strtotime($week_start)); ?> - <?php echo date('d/m/Y', strtotime($week_end)); ?>)
-                    </small>
-                </h5>
-            </div>
             <div class="card-body"><!-- CUSTOM: Padding diatur di CSS section di bawah (line 289) -->
                 <?php if (empty($jadwal)): ?>
                     <div class="text-center text-muted py-5">
