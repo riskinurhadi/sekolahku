@@ -231,13 +231,30 @@ $conn->close();
             <div class="card-body">
                 <?php if (!empty($history_pelajaran)): ?>
                     <div class="history-list" style="max-height: 600px; overflow-y: auto;">
-                        <?php foreach ($history_pelajaran as $history): ?>
-                            <div class="history-item mb-2 pb-2 border-bottom">
-                                <div class="d-flex align-items-center">
-                                    <i class="bi bi-book text-primary me-2"></i>
+                        <?php 
+                        $icon_styles = [
+                            ['gradient' => 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', 'icon' => 'book'],
+                            ['gradient' => 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 'icon' => 'journal-bookmark'],
+                            ['gradient' => 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', 'icon' => 'book-half'],
+                            ['gradient' => 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', 'icon' => 'journal-text']
+                        ];
+                        $index = 0;
+                        foreach ($history_pelajaran as $history): 
+                            $style = $icon_styles[$index % count($icon_styles)];
+                            $index++;
+                        ?>
+                            <div class="history-task-item mb-3 p-3 bg-white rounded border" style="border-color: #e2e8f0 !important; transition: all 0.2s ease;">
+                                <div class="d-flex align-items-start">
+                                    <div class="history-icon-wrapper me-3 flex-shrink-0" style="width: 48px; height: 48px; border-radius: 12px; background: <?php echo $style['gradient']; ?>; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+                                        <i class="bi bi-<?php echo $style['icon']; ?> text-white fs-5"></i>
+                                    </div>
                                     <div class="flex-grow-1">
-                                        <span class="text-primary fw-semibold"><?php echo htmlspecialchars($history['nama_pelajaran']); ?></span>
-                                        <span class="text-muted ms-2">- <?php echo htmlspecialchars($history['nama_kelas']); ?></span>
+                                        <h6 class="mb-1 fw-semibold" style="color: #1e293b; font-size: 15px; line-height: 1.3;">
+                                            <?php echo htmlspecialchars($history['nama_pelajaran']); ?>
+                                        </h6>
+                                        <p class="mb-0 text-muted" style="font-size: 13px; line-height: 1.5; color: #64748b;">
+                                            Kelas <?php echo htmlspecialchars($history['nama_kelas']); ?> - Pembelajaran selesai
+                                        </p>
                                     </div>
                                 </div>
                             </div>
