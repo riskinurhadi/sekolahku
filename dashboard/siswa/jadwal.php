@@ -152,7 +152,6 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                                     <th>Guru</th>
                                     <th>Ruangan</th>
                                     <th>Status</th>
-                                    <th>Keterangan</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -208,13 +207,6 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                                             </span>
                                         </td>
                                         <td>
-                                            <?php if ($j['keterangan']): ?>
-                                                <small><?php echo htmlspecialchars($j['keterangan']); ?></small>
-                                            <?php else: ?>
-                                                <span class="text-muted">-</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
                                             <?php 
                                             $jadwal_presensi = $presensi_status[$j['id']] ?? null;
                                             $sesi = $jadwal_presensi['sesi'] ?? null;
@@ -225,8 +217,8 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                                                     <i class="bi bi-check-circle"></i> Sudah Presensi
                                                 </span>
                                             <?php elseif ($sesi && ($sesi['status_waktu'] == 'berlangsung' || $sesi['status_waktu'] == 'belum_mulai')): ?>
-                                                <form class="d-inline presensi-form-inline" data-jadwal-id="<?php echo $j['id']; ?>">
-                                                    <div class="input-group input-group-sm" style="width: 200px;">
+                                                <form class="d-inline presensi-form-inline" data-jadwal-id="<?php echo $j['id']; ?>" style="min-width: 180px;">
+                                                    <div class="input-group input-group-sm">
                                                         <input type="text" 
                                                                class="form-control form-control-sm kode-presensi-input" 
                                                                name="kode_presensi" 
@@ -234,9 +226,9 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                                                                maxlength="10" 
                                                                required
                                                                autocomplete="off"
-                                                               style="text-transform: uppercase; font-size: 0.875rem;">
-                                                        <button type="submit" class="btn btn-primary btn-sm btn-submit-presensi">
-                                                            <i class="bi bi-send"></i> Kirim
+                                                               style="text-transform: uppercase; font-size: 0.8rem; width: 100px;">
+                                                        <button type="submit" class="btn btn-primary btn-sm btn-submit-presensi" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                                                            <i class="bi bi-send"></i>
                                                         </button>
                                                     </div>
                                                 </form>
@@ -269,8 +261,8 @@ $(document).ready(function() {
         lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
         dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
         columnDefs: [
-            { orderable: true, targets: [0, 1, 2, 3, 4, 5, 6, 7] },
-            { orderable: false, targets: [8, 9] } // Keterangan dan Aksi tidak bisa di-sort
+            { orderable: true, targets: [0, 1, 2, 3, 4, 5, 6] },
+            { orderable: false, targets: [7] } // Aksi tidak bisa di-sort
         ]
     });
     
