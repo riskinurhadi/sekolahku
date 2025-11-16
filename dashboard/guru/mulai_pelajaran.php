@@ -141,18 +141,44 @@ $conn->close();
                                     </span>
                                 </td>
                                 <td>
-                                    <?php 
-                                    $existing_kode = isset($kode_presensi_map[$jadwal['id']]) ? $kode_presensi_map[$jadwal['id']] : null;
-                                    ?>
-                                    <button type="button" class="btn btn-sm btn-primary generate-kode-btn" 
-                                            data-jadwal-id="<?php echo $jadwal['id']; ?>"
-                                            data-kode="<?php echo $existing_kode ? htmlspecialchars($existing_kode) : ''; ?>">
-                                        <i class="bi bi-<?php echo $existing_kode ? 'clipboard-check' : 'key'; ?>"></i> 
-                                        <?php echo $existing_kode ? 'Copy Kode' : 'Generate & Copy'; ?>
-                                    </button>
-                                    <?php if ($existing_kode): ?>
-                                        <small class="d-block text-muted mt-1">Kode: <strong><?php echo htmlspecialchars($existing_kode); ?></strong></small>
-                                    <?php endif; ?>
+                                    <div class="d-flex flex-column gap-2">
+                                        <?php 
+                                        $existing_kode = isset($kode_presensi_map[$jadwal['id']]) ? $kode_presensi_map[$jadwal['id']] : null;
+                                        $today = date('Y-m-d');
+                                        $is_today = $jadwal['tanggal'] == $today;
+                                        ?>
+                                        
+                                        <!-- Status buttons -->
+                                        <?php if ($is_today): ?>
+                                            <?php if ($jadwal['status'] == 'terjadwal'): ?>
+                                                <button type="button" class="btn btn-sm btn-success update-status-btn" 
+                                                        data-jadwal-id="<?php echo $jadwal['id']; ?>"
+                                                        data-status="berlangsung"
+                                                        title="Mulai Pelajaran">
+                                                    <i class="bi bi-play-circle"></i> Mulai
+                                                </button>
+                                            <?php elseif ($jadwal['status'] == 'berlangsung'): ?>
+                                                <button type="button" class="btn btn-sm btn-info update-status-btn" 
+                                                        data-jadwal-id="<?php echo $jadwal['id']; ?>"
+                                                        data-status="selesai"
+                                                        title="Selesai Pelajaran">
+                                                    <i class="bi bi-check-circle"></i> Selesai
+                                                </button>
+                                            <?php endif; ?>
+                                        <?php endif; ?>
+                                        
+                                        <!-- Generate/Copy Kode -->
+                                        <button type="button" class="btn btn-sm btn-primary generate-kode-btn" 
+                                                data-jadwal-id="<?php echo $jadwal['id']; ?>"
+                                                data-kode="<?php echo $existing_kode ? htmlspecialchars($existing_kode) : ''; ?>">
+                                            <i class="bi bi-<?php echo $existing_kode ? 'clipboard-check' : 'key'; ?>"></i> 
+                                            <?php echo $existing_kode ? 'Copy Kode' : 'Generate & Copy'; ?>
+                                        </button>
+                                        
+                                        <?php if ($existing_kode): ?>
+                                            <small class="text-muted">Kode: <strong><?php echo htmlspecialchars($existing_kode); ?></strong></small>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -167,6 +193,77 @@ $conn->close();
 <script>
 // Handle generate and copy kode presensi
 document.addEventListener('DOMContentLoaded', function() {
+    // Handle update status jadwal
+    const updateStatusButtons = document.querySelectorAll('.update-status-btn');
+    
+    updateStatusButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const jadwalId = this.getAttribute('data-jadwal-id');
+            const status = this.getAttribute('data-status');
+            const statusText = status === 'berlangsung' ? 'Mulai Pelajaran' : 'Selesai Pelajaran';
+            
+            Swal.fire({
+                title: 'Konfirmasi',
+                text: `Apakah Anda yakin ingin ${statusText.toLowerCase()}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: status === 'berlangsung' ? '#28a745' : '#17a2b8',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Ubah',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Disable button
+                    this.disabled = true;
+                    const originalHtml = this.innerHTML;
+                    this.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+                    
+                    const formData = new FormData();
+                    formData.append('action', 'update_status');
+                    formData.append('jadwal_id', jadwalId);
+                    formData.append('status', status);
+                    
+                    fetch('update_status_jadwal.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: data.message,
+                                timer: 2000
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            this.disabled = false;
+                            this.innerHTML = originalHtml;
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal!',
+                                text: data.message || 'Gagal mengubah status jadwal'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        this.disabled = false;
+                        this.innerHTML = originalHtml;
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'Terjadi kesalahan saat mengubah status jadwal'
+                        });
+                    });
+                }
+            });
+        });
+    });
+    
+    // Handle generate and copy kode presensi
     const generateButtons = document.querySelectorAll('.generate-kode-btn');
     
     generateButtons.forEach(btn => {
