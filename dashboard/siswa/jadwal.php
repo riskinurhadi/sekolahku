@@ -133,7 +133,7 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                     </small>
                 </h5>
             </div>
-            <div class="card-body" style="padding: 1rem;">
+            <div class="card-body"><!-- CUSTOM: Padding diatur di CSS section di bawah (line 289) -->
                 <?php if (empty($jadwal)): ?>
                     <div class="text-center text-muted py-5">
                         <i class="bi bi-calendar-x" style="font-size: 3rem;"></i>
@@ -274,18 +274,47 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     width: 100% !important;
 }
 
-/* Pastikan card-body tidak overflow dan membatasi scroll hanya di wrapper */
+/* ============================================
+   CUSTOM UKURAN CARD JADWAL - EDIT DI SINI
+   ============================================ */
+   
+/* Ukuran padding di dalam card (saat ini 1rem = 16px, bisa diubah ke 24px, 32px, dll) */
 .dashboard-card .card-body {
     overflow-x: hidden !important;
     overflow-y: visible;
     width: 100%;
     max-width: 100%;
+    /* CUSTOM: Ubah padding di sini untuk mengatur ruang dalam card */
+    /* Uncomment dan ubah nilai di bawah ini, atau ubah inline style di HTML (line 136) */
+    padding: 1rem !important;  /* Saat ini: 1rem (16px). Ubah ke: 24px, 32px, 1.5rem, dll */
 }
 
 .dashboard-card {
     overflow: hidden !important;
     width: 100%;
     max-width: 100%;
+    /* CUSTOM: Bisa tambahkan margin-bottom untuk jarak antar card */
+    /* margin-bottom: 24px; */
+}
+
+/* Ukuran padding kiri-kanan container card (saat ini 15px) */
+.row > .col-12 {
+    padding-left: 15px !important;  /* CUSTOM: Ubah nilai ini untuk mengatur jarak kiri-kanan card */
+    padding-right: 15px !important;  /* CUSTOM: Contoh: 20px, 24px, 30px, dll */
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Ukuran padding kiri-kanan halaman (saat ini 32px) */
+.container-fluid {
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    padding-left: 32px !important;   /* CUSTOM: Ubah nilai ini untuk mengatur jarak kiri-kanan seluruh halaman */
+    padding-right: 32px !important;  /* CUSTOM: Contoh: 24px, 40px, 48px, dll */
+    box-sizing: border-box !important;
 }
 
 /* Pastikan row dan col tidak melebihi container */
