@@ -16,9 +16,10 @@ $siswa_info = $stmt->get_result()->fetch_assoc();
 $kelas_id = $siswa_info['kelas_id'] ?? null;
 $stmt->close();
 
-// Always show this week's schedule
+// Show schedule for this week and next week (2 weeks ahead)
+// Start from Monday this week, end on Sunday next week
 $week_start = date('Y-m-d', strtotime('monday this week'));
-$week_end = date('Y-m-d', strtotime('sunday this week'));
+$week_end = date('Y-m-d', strtotime('sunday next week'));
 
 // Get jadwal for selected week based on siswa's kelas - OPTIMIZED: Single query with JOINs
 if ($kelas_id) {
@@ -182,7 +183,7 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
         <div class="dashboard-card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="bi bi-calendar-week"></i> Jadwal Pelajaran Minggu Ini
+                    <i class="bi bi-calendar-week"></i> Jadwal Pelajaran (2 Minggu)
                     <small class="text-muted ms-2">
                         (<?php echo date('d/m/Y', strtotime($week_start)); ?> - <?php echo date('d/m/Y', strtotime($week_end)); ?>)
                     </small>
@@ -192,7 +193,7 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                 <?php if (empty($jadwal)): ?>
                     <div class="text-center text-muted py-5">
                         <i class="bi bi-calendar-x" style="font-size: 3rem;"></i>
-                        <p class="mt-3 mb-0">Tidak ada jadwal untuk minggu ini</p>
+                        <p class="mt-3 mb-0">Tidak ada jadwal untuk periode ini</p>
                     </div>
                 <?php else: ?>
                     <div class="table-responsive">
