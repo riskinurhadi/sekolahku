@@ -241,13 +241,33 @@ $conn->close();
                             <?php echo $presensi_stats['persentase']; ?>%
                         </h1>
                         <p class="text-muted mb-4" style="font-size: 1rem;">Kehadiran</p>
-                        <div class="progress mx-auto" style="height: 12px; max-width: 300px;">
+                        <div class="progress mx-auto mb-4" style="height: 12px; max-width: 300px;">
                             <div class="progress-bar bg-success" role="progressbar" 
                                  style="width: <?php echo $presensi_stats['persentase']; ?>%" 
                                  aria-valuenow="<?php echo $presensi_stats['persentase']; ?>" 
                                  aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
-                        <div class="mt-4 pt-3 border-top">
+                        <div class="row text-center mt-3 pt-3 border-top">
+                            <div class="col-4">
+                                <div class="py-2">
+                                    <h5 class="text-success mb-1 fw-bold"><?php echo $presensi_stats['hadir']; ?></h5>
+                                    <small class="text-muted">Hadir</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="py-2">
+                                    <h5 class="text-warning mb-1 fw-bold"><?php echo $presensi_stats['terlambat']; ?></h5>
+                                    <small class="text-muted">Terlambat</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="py-2">
+                                    <h5 class="text-danger mb-1 fw-bold"><?php echo $presensi_stats['tidak_hadir']; ?></h5>
+                                    <small class="text-muted">Tidak Hadir</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-2 pt-2 border-top">
                             <small class="text-muted">Total: <?php echo $presensi_stats['total']; ?> sesi</small>
                         </div>
                     </div>
