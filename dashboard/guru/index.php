@@ -243,7 +243,7 @@ $conn->close();
                             $style = $icon_styles[$index % count($icon_styles)];
                             $index++;
                         ?>
-                            <div class="history-task-item mb-3 p-3 bg-white rounded border" style="border-color: #e2e8f0 !important; transition: all 0.2s ease;">
+                            <div class="history-task-item mb-2 p-3 bg-white rounded border" style="border-color: #e2e8f0 !important; transition: all 0.2s ease;">
                                 <div class="d-flex align-items-start">
                                     <div class="history-icon-wrapper me-3 flex-shrink-0" style="width: 48px; height: 48px; border-radius: 12px; background: <?php echo $style['gradient']; ?>; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
                                         <i class="bi bi-<?php echo $style['icon']; ?> text-white fs-5"></i>
