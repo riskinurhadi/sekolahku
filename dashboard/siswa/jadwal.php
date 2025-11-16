@@ -299,8 +299,8 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
 /* Ukuran padding kiri-kanan container card (saat ini 15px) */
 .row > .col-12 {
-    padding-left: 5px !important;  /* CUSTOM: Ubah nilai ini untuk mengatur jarak kiri-kanan card */
-    padding-right: 5px !important;  /* CUSTOM: Contoh: 20px, 24px, 30px, dll */
+    padding-left: 30px !important;  /* CUSTOM: Ubah nilai ini untuk mengatur jarak kiri-kanan card */
+    padding-right: 30px !important;  /* CUSTOM: Contoh: 20px, 24px, 30px, dll */
     max-width: 100% !important;
     overflow-x: hidden !important;
     width: 100% !important;
