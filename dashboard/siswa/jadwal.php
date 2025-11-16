@@ -124,7 +124,7 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 <!-- Weekly Schedule Table -->
 <div class="row">
     <div class="col-12">
-        <div class="dashboard-card" style="overflow: hidden;">
+        <div class="dashboard-card">
             <div class="card-header">
                 <h5 class="mb-0">
                     <i class="bi bi-calendar-week"></i> Jadwal Pelajaran Minggu Ini
@@ -140,8 +140,8 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                         <p class="mt-3 mb-0">Tidak ada jadwal untuk minggu ini</p>
                     </div>
                 <?php else: ?>
-                    <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%;">
-                        <table class="table table-hover" id="jadwalTable" style="width: 100%; min-width: 1000px; margin-bottom: 0;">
+                    <div class="jadwal-table-wrapper" style="width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch; display: block; position: relative; max-width: 100%;">
+                        <table class="table table-hover" id="jadwalTable" style="width: 100% !important; min-width: 1100px !important; margin-bottom: 0; table-layout: auto;">
                             <thead>
                                 <tr>
                                     <th>Tanggal</th>
@@ -248,6 +248,7 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 <?php endif; ?>
             </div>
@@ -256,6 +257,49 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 </div>
 
 <?php endif; ?>
+
+<style>
+/* Force horizontal scroll untuk tabel jadwal */
+.jadwal-table-wrapper {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    max-width: 100%;
+    position: relative;
+    display: block;
+}
+
+.jadwal-table-wrapper table#jadwalTable {
+    min-width: 1100px !important;
+    width: 100% !important;
+}
+
+/* Pastikan card-body tidak membatasi lebar */
+.dashboard-card .card-body {
+    overflow-x: visible !important;
+    overflow-y: visible;
+}
+
+.dashboard-card {
+    overflow-x: visible !important;
+    overflow-y: visible;
+}
+
+/* Pastikan wrapper container tidak membatasi */
+.row > .col-12 {
+    overflow-x: visible !important;
+}
+
+/* Pastikan content area tidak membatasi */
+.content {
+    overflow-x: visible !important;
+}
+
+/* Pastikan wrapper utama tidak membatasi */
+.wrapper {
+    overflow-x: visible !important;
+}
+</style>
 
 <script>
 // Wait for jQuery to be available
@@ -278,8 +322,9 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                     },
                     responsive: false, // Disable responsive untuk memaksa horizontal scroll
                     scrollX: true, // Enable horizontal scrolling
-                    scrollCollapse: true,
-                    fixedColumns: false,
+                    scrollXInner: '100%',
+                    scrollCollapse: false,
+                    autoWidth: false,
                     order: [[0, 'asc'], [2, 'asc']], // Sort by date, then time
                     pageLength: 25,
                     lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
