@@ -181,66 +181,6 @@ $conn->close();
     </div>
 </div>
 
-<!-- Jadwal Hari Ini & Besok -->
-<?php if ($kelas_id): ?>
-<div class="row mt-4">
-    <?php if (!empty($jadwal_hari_ini)): ?>
-        <div class="col-lg-<?php echo !empty($jadwal_besok) ? '6' : '12'; ?> mb-4">
-            <div class="dashboard-card border-primary border-2">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="bi bi-calendar-day"></i> Jadwal Hari Ini
-                        <small class="ms-2"><?php echo date('d/m/Y'); ?></small>
-                    </h5>
-                </div>
-                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
-                    <?php foreach ($jadwal_hari_ini as $j): ?>
-                        <div class="mb-3 pb-3 border-bottom">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <h6 class="mb-1">
-                                        <i class="bi bi-book"></i> <?php echo htmlspecialchars($j['nama_pelajaran']); ?>
-                                    </h6>
-                                    <small class="text-muted">
-                                        <i class="bi bi-clock"></i> 
-                                        <?php echo date('H:i', strtotime($j['jam_mulai'])); ?> - 
-                                        <?php echo date('H:i', strtotime($j['jam_selesai'])); ?>
-                                    </small>
-                                </div>
-                                <span class="badge bg-<?php 
-                                    echo $j['status'] == 'berlangsung' ? 'success' : 
-                                        ($j['status'] == 'selesai' ? 'info' : 'secondary'); 
-                                ?>">
-                                    <?php 
-                                    $status_text = [
-                                        'terjadwal' => 'Terjadwal',
-                                        'berlangsung' => 'Berlangsung',
-                                        'selesai' => 'Selesai'
-                                    ];
-                                    echo $status_text[$j['status']] ?? ucfirst($j['status']);
-                                    ?>
-                                </span>
-                            </div>
-                            <div class="d-flex gap-3">
-                                <small class="text-muted">
-                                    <i class="bi bi-person"></i> <?php echo htmlspecialchars($j['nama_guru']); ?>
-                                </small>
-                                <?php if ($j['ruangan']): ?>
-                                    <small class="text-muted">
-                                        <i class="bi bi-door-open"></i> <?php echo htmlspecialchars($j['ruangan']); ?>
-                                    </small>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-        </div>
-    <?php endif; ?>
-    
-</div>
-<?php endif; ?>
-
 <!-- Jadwal Besok & Ringkasan Jadwal Minggu Ini -->
 <?php if ($kelas_id): ?>
 <div class="row mt-4 align-items-stretch">
