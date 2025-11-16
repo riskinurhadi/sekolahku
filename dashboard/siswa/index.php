@@ -250,25 +250,25 @@ $conn->close();
                         <div class="row text-center mt-3 pt-3 border-top">
                             <div class="col-4">
                                 <div class="py-2">
-                                    <h5 class="text-success mb-1 fw-bold"><?php echo $presensi_stats['hadir']; ?></h5>
-                                    <small class="text-muted">Hadir</small>
+                                    <h3 class="text-success mb-2 fw-bold" style="font-size: 2.5rem;"><?php echo $presensi_stats['hadir']; ?></h3>
+                                    <p class="text-muted mb-0" style="font-size: 0.95rem;">Hadir</p>
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="py-2">
-                                    <h5 class="text-warning mb-1 fw-bold"><?php echo $presensi_stats['terlambat']; ?></h5>
-                                    <small class="text-muted">Terlambat</small>
+                                    <h3 class="text-warning mb-2 fw-bold" style="font-size: 2.5rem;"><?php echo $presensi_stats['terlambat']; ?></h3>
+                                    <p class="text-muted mb-0" style="font-size: 0.95rem;">Terlambat</p>
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="py-2">
-                                    <h5 class="text-danger mb-1 fw-bold"><?php echo $presensi_stats['tidak_hadir']; ?></h5>
-                                    <small class="text-muted">Tidak Hadir</small>
+                                    <h3 class="text-danger mb-2 fw-bold" style="font-size: 2.5rem;"><?php echo $presensi_stats['tidak_hadir']; ?></h3>
+                                    <p class="text-muted mb-0" style="font-size: 0.95rem;">Tidak Hadir</p>
                                 </div>
                             </div>
                         </div>
                         <div class="mt-2 pt-2 border-top">
-                            <small class="text-muted">Total: <?php echo $presensi_stats['total']; ?> sesi</small>
+                            <p class="text-muted mb-0" style="font-size: 0.9rem;">Total: <?php echo $presensi_stats['total']; ?> sesi</p>
                         </div>
                     </div>
                 <?php else: ?>
