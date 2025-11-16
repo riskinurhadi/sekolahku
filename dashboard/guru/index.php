@@ -232,45 +232,13 @@ $conn->close();
                 <?php if (!empty($history_pelajaran)): ?>
                     <div class="history-list" style="max-height: 600px; overflow-y: auto;">
                         <?php foreach ($history_pelajaran as $history): ?>
-                            <div class="history-item mb-3 pb-3 border-bottom">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <div>
-                                        <h6 class="mb-1 text-primary">
-                                            <i class="bi bi-book"></i> <?php echo htmlspecialchars($history['nama_pelajaran']); ?>
-                                        </h6>
-                                        <small class="text-muted">
-                                            <i class="bi bi-people"></i> <?php echo htmlspecialchars($history['nama_kelas']); ?>
-                                        </small>
+                            <div class="history-item mb-2 pb-2 border-bottom">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-book text-primary me-2"></i>
+                                    <div class="flex-grow-1">
+                                        <span class="text-primary fw-semibold"><?php echo htmlspecialchars($history['nama_pelajaran']); ?></span>
+                                        <span class="text-muted ms-2">- <?php echo htmlspecialchars($history['nama_kelas']); ?></span>
                                     </div>
-                                    <span class="badge bg-info">Selesai</span>
-                                </div>
-                                <div class="mb-2">
-                                    <small class="text-muted d-block">
-                                        <i class="bi bi-calendar"></i> 
-                                        <?php echo date('d/m/Y', strtotime($history['tanggal'])); ?>
-                                    </small>
-                                    <small class="text-muted d-block">
-                                        <i class="bi bi-clock"></i> 
-                                        <?php echo date('H:i', strtotime($history['jam_mulai'])); ?> - 
-                                        <?php echo date('H:i', strtotime($history['jam_selesai'])); ?>
-                                    </small>
-                                    <?php if ($history['kode_presensi']): ?>
-                                        <small class="text-muted d-block">
-                                            <i class="bi bi-key"></i> Kode: <?php echo htmlspecialchars($history['kode_presensi']); ?>
-                                        </small>
-                                        <?php if ($history['total_presensi']): ?>
-                                            <small class="text-success d-block">
-                                                <i class="bi bi-check-circle"></i> 
-                                                <?php echo $history['total_presensi']; ?> siswa hadir
-                                            </small>
-                                        <?php endif; ?>
-                                    <?php endif; ?>
-                                    <?php if ($history['sesi_waktu_selesai']): ?>
-                                        <small class="text-muted d-block">
-                                            <i class="bi bi-check2-circle"></i> 
-                                            Selesai: <?php echo date('d/m/Y H:i', strtotime($history['sesi_waktu_selesai'])); ?>
-                                        </small>
-                                    <?php endif; ?>
                                 </div>
                             </div>
                         <?php endforeach; ?>
