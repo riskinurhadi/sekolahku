@@ -211,12 +211,20 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                                             $jadwal_presensi = $presensi_status[$j['id']] ?? null;
                                             $sesi = $jadwal_presensi['sesi'] ?? null;
                                             $sudah_presensi = $jadwal_presensi['sudah_presensi'] ?? false;
+                                            $today = date('Y-m-d');
+                                            $is_today = $jadwal['tanggal'] == $today;
+                                            $is_berlangsung_or_terjadwal = in_array($jadwal['status'], ['berlangsung', 'terjadwal']);
+                                            
+                                            // Tampilkan form input kode jika:
+                                            // 1. Belum presensi DAN
+                                            // 2. (Hari ini dengan status berlangsung/terjadwal ATAU ada sesi aktif)
+                                            $show_form = !$sudah_presensi && ($is_today && $is_berlangsung_or_terjadwal || ($sesi && ($sesi['status_waktu'] == 'berlangsung' || $sesi['status_waktu'] == 'belum_mulai')));
                                             
                                             if ($sudah_presensi): ?>
                                                 <span class="badge bg-success">
                                                     <i class="bi bi-check-circle"></i> Sudah Presensi
                                                 </span>
-                                            <?php elseif ($sesi && ($sesi['status_waktu'] == 'berlangsung' || $sesi['status_waktu'] == 'belum_mulai')): ?>
+                                            <?php elseif ($show_form): ?>
                                                 <form class="d-inline presensi-form-inline" data-jadwal-id="<?php echo $j['id']; ?>" style="min-width: 180px;">
                                                     <div class="input-group input-group-sm">
                                                         <input type="text" 
