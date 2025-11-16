@@ -1,99 +1,15 @@
 <?php
-// Start output buffering to prevent any output before JSON response
-ob_start();
-
 $page_title = 'Mulai Pelajaran';
 require_once '../../config/session.php';
 require_once '../../config/database.php';
 requireRole(['guru']);
+require_once '../../includes/header.php';
 
 $conn = getConnection();
 $guru_id = $_SESSION['user_id'];
 $sekolah_id = $_SESSION['sekolah_id'];
 $message = '';
 
-// Handle form submission - Generate and copy kode presensi
-// This MUST be before header.php is included to send clean JSON response
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'generate_kode') {
-    $jadwal_id = intval($_POST['jadwal_id'] ?? 0);
-    
-    if ($jadwal_id > 0) {
-        // Verify that this jadwal belongs to a mata pelajaran taught by this guru
-        $stmt = $conn->prepare("SELECT jp.*, mp.id as mata_pelajaran_id, mp.nama_pelajaran
-            FROM jadwal_pelajaran jp
-            JOIN mata_pelajaran mp ON jp.mata_pelajaran_id = mp.id
-            WHERE jp.id = ? AND mp.guru_id = ?");
-        $stmt->bind_param("ii", $jadwal_id, $guru_id);
-        $stmt->execute();
-        $jadwal = $stmt->get_result()->fetch_assoc();
-        $stmt->close();
-        
-        if ($jadwal) {
-            // Generate unique code (6 characters alphanumeric)
-            function generateKodePresensi($conn) {
-                $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Exclude confusing chars like 0, O, I, 1
-                do {
-                    $kode = '';
-                    for ($i = 0; $i < 6; $i++) {
-                        $kode .= $chars[rand(0, strlen($chars) - 1)];
-                    }
-                    // Check if code already exists
-                    $check = $conn->prepare("SELECT id FROM sesi_pelajaran WHERE kode_presensi = ?");
-                    $check->bind_param("s", $kode);
-                    $check->execute();
-                    $exists = $check->get_result()->num_rows > 0;
-                    $check->close();
-                } while ($exists);
-                return $kode;
-            }
-            
-            $kode_presensi = generateKodePresensi($conn);
-            
-            // Calculate waktu_mulai and waktu_selesai from jadwal
-            $tanggal = $jadwal['tanggal'];
-            $waktu_mulai = $tanggal . ' ' . $jadwal['jam_mulai'];
-            $waktu_selesai = $tanggal . ' ' . $jadwal['jam_selesai'];
-            
-            // Create sesi_pelajaran
-            $stmt = $conn->prepare("INSERT INTO sesi_pelajaran (mata_pelajaran_id, guru_id, kode_presensi, waktu_mulai, waktu_selesai, status) 
-                VALUES (?, ?, ?, ?, ?, 'aktif')");
-            $stmt->bind_param("iisss", $jadwal['mata_pelajaran_id'], $guru_id, $kode_presensi, $waktu_mulai, $waktu_selesai);
-            
-            if ($stmt->execute()) {
-                $stmt->close();
-                $conn->close();
-                
-                // Clear any output buffer and send clean JSON
-                ob_end_clean();
-                header('Content-Type: application/json');
-                echo json_encode(['success' => true, 'kode' => $kode_presensi, 'message' => 'Kode presensi berhasil dibuat!']);
-                exit();
-            } else {
-                $error_msg = $conn->error;
-                $stmt->close();
-                $conn->close();
-                ob_end_clean();
-                header('Content-Type: application/json');
-                echo json_encode(['success' => false, 'message' => 'Gagal membuat kode presensi: ' . $error_msg]);
-                exit();
-            }
-        } else {
-            $conn->close();
-            ob_end_clean();
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'message' => 'Jadwal tidak ditemukan atau tidak memiliki akses!']);
-            exit();
-        }
-    } else {
-        $conn->close();
-        ob_end_clean();
-        header('Content-Type: application/json');
-        echo json_encode(['success' => false, 'message' => 'ID jadwal tidak valid!']);
-        exit();
-    }
-}
-
-// If not POST request for generate_kode, continue with normal page load
 // Get guru info including spesialisasi
 $stmt = $conn->prepare("SELECT spesialisasi FROM users WHERE id = ?");
 $stmt->bind_param("i", $guru_id);
@@ -101,9 +17,6 @@ $stmt->execute();
 $guru_info = $stmt->get_result()->fetch_assoc();
 $spesialisasi = $guru_info['spesialisasi'] ?? '';
 $stmt->close();
-
-// Now include header for normal page rendering
-require_once '../../includes/header.php';
 
 // Get jadwal minggu ini
 $week_start = date('Y-m-d', strtotime('monday this week'));
@@ -276,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 formData.append('action', 'generate_kode');
                 formData.append('jadwal_id', jadwalId);
                 
-                fetch('<?php echo $_SERVER['PHP_SELF']; ?>', {
+                fetch('generate_kode_presensi.php', {
                     method: 'POST',
                     body: formData
                 })
