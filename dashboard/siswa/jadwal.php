@@ -259,7 +259,7 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 <?php endif; ?>
 
 <style>
-/* Force horizontal scroll untuk tabel jadwal */
+/* Force horizontal scroll untuk tabel jadwal - hanya di dalam wrapper */
 .jadwal-table-wrapper {
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch;
@@ -274,30 +274,77 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     width: 100% !important;
 }
 
-/* Pastikan card-body tidak membatasi lebar */
+/* Pastikan card-body tidak overflow dan membatasi scroll hanya di wrapper */
 .dashboard-card .card-body {
-    overflow-x: visible !important;
+    overflow-x: hidden !important;
     overflow-y: visible;
+    width: 100%;
+    max-width: 100%;
 }
 
 .dashboard-card {
-    overflow-x: visible !important;
-    overflow-y: visible;
+    overflow: hidden !important;
+    width: 100%;
+    max-width: 100%;
 }
 
-/* Pastikan wrapper container tidak membatasi */
+/* Pastikan row dan col tidak melebihi container */
+.row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    width: 100% !important;
+}
+
 .row > .col-12 {
-    overflow-x: visible !important;
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
 
-/* Pastikan content area tidak membatasi */
+/* Pastikan content area tidak overflow */
 .content {
-    overflow-x: visible !important;
+    overflow-x: hidden !important;
+    max-width: calc(100vw - var(--sidebar-width)) !important;
+    width: calc(100% - var(--sidebar-width)) !important;
+    margin-left: var(--sidebar-width) !important;
+    box-sizing: border-box !important;
 }
 
-/* Pastikan wrapper utama tidak membatasi */
+/* Pastikan page-content tidak overflow */
+.page-content {
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Pastikan container-fluid tidak overflow */
+.container-fluid {
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    padding-left: 32px !important;
+    padding-right: 32px !important;
+    box-sizing: border-box !important;
+}
+
+/* Pastikan wrapper utama tidak overflow */
 .wrapper {
-    overflow-x: visible !important;
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Pastikan body tidak overflow */
+body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
 }
 </style>
 
