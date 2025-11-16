@@ -124,7 +124,7 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 <!-- Weekly Schedule Table -->
 <div class="row">
     <div class="col-12">
-        <div class="dashboard-card">
+        <div class="dashboard-card" style="overflow: hidden;">
             <div class="card-header">
                 <h5 class="mb-0">
                     <i class="bi bi-calendar-week"></i> Jadwal Pelajaran Minggu Ini
@@ -133,15 +133,15 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                     </small>
                 </h5>
             </div>
-            <div class="card-body">
+            <div class="card-body" style="padding: 1rem;">
                 <?php if (empty($jadwal)): ?>
                     <div class="text-center text-muted py-5">
                         <i class="bi bi-calendar-x" style="font-size: 3rem;"></i>
                         <p class="mt-3 mb-0">Tidak ada jadwal untuk minggu ini</p>
                     </div>
                 <?php else: ?>
-                    <div class="table-responsive">
-                        <table class="table table-hover" id="jadwalTable">
+                    <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%;">
+                        <table class="table table-hover" id="jadwalTable" style="width: 100%; min-width: 1000px; margin-bottom: 0;">
                             <thead>
                                 <tr>
                                     <th>Tanggal</th>
@@ -276,14 +276,26 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                     language: {
                         url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
                     },
-                    responsive: true,
+                    responsive: false, // Disable responsive untuk memaksa horizontal scroll
+                    scrollX: true, // Enable horizontal scrolling
+                    scrollCollapse: true,
+                    fixedColumns: false,
                     order: [[0, 'asc'], [2, 'asc']], // Sort by date, then time
                     pageLength: 25,
                     lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
                     dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
                     columnDefs: [
                         { orderable: true, targets: [0, 1, 2, 3, 4, 5, 6] },
-                        { orderable: false, targets: [7] } // Aksi tidak bisa di-sort
+                        { orderable: false, targets: [7] }, // Aksi tidak bisa di-sort
+                        { width: '100px', targets: [0] }, // Tanggal
+                        { width: '80px', targets: [1] }, // Hari
+                        { width: '120px', targets: [2] }, // Jam
+                        { width: '150px', targets: [3] }, // Mata Pelajaran
+                        { width: '80px', targets: [4] }, // Kode
+                        { width: '120px', targets: [5] }, // Guru
+                        { width: '120px', targets: [6] }, // Ruangan
+                        { width: '120px', targets: [7] }, // Status
+                        { width: '200px', targets: [8] } // Aksi
                     ]
                 });
             }
