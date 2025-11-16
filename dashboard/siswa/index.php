@@ -236,33 +236,33 @@ $conn->close();
             </div>
             <div class="card-body flex-grow-1 d-flex flex-column justify-content-center">
                 <div class="row text-center">
-                    <div class="col-6 mb-3">
-                        <div class="p-2">
-                            <h4 class="text-primary mb-0"><?php echo count($jadwal_minggu_ini); ?></h4>
+                    <div class="col-6 mb-4">
+                        <div class="py-3">
+                            <h1 class="text-primary mb-1 fw-bold" style="font-size: 3rem;"><?php echo count($jadwal_minggu_ini); ?></h1>
                             <small class="text-muted">Total Jadwal</small>
                         </div>
                     </div>
-                    <div class="col-6 mb-3">
-                        <div class="p-2">
-                            <h4 class="text-success mb-0">
+                    <div class="col-6 mb-4">
+                        <div class="py-3">
+                            <h1 class="text-success mb-1 fw-bold" style="font-size: 3rem;">
                                 <?php echo count(array_filter($jadwal_minggu_ini, function($j) { return $j['status'] == 'berlangsung'; })); ?>
-                            </h4>
+                            </h1>
                             <small class="text-muted">Berlangsung</small>
                         </div>
                     </div>
                     <div class="col-6">
-                        <div class="p-2">
-                            <h4 class="text-info mb-0">
+                        <div class="py-3">
+                            <h1 class="text-info mb-1 fw-bold" style="font-size: 3rem;">
                                 <?php echo count(array_filter($jadwal_minggu_ini, function($j) { return $j['status'] == 'selesai'; })); ?>
-                            </h4>
+                            </h1>
                             <small class="text-muted">Selesai</small>
                         </div>
                     </div>
                     <div class="col-6">
-                        <div class="p-2">
-                            <h4 class="text-secondary mb-0">
+                        <div class="py-3">
+                            <h1 class="text-secondary mb-1 fw-bold" style="font-size: 3rem;">
                                 <?php echo count(array_filter($jadwal_minggu_ini, function($j) { return $j['status'] == 'terjadwal'; })); ?>
-                            </h4>
+                            </h1>
                             <small class="text-muted">Terjadwal</small>
                         </div>
                     </div>
