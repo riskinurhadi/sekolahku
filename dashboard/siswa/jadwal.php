@@ -299,7 +299,7 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     width: 100%;
     max-width: 100%;
     /* CUSTOM: Ubah padding di sini untuk mengatur ruang dalam card */
-    padding: 24px !important;  /* Default: 24px. Ubah ke: 16px, 20px, 32px, dll */
+    padding: 16px !important;  /* Default: 24px. Ubah ke: 16px, 20px, 32px, dll */
 }
 
 .dashboard-card {
