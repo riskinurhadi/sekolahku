@@ -164,14 +164,14 @@ $conn->close();
 </div>
 
 <!-- Statistik Per Mata Pelajaran dan History -->
-<div class="row mb-4">
+<div class="row mb-4 align-items-stretch">
     <!-- Statistik Per Mata Pelajaran -->
     <?php if (!empty($stats_per_pelajaran)): ?>
-        <div class="col-lg-6 mb-3">
-            <div class="row">
+        <div class="col-lg-6 mb-3 d-flex flex-column">
+            <div class="flex-grow-1">
                 <?php foreach ($stats_per_pelajaran as $pelajaran => $stats): ?>
-                    <div class="col-12 mb-3">
-                        <div class="dashboard-card">
+                    <div class="mb-3">
+                        <div class="dashboard-card h-100">
                             <div class="card-header bg-primary text-white">
                                 <h6 class="mb-0"><i class="bi bi-book"></i> <?php echo htmlspecialchars($pelajaran); ?></h6>
                             </div>
@@ -223,14 +223,14 @@ $conn->close();
     <?php endif; ?>
     
     <!-- History Pembelajaran -->
-    <div class="col-lg-6 mb-3">
-        <div class="dashboard-card">
+    <div class="col-lg-6 mb-3 d-flex">
+        <div class="dashboard-card w-100 d-flex flex-column">
             <div class="card-header bg-info text-white">
                 <h6 class="mb-0"><i class="bi bi-clock-history"></i> History Pembelajaran</h6>
             </div>
-            <div class="card-body">
+            <div class="card-body d-flex flex-column flex-grow-1">
                 <?php if (!empty($history_pelajaran)): ?>
-                    <div class="history-list" style="max-height: 600px; overflow-y: auto;">
+                    <div class="history-list flex-grow-1" style="overflow-y: auto;">
                         <?php 
                         $icon_styles = [
                             ['gradient' => 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', 'icon' => 'book'],
