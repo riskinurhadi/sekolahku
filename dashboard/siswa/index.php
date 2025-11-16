@@ -187,7 +187,7 @@ $conn->close();
     <!-- Jadwal Besok -->
     <?php if (!empty($jadwal_besok)): ?>
         <div class="col-lg-6 mb-4 d-flex">
-            <div class="dashboard-card w-100 d-flex flex-column" style="max-height: 500px;">
+            <div class="dashboard-card w-100 d-flex flex-column" style="max-height: 400px;">
                 <div class="card-header bg-info text-white flex-shrink-0">
                     <h6 class="mb-0"><i class="bi bi-calendar-check"></i> Jadwal Besok</h6>
                 </div>
@@ -205,16 +205,16 @@ $conn->close();
                             $style = $icon_styles[$index % count($icon_styles)];
                             $index++;
                         ?>
-                            <div class="history-task-item mb-2 p-3 bg-white rounded border" style="border-color: #e2e8f0 !important; transition: all 0.2s ease;">
+                            <div class="history-task-item mb-2 p-2 bg-white rounded border" style="border-color: #e2e8f0 !important; transition: all 0.2s ease;">
                                 <div class="d-flex align-items-start">
-                                    <div class="history-icon-wrapper me-3 flex-shrink-0" style="width: 48px; height: 48px; border-radius: 12px; background: <?php echo $style['gradient']; ?>; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
-                                        <i class="bi bi-<?php echo $style['icon']; ?> text-white fs-5"></i>
+                                    <div class="history-icon-wrapper me-3 flex-shrink-0" style="width: 42px; height: 42px; border-radius: 10px; background: <?php echo $style['gradient']; ?>; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+                                        <i class="bi bi-<?php echo $style['icon']; ?> text-white" style="font-size: 1.1rem;"></i>
                                     </div>
                                     <div class="flex-grow-1">
-                                        <h6 class="mb-1 fw-semibold" style="color: #1e293b; font-size: 15px; line-height: 1.3;">
+                                        <h6 class="mb-1 fw-semibold" style="color: #1e293b; font-size: 14px; line-height: 1.3;">
                                             <?php echo htmlspecialchars($j['nama_pelajaran']); ?>
                                         </h6>
-                                        <p class="mb-0 text-muted" style="font-size: 13px; line-height: 1.5; color: #64748b;">
+                                        <p class="mb-0 text-muted" style="font-size: 12px; line-height: 1.4; color: #64748b;">
                                             <?php echo date('H:i', strtotime($j['jam_mulai'])); ?> - <?php echo date('H:i', strtotime($j['jam_selesai'])); ?>
                                         </p>
                                     </div>
@@ -229,7 +229,7 @@ $conn->close();
     
     <!-- Presensi Minggu Ini -->
     <div class="col-lg-<?php echo !empty($jadwal_besok) ? '6' : '12'; ?> mb-4 d-flex">
-        <div class="dashboard-card w-100 d-flex flex-column" style="max-height: 500px;">
+        <div class="dashboard-card w-100 d-flex flex-column" style="max-height: 400px;">
             <div class="card-header d-flex justify-content-between align-items-center flex-shrink-0">
                 <h6 class="mb-0"><i class="bi bi-clipboard-check"></i> Presensi Minggu Ini</h6>
                 <a href="presensi.php" class="text-decoration-none small">Lihat Detail <i class="bi bi-arrow-right"></i></a>
@@ -237,38 +237,38 @@ $conn->close();
             <div class="card-body flex-grow-1 d-flex flex-column justify-content-center">
                 <?php if ($presensi_stats['total'] > 0): ?>
                     <div class="text-center">
-                        <h1 class="text-primary mb-2 fw-bold" style="font-size: 4.5rem; line-height: 1;">
+                        <h1 class="text-primary mb-1 fw-bold" style="font-size: 3.5rem; line-height: 1;">
                             <?php echo $presensi_stats['persentase']; ?>%
                         </h1>
-                        <p class="text-muted mb-4" style="font-size: 1rem;">Kehadiran</p>
-                        <div class="progress mx-auto mb-4" style="height: 12px; max-width: 300px;">
+                        <p class="text-muted mb-3" style="font-size: 0.9rem;">Kehadiran</p>
+                        <div class="progress mx-auto mb-3" style="height: 10px; max-width: 280px;">
                             <div class="progress-bar bg-success" role="progressbar" 
                                  style="width: <?php echo $presensi_stats['persentase']; ?>%" 
                                  aria-valuenow="<?php echo $presensi_stats['persentase']; ?>" 
                                  aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
-                        <div class="row text-center mt-3 pt-3 border-top">
+                        <div class="row text-center mt-2 pt-2 border-top">
                             <div class="col-4">
-                                <div class="py-2">
-                                    <h3 class="text-success mb-2 fw-bold" style="font-size: 2.5rem;"><?php echo $presensi_stats['hadir']; ?></h3>
-                                    <p class="text-muted mb-0" style="font-size: 0.95rem;">Hadir</p>
+                                <div class="py-1">
+                                    <h3 class="text-success mb-1 fw-bold" style="font-size: 2rem;"><?php echo $presensi_stats['hadir']; ?></h3>
+                                    <p class="text-muted mb-0" style="font-size: 0.85rem;">Hadir</p>
                                 </div>
                             </div>
                             <div class="col-4">
-                                <div class="py-2">
-                                    <h3 class="text-warning mb-2 fw-bold" style="font-size: 2.5rem;"><?php echo $presensi_stats['terlambat']; ?></h3>
-                                    <p class="text-muted mb-0" style="font-size: 0.95rem;">Terlambat</p>
+                                <div class="py-1">
+                                    <h3 class="text-warning mb-1 fw-bold" style="font-size: 2rem;"><?php echo $presensi_stats['terlambat']; ?></h3>
+                                    <p class="text-muted mb-0" style="font-size: 0.85rem;">Terlambat</p>
                                 </div>
                             </div>
                             <div class="col-4">
-                                <div class="py-2">
-                                    <h3 class="text-danger mb-2 fw-bold" style="font-size: 2.5rem;"><?php echo $presensi_stats['tidak_hadir']; ?></h3>
-                                    <p class="text-muted mb-0" style="font-size: 0.95rem;">Tidak Hadir</p>
+                                <div class="py-1">
+                                    <h3 class="text-danger mb-1 fw-bold" style="font-size: 2rem;"><?php echo $presensi_stats['tidak_hadir']; ?></h3>
+                                    <p class="text-muted mb-0" style="font-size: 0.85rem;">Tidak Hadir</p>
                                 </div>
                             </div>
                         </div>
                         <div class="mt-2 pt-2 border-top">
-                            <p class="text-muted mb-0" style="font-size: 0.9rem;">Total: <?php echo $presensi_stats['total']; ?> sesi</p>
+                            <p class="text-muted mb-0" style="font-size: 0.85rem;">Total: <?php echo $presensi_stats['total']; ?> sesi</p>
                         </div>
                     </div>
                 <?php else: ?>
