@@ -260,192 +260,37 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
 <style>
 /* ============================================
-   TABEL JADWAL - RESPONSIVE DESIGN
+   TABEL JADWAL - STYLE SAMA DENGAN PRESENSI
    ============================================ */
 
-/* Container untuk tabel - hanya scroll jika diperlukan */
+/* Container untuk tabel - scroll hanya jika diperlukan */
 .table-responsive {
     position: relative;
     max-height: calc(100vh - 300px);
     overflow-y: auto;
-    overflow-x: auto; /* Scroll horizontal hanya muncul jika konten lebih lebar */
+    overflow-x: auto; /* Scroll horizontal hanya muncul jika diperlukan */
     width: 100%;
     -webkit-overflow-scrolling: touch;
 }
 
-/* Tabel responsif - gunakan space secara efisien */
-.table-responsive table#jadwalTable {
-    width: 100%;
-    margin-bottom: 0;
-    table-layout: auto; /* Auto layout untuk fleksibilitas - kolom menyesuaikan konten */
-    border-collapse: collapse;
-}
-
-/* Di layar lebar, tabel akan otomatis menggunakan semua space */
-@media (min-width: 1400px) {
-    .table-responsive table#jadwalTable {
-        width: 100%;
-    }
-    
-    /* Biarkan kolom mengembang jika ada space */
-    .table-responsive table#jadwalTable th:nth-child(4),
-    .table-responsive table#jadwalTable td:nth-child(4) {
-        max-width: none; /* Mata Pelajaran bisa lebih lebar */
-    }
-    
-    .table-responsive table#jadwalTable th:nth-child(6),
-    .table-responsive table#jadwalTable td:nth-child(6) {
-        max-width: none; /* Guru bisa lebih lebar */
-    }
-}
-
-/* Optimize kolom width untuk efisiensi space */
-.table-responsive table#jadwalTable th,
-.table-responsive table#jadwalTable td {
-    padding: 0.75rem 0.5rem !important;
-    vertical-align: middle;
-    white-space: nowrap;
-    font-size: 0.875rem;
-}
-
-/* Kolom khusus - lebih compact */
-.table-responsive table#jadwalTable th:nth-child(1),
-.table-responsive table#jadwalTable td:nth-child(1) {
-    min-width: 120px; /* Tanggal */
-}
-
-.table-responsive table#jadwalTable th:nth-child(2),
-.table-responsive table#jadwalTable td:nth-child(2) {
-    min-width: 80px; /* Hari */
-}
-
-.table-responsive table#jadwalTable th:nth-child(3),
-.table-responsive table#jadwalTable td:nth-child(3) {
-    min-width: 110px; /* Jam */
-}
-
-.table-responsive table#jadwalTable th:nth-child(4),
-.table-responsive table#jadwalTable td:nth-child(4) {
-    min-width: 150px; /* Mata Pelajaran */
-    max-width: 200px;
-    white-space: normal;
-    word-wrap: break-word;
-}
-
-.table-responsive table#jadwalTable th:nth-child(5),
-.table-responsive table#jadwalTable td:nth-child(5) {
-    min-width: 70px; /* Kode */
-}
-
-.table-responsive table#jadwalTable th:nth-child(6),
-.table-responsive table#jadwalTable td:nth-child(6) {
-    min-width: 100px; /* Guru */
-    max-width: 150px;
-}
-
-.table-responsive table#jadwalTable th:nth-child(7),
-.table-responsive table#jadwalTable td:nth-child(7) {
-    min-width: 100px; /* Ruangan */
-}
-
-.table-responsive table#jadwalTable th:nth-child(8),
-.table-responsive table#jadwalTable td:nth-child(8) {
-    min-width: 100px; /* Status */
-}
-
-.table-responsive table#jadwalTable th:nth-child(9),
-.table-responsive table#jadwalTable td:nth-child(9) {
-    min-width: 140px; /* Aksi */
-    white-space: nowrap;
-}
-
-/* Fixed/Sticky Header */
+/* Menggunakan style standar dari style.css (.dashboard-card .table) */
+/* Sticky Header - tetap terlihat saat scroll */
 .table-responsive table#jadwalTable thead {
     position: sticky;
     top: 0;
     z-index: 10;
-    background: #ffffff;
 }
 
 .table-responsive table#jadwalTable thead th {
-    background: #f8f9fa !important;
-    font-weight: 600;
     position: sticky;
     top: 0;
     z-index: 11;
-    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
-    font-size: 0.875rem;
 }
 
-/* Badge lebih compact */
-.table-responsive table#jadwalTable .badge {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    font-weight: 500;
-    white-space: nowrap;
-}
-
-/* Form presensi lebih compact */
-.table-responsive table#jadwalTable .presensi-form-inline {
-    display: inline-block;
-    min-width: 0;
-}
-
-.table-responsive table#jadwalTable .input-group-sm {
-    font-size: 0.875rem;
-}
-
-.table-responsive table#jadwalTable .btn-sm {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-}
-
-/* Responsive breakpoints */
-@media (max-width: 1400px) {
-    .table-responsive table#jadwalTable th,
-    .table-responsive table#jadwalTable td {
-        padding: 0.65rem 0.4rem !important;
-        font-size: 0.8rem;
-    }
-    
-    .table-responsive table#jadwalTable th:nth-child(4),
-    .table-responsive table#jadwalTable td:nth-child(4) {
-        min-width: 130px;
-        max-width: 180px;
-    }
-}
-
-@media (max-width: 1200px) {
-    .table-responsive table#jadwalTable th,
-    .table-responsive table#jadwalTable td {
-        padding: 0.6rem 0.35rem !important;
-        font-size: 0.775rem;
-    }
-    
-    .table-responsive table#jadwalTable th:nth-child(1),
-    .table-responsive table#jadwalTable td:nth-child(1) {
-        min-width: 100px;
-    }
-    
-    .table-responsive table#jadwalTable th:nth-child(2),
-    .table-responsive table#jadwalTable td:nth-child(2) {
-        min-width: 70px;
-    }
-    
-    .table-responsive table#jadwalTable th:nth-child(4),
-    .table-responsive table#jadwalTable td:nth-child(4) {
-        min-width: 120px;
-        max-width: 160px;
-    }
-}
-
+/* Responsif - horizontal scroll di layar kecil */
 @media (max-width: 992px) {
     .table-responsive {
-        overflow-x: auto; /* Enable horizontal scroll di tablet */
-    }
-    
-    .table-responsive table#jadwalTable {
-        min-width: 900px; /* Force minimum width untuk tablet */
+        overflow-x: auto;
     }
 }
 
@@ -453,86 +298,25 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
    CUSTOM UKURAN CARD JADWAL - EDIT DI SINI
    ============================================ */
    
-/* Ukuran padding di dalam card */
+/* Pastikan tidak ada overflow di level page */
 .dashboard-card .card-body {
     overflow-x: hidden !important;
-    overflow-y: visible;
-    width: 100%;
-    max-width: 100%;
-    /* CUSTOM: Ubah padding di sini untuk mengatur ruang dalam card */
-    padding: 20px !important;  /* Default: 20px. Ubah ke: 16px, 24px, 32px, dll */
 }
 
-.dashboard-card {
-    overflow: hidden !important;
-    width: 100%;
-    max-width: 100%;
-    /* CUSTOM: Bisa tambahkan margin-bottom untuk jarak antar card */
-    /* margin-bottom: 24px; */
-}
-
-/* ============================================
-   CUSTOM UKURAN CARD JADWAL - EDIT DI SINI
-   ============================================ */
-
-/* Ukuran padding kiri-kanan container card */
-.row > .col-12 {
-    padding-left: 15px !important;
-    padding-right: 15px !important;
-    max-width: 100% !important;
-    overflow-x: hidden !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-}
-
-/* Ukuran padding kiri-kanan halaman */
 .container-fluid {
     overflow-x: hidden !important;
-    max-width: 100% !important;
-    width: 100% !important;
-    padding-left: 24px !important;
-    padding-right: 24px !important;
-    box-sizing: border-box !important;
 }
 
-/* Pastikan row tidak melebihi container */
-.row {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    max-width: 100% !important;
-    overflow-x: hidden !important;
-    width: 100% !important;
-}
-
-/* Pastikan content area tidak overflow */
 .content {
     overflow-x: hidden !important;
-    max-width: calc(100vw - var(--sidebar-width)) !important;
-    width: calc(100% - var(--sidebar-width)) !important;
-    margin-left: var(--sidebar-width) !important;
-    box-sizing: border-box !important;
 }
 
-/* Pastikan page-content tidak overflow */
-.page-content {
-    overflow-x: hidden !important;
-    max-width: 100% !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-}
-
-/* Pastikan wrapper utama tidak overflow */
 .wrapper {
     overflow-x: hidden !important;
-    max-width: 100vw !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
 }
 
-/* Pastikan body tidak overflow */
 body {
     overflow-x: hidden !important;
-    max-width: 100vw !important;
 }
 </style>
 
