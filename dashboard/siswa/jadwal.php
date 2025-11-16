@@ -258,140 +258,181 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 <?php endif; ?>
 
 <script>
-$(document).ready(function() {
-    $('#jadwalTable').DataTable({
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
-        },
-        responsive: true,
-        order: [[0, 'asc'], [2, 'asc']], // Sort by date, then time
-        pageLength: 25,
-        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
-        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
-        columnDefs: [
-            { orderable: true, targets: [0, 1, 2, 3, 4, 5, 6] },
-            { orderable: false, targets: [7] } // Aksi tidak bisa di-sort
-        ]
-    });
-    
-    // Auto uppercase kode presensi input
-    $('.kode-presensi-input').on('input', function() {
-        this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-    });
-    
-    // Handle submit presensi
-    $('.presensi-form-inline').on('submit', function(e) {
-        e.preventDefault();
-        
-        const form = $(this);
-        const btn = form.find('.btn-submit-presensi');
-        const kodeInput = form.find('.kode-presensi-input');
-        const kode = kodeInput.val().trim().toUpperCase();
-        
-        // Update input value
-        kodeInput.val(kode);
-        
-        // Validation
-        if (!kode || kode.length < 3) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Kode presensi minimal 3 karakter!',
-                timer: 2000
-            });
-            return false;
+// Wait for jQuery to be available
+(function() {
+    function initJadwal() {
+        // Check if jQuery is loaded
+        if (typeof jQuery === 'undefined') {
+            setTimeout(initJadwal, 100);
+            return;
         }
         
-        // Disable button and input
-        btn.prop('disabled', true);
-        kodeInput.prop('disabled', true);
-        const originalHtml = btn.html();
-        btn.html('<span class="spinner-border spinner-border-sm"></span>');
+        const $ = jQuery;
         
-        // Submit presensi
-        const formData = new FormData();
-        formData.append('action', 'presensi');
-        formData.append('kode_presensi', kode);
-        
-        fetch('submit_presensi.php', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => {
-            console.log('Response status:', response.status);
-            console.log('Response headers:', response.headers);
-            
-            // Check if response is OK
-            if (!response.ok) {
-                return response.text().then(text => {
-                    console.error('Response not OK:', text);
-                    throw new Error('Network response was not ok: ' + response.status);
+        $(document).ready(function() {
+            // Initialize DataTable
+            if ($.fn.DataTable && $('#jadwalTable').length) {
+                $('#jadwalTable').DataTable({
+                    language: {
+                        url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
+                    },
+                    responsive: true,
+                    order: [[0, 'asc'], [2, 'asc']], // Sort by date, then time
+                    pageLength: 25,
+                    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
+                    dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
+                    columnDefs: [
+                        { orderable: true, targets: [0, 1, 2, 3, 4, 5, 6] },
+                        { orderable: false, targets: [7] } // Aksi tidak bisa di-sort
+                    ]
                 });
             }
             
-            // Try to parse as JSON
-            return response.text().then(text => {
-                console.log('Response text:', text);
-                try {
-                    const data = JSON.parse(text);
-                    return data;
-                } catch (e) {
-                    console.error('JSON parse error:', e);
-                    console.error('Response text:', text);
-                    throw new Error('Invalid JSON response: ' + text.substring(0, 100));
-                }
+            // Auto uppercase kode presensi input using vanilla JS
+            document.querySelectorAll('.kode-presensi-input').forEach(input => {
+                input.addEventListener('input', function() {
+                    this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                });
             });
-        })
-        .then(data => {
-            console.log('Parsed data:', data);
             
-            if (data && data.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: data.message || 'Presensi berhasil!',
-                    timer: 2000,
-                    showConfirmButton: false,
-                    allowOutsideClick: false
-                }).then(() => {
-                    // Reload page to update status
-                    window.location.reload();
+            // Handle submit presensi using vanilla JS
+            document.querySelectorAll('.presensi-form-inline').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const btn = form.querySelector('.btn-submit-presensi');
+                    const kodeInput = form.querySelector('.kode-presensi-input');
+                    const kode = kodeInput.value.trim().toUpperCase();
+                    
+                    // Update input value
+                    kodeInput.value = kode;
+                    
+                    // Validation
+                    if (!kode || kode.length < 3) {
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Kode presensi minimal 3 karakter!',
+                                timer: 2000
+                            });
+                        } else {
+                            alert('Kode presensi minimal 3 karakter!');
+                        }
+                        return false;
+                    }
+                    
+                    // Disable button and input
+                    btn.disabled = true;
+                    kodeInput.disabled = true;
+                    const originalHtml = btn.innerHTML;
+                    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+                    
+                    // Submit presensi
+                    const formData = new FormData();
+                    formData.append('action', 'presensi');
+                    formData.append('kode_presensi', kode);
+                    
+                    fetch('submit_presensi.php', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        
+                        // Check if response is OK
+                        if (!response.ok) {
+                            return response.text().then(text => {
+                                console.error('Response not OK:', text);
+                                throw new Error('Network response was not ok: ' + response.status);
+                            });
+                        }
+                        
+                        // Try to parse as JSON
+                        return response.text().then(text => {
+                            console.log('Response text:', text);
+                            try {
+                                const data = JSON.parse(text);
+                                return data;
+                            } catch (e) {
+                                console.error('JSON parse error:', e);
+                                console.error('Response text:', text);
+                                throw new Error('Invalid JSON response: ' + text.substring(0, 100));
+                            }
+                        });
+                    })
+                    .then(data => {
+                        console.log('Parsed data:', data);
+                        
+                        if (data && data.success) {
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil!',
+                                    text: data.message || 'Presensi berhasil!',
+                                    timer: 2000,
+                                    showConfirmButton: false,
+                                    allowOutsideClick: false
+                                }).then(() => {
+                                    // Reload page to update status
+                                    window.location.reload();
+                                });
+                            } else {
+                                alert(data.message || 'Presensi berhasil!');
+                                window.location.reload();
+                            }
+                        } else {
+                            btn.disabled = false;
+                            kodeInput.disabled = false;
+                            btn.innerHTML = originalHtml;
+                            
+                            const errorMessage = (data && data.message) ? data.message : 'Gagal melakukan presensi';
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    icon: (data && data.expired) ? 'error' : 'error',
+                                    title: (data && data.expired) ? 'Kode Kadaluarsa' : 'Error',
+                                    text: errorMessage,
+                                    timer: 3000
+                                });
+                            } else {
+                                alert(errorMessage);
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Fetch error:', error);
+                        btn.disabled = false;
+                        kodeInput.disabled = false;
+                        btn.innerHTML = originalHtml;
+                        
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: 'Terjadi kesalahan saat melakukan presensi: ' + (error.message || 'Unknown error'),
+                                timer: 3000
+                            });
+                        } else {
+                            alert('Terjadi kesalahan saat melakukan presensi: ' + (error.message || 'Unknown error'));
+                        }
+                    });
+                    
+                    return false;
                 });
-            } else {
-                btn.prop('disabled', false);
-                kodeInput.prop('disabled', false);
-                btn.html(originalHtml);
-                
-                const errorMessage = (data && data.message) ? data.message : 'Gagal melakukan presensi';
-                Swal.fire({
-                    icon: (data && data.expired) ? 'error' : 'error',
-                    title: (data && data.expired) ? 'Kode Kadaluarsa' : 'Error',
-                    text: errorMessage,
-                    timer: 3000
-                });
-            }
-        })
-        .catch(error => {
-            console.error('Fetch error:', error);
-            console.error('Error stack:', error.stack);
-            btn.prop('disabled', false);
-            kodeInput.prop('disabled', false);
-            btn.html(originalHtml);
-            
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: 'Terjadi kesalahan saat melakukan presensi: ' + (error.message || 'Unknown error'),
-                timer: 3000
             });
         });
-        
-        return false;
-    });
-});
+    }
+    
+    // Start initialization
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initJadwal);
+    } else {
+        initJadwal();
+    }
+})();
 </script>
 
 <?php require_once '../../includes/footer.php'; ?>
