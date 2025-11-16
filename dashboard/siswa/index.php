@@ -243,16 +243,16 @@ $conn->close();
 
 <!-- Jadwal Besok & Ringkasan Jadwal Minggu Ini -->
 <?php if ($kelas_id): ?>
-<div class="row mt-4">
+<div class="row mt-4 align-items-stretch">
     <!-- Jadwal Besok -->
     <?php if (!empty($jadwal_besok)): ?>
-        <div class="col-lg-6 mb-4">
-            <div class="dashboard-card">
-                <div class="card-header bg-info text-white">
+        <div class="col-lg-6 mb-4 d-flex">
+            <div class="dashboard-card w-100 d-flex flex-column" style="max-height: 500px;">
+                <div class="card-header bg-info text-white flex-shrink-0">
                     <h6 class="mb-0"><i class="bi bi-calendar-check"></i> Jadwal Besok</h6>
                 </div>
-                <div class="card-body">
-                    <div style="max-height: 400px; overflow-y: auto;">
+                <div class="card-body flex-grow-1 d-flex flex-column" style="overflow: hidden;">
+                    <div class="flex-grow-1" style="overflow-y: auto; min-height: 0;">
                         <?php 
                         $icon_styles = [
                             ['gradient' => 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', 'icon' => 'book'],
@@ -288,13 +288,13 @@ $conn->close();
     <?php endif; ?>
     
     <!-- Ringkasan Jadwal Minggu Ini -->
-    <div class="col-lg-<?php echo !empty($jadwal_besok) ? '6' : '12'; ?> mb-4">
-        <div class="dashboard-card">
-            <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="col-lg-<?php echo !empty($jadwal_besok) ? '6' : '12'; ?> mb-4 d-flex">
+        <div class="dashboard-card w-100 d-flex flex-column" style="max-height: 500px;">
+            <div class="card-header d-flex justify-content-between align-items-center flex-shrink-0">
                 <h6 class="mb-0"><i class="bi bi-bar-chart"></i> Ringkasan Jadwal Minggu Ini</h6>
                 <a href="jadwal.php" class="text-decoration-none small">Lihat Detail <i class="bi bi-arrow-right"></i></a>
             </div>
-            <div class="card-body">
+            <div class="card-body flex-grow-1 d-flex flex-column justify-content-center">
                 <div class="row text-center">
                     <div class="col-6 mb-3">
                         <div class="p-2">
