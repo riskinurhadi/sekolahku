@@ -285,15 +285,15 @@ $conn->close();
 
 <!-- Ringkasan Jadwal & Hasil Terbaru -->
 <?php if ($kelas_id): ?>
-<div class="row mt-4">
+<div class="row mt-4 align-items-stretch">
     <!-- Ringkasan Jadwal Minggu Ini -->
-    <div class="col-lg-4 mb-4">
-        <div class="dashboard-card">
-            <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="col-lg-4 mb-4 d-flex">
+        <div class="dashboard-card w-100 d-flex flex-column h-100">
+            <div class="card-header d-flex justify-content-between align-items-center flex-shrink-0">
                 <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Ringkasan Jadwal Minggu Ini</h5>
                 <a href="jadwal.php" class="text-decoration-none small">Lihat Detail <i class="bi bi-arrow-right"></i></a>
             </div>
-            <div class="card-body">
+            <div class="card-body flex-grow-1 d-flex flex-column justify-content-center">
                 <div class="row text-center">
                     <div class="col-6 mb-3">
                         <div class="p-2">
@@ -331,13 +331,13 @@ $conn->close();
     </div>
     
     <!-- Hasil Terbaru -->
-    <div class="col-lg-8 mb-4">
-        <div class="dashboard-card">
-            <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="col-lg-8 mb-4 d-flex">
+        <div class="dashboard-card w-100 d-flex flex-column h-100">
+            <div class="card-header d-flex justify-content-between align-items-center flex-shrink-0">
                 <h5 class="mb-0"><i class="bi bi-trophy"></i> Hasil Terbaru</h5>
                 <a href="hasil.php" class="text-decoration-none">Lihat Semua <i class="bi bi-arrow-right"></i></a>
             </div>
-            <div class="card-body">
+            <div class="card-body flex-grow-1 d-flex flex-column">
                 <?php if (count($hasil_terbaru) > 0): ?>
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
