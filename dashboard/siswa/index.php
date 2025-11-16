@@ -227,106 +227,85 @@ $conn->close();
         </div>
     <?php endif; ?>
     
-    <!-- Ringkasan Jadwal Minggu Ini -->
+    <!-- Presensi Minggu Ini -->
     <div class="col-lg-<?php echo !empty($jadwal_besok) ? '6' : '12'; ?> mb-4 d-flex">
         <div class="dashboard-card w-100 d-flex flex-column" style="max-height: 500px;">
             <div class="card-header d-flex justify-content-between align-items-center flex-shrink-0">
-                <h6 class="mb-0"><i class="bi bi-bar-chart"></i> Ringkasan Jadwal Minggu Ini</h6>
-                <a href="jadwal.php" class="text-decoration-none small">Lihat Detail <i class="bi bi-arrow-right"></i></a>
+                <h6 class="mb-0"><i class="bi bi-clipboard-check"></i> Presensi Minggu Ini</h6>
+                <a href="presensi.php" class="text-decoration-none small">Lihat Detail <i class="bi bi-arrow-right"></i></a>
             </div>
             <div class="card-body flex-grow-1 d-flex flex-column justify-content-center">
-                <div class="row text-center">
-                    <div class="col-6 mb-4">
-                        <div class="py-3">
-                            <h1 class="text-primary mb-1 fw-bold" style="font-size: 3rem;"><?php echo count($jadwal_minggu_ini); ?></h1>
-                            <small class="text-muted">Total Jadwal</small>
+                <?php if ($presensi_stats['total'] > 0): ?>
+                    <div class="text-center">
+                        <h1 class="text-primary mb-2 fw-bold" style="font-size: 4.5rem; line-height: 1;">
+                            <?php echo $presensi_stats['persentase']; ?>%
+                        </h1>
+                        <p class="text-muted mb-4" style="font-size: 1rem;">Kehadiran</p>
+                        <div class="progress mx-auto" style="height: 12px; max-width: 300px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: <?php echo $presensi_stats['persentase']; ?>%" 
+                                 aria-valuenow="<?php echo $presensi_stats['persentase']; ?>" 
+                                 aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="mt-4 pt-3 border-top">
+                            <small class="text-muted">Total: <?php echo $presensi_stats['total']; ?> sesi</small>
                         </div>
                     </div>
-                    <div class="col-6 mb-4">
-                        <div class="py-3">
-                            <h1 class="text-success mb-1 fw-bold" style="font-size: 3rem;">
-                                <?php echo count(array_filter($jadwal_minggu_ini, function($j) { return $j['status'] == 'berlangsung'; })); ?>
-                            </h1>
-                            <small class="text-muted">Berlangsung</small>
-                        </div>
+                <?php else: ?>
+                    <div class="text-center py-4">
+                        <i class="bi bi-clipboard-check text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
+                        <p class="text-muted mt-3 mb-0">Belum ada data presensi minggu ini</p>
                     </div>
-                    <div class="col-6">
-                        <div class="py-3">
-                            <h1 class="text-info mb-1 fw-bold" style="font-size: 3rem;">
-                                <?php echo count(array_filter($jadwal_minggu_ini, function($j) { return $j['status'] == 'selesai'; })); ?>
-                            </h1>
-                            <small class="text-muted">Selesai</small>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="py-3">
-                            <h1 class="text-secondary mb-1 fw-bold" style="font-size: 3rem;">
-                                <?php echo count(array_filter($jadwal_minggu_ini, function($j) { return $j['status'] == 'terjadwal'; })); ?>
-                            </h1>
-                            <small class="text-muted">Terjadwal</small>
-                        </div>
-                    </div>
-                </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
 </div>
 <?php endif; ?>
 
-<!-- Presensi Minggu Ini & Hasil Terbaru -->
+<!-- Ringkasan Jadwal & Hasil Terbaru -->
 <?php if ($kelas_id): ?>
 <div class="row mt-4">
-    <!-- Presensi Minggu Ini -->
+    <!-- Ringkasan Jadwal Minggu Ini -->
     <div class="col-lg-4 mb-4">
         <div class="dashboard-card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="bi bi-clipboard-check"></i> Presensi Minggu Ini</h5>
-                <a href="presensi.php" class="text-decoration-none small">Lihat Detail <i class="bi bi-arrow-right"></i></a>
+                <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Ringkasan Jadwal Minggu Ini</h5>
+                <a href="jadwal.php" class="text-decoration-none small">Lihat Detail <i class="bi bi-arrow-right"></i></a>
             </div>
             <div class="card-body">
-                <?php if ($presensi_stats['total'] > 0): ?>
-                    <div class="text-center mb-3">
-                        <div class="mb-2">
-                            <h2 class="text-primary mb-0"><?php echo $presensi_stats['persentase']; ?>%</h2>
-                            <small class="text-muted">Kehadiran</small>
-                        </div>
-                        <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-success" role="progressbar" 
-                                 style="width: <?php echo $presensi_stats['persentase']; ?>%" 
-                                 aria-valuenow="<?php echo $presensi_stats['persentase']; ?>" 
-                                 aria-valuemin="0" aria-valuemax="100"></div>
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <div class="p-2">
+                            <h4 class="text-primary mb-0"><?php echo count($jadwal_minggu_ini); ?></h4>
+                            <small class="text-muted">Total Jadwal</small>
                         </div>
                     </div>
-                    <div class="row text-center">
-                        <div class="col-4">
-                            <div class="p-2">
-                                <h4 class="text-success mb-0"><?php echo $presensi_stats['hadir']; ?></h4>
-                                <small class="text-muted">Hadir</small>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="p-2">
-                                <h4 class="text-warning mb-0"><?php echo $presensi_stats['terlambat']; ?></h4>
-                                <small class="text-muted">Terlambat</small>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="p-2">
-                                <h4 class="text-danger mb-0"><?php echo $presensi_stats['tidak_hadir']; ?></h4>
-                                <small class="text-muted">Tidak Hadir</small>
-                            </div>
+                    <div class="col-6 mb-3">
+                        <div class="p-2">
+                            <h4 class="text-success mb-0">
+                                <?php echo count(array_filter($jadwal_minggu_ini, function($j) { return $j['status'] == 'berlangsung'; })); ?>
+                            </h4>
+                            <small class="text-muted">Berlangsung</small>
                         </div>
                     </div>
-                    <hr>
-                    <div class="text-center">
-                        <small class="text-muted">Total: <?php echo $presensi_stats['total']; ?> sesi</small>
+                    <div class="col-6">
+                        <div class="p-2">
+                            <h4 class="text-info mb-0">
+                                <?php echo count(array_filter($jadwal_minggu_ini, function($j) { return $j['status'] == 'selesai'; })); ?>
+                            </h4>
+                            <small class="text-muted">Selesai</small>
+                        </div>
                     </div>
-                <?php else: ?>
-                    <div class="text-center py-4">
-                        <i class="bi bi-clipboard-check text-muted" style="font-size: 2.5rem; opacity: 0.3;"></i>
-                        <p class="text-muted mt-2 mb-0">Belum ada data presensi minggu ini</p>
+                    <div class="col-6">
+                        <div class="p-2">
+                            <h4 class="text-secondary mb-0">
+                                <?php echo count(array_filter($jadwal_minggu_ini, function($j) { return $j['status'] == 'terjadwal'; })); ?>
+                            </h4>
+                            <small class="text-muted">Terjadwal</small>
+                        </div>
                     </div>
-                <?php endif; ?>
+                </div>
             </div>
         </div>
     </div>
