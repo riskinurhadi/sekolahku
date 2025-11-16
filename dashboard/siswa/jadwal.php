@@ -147,7 +147,7 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                                     <th>Tanggal</th>
                                     <th>Hari</th>
                                     <th>Jam</th>
-                                    <th>Mata Pelajaran</th>
+                                    <th>Mapel</th>
                                     <th>Kode</th>
                                     <th>Guru</th>
                                     <th>Ruangan</th>
