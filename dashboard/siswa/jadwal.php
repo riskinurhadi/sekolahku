@@ -309,14 +309,31 @@ $(document).ready(function() {
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
+        .then(response => {
+            // Check if response is OK
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            // Check if response is JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                return response.text().then(text => {
+                    console.error('Response is not JSON:', text);
+                    throw new Error('Response is not JSON');
+                });
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('Response data:', data);
+            
             if (data.success) {
                 Swal.fire({
                     icon: 'success',
                     title: 'Berhasil!',
                     text: data.message || 'Presensi berhasil!',
-                    timer: 2000
+                    timer: 2000,
+                    showConfirmButton: false
                 }).then(() => {
                     // Reload page to update status
                     window.location.reload();
@@ -336,6 +353,7 @@ $(document).ready(function() {
         })
         .catch(error => {
             console.error('Error:', error);
+            console.error('Error details:', error.message);
             btn.prop('disabled', false);
             kodeInput.prop('disabled', false);
             btn.html(originalHtml);
@@ -343,7 +361,8 @@ $(document).ready(function() {
             Swal.fire({
                 icon: 'error',
                 title: 'Error!',
-                text: 'Terjadi kesalahan saat melakukan presensi'
+                text: 'Terjadi kesalahan saat melakukan presensi: ' + error.message,
+                timer: 3000
             });
         });
         
