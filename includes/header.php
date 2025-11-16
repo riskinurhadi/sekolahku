@@ -167,6 +167,19 @@ if ($table_check && $table_check->num_rows > 0) {
                             <i class="bi bi-calendar-week"></i> Jadwal Pelajaran
                         </a>
                     </li>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/akademik/slider.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'slider.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-images"></i> Slider Dashboard
+                        </a>
+                    </li>
+                <?php endif; ?>
+                
+                <?php if ($_SESSION['user_role'] == 'developer'): ?>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/akademik/slider.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'slider.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-images"></i> Slider Dashboard
+                        </a>
+                    </li>
                 <?php endif; ?>
                 
                 <?php if ($_SESSION['user_role'] == 'siswa'): ?>
