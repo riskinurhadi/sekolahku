@@ -4,7 +4,6 @@ require_once '../../config/session.php';
 require_once '../../config/database.php';
 requireRole(['siswa']);
 
-// Handle presensi - MUST be before header output
 $conn = getConnection();
 $siswa_id = $_SESSION['user_id'];
 $sekolah_id = $_SESSION['sekolah_id'] ?? null;
@@ -20,7 +19,8 @@ if (!$sekolah_id) {
     $sekolah_id = $user['sekolah_id'] ?? null;
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'presensi') {
+// Removed presensi handling - now handled via submit_presensi.php endpoint
+if (false && $_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'presensi') {
     $kode_presensi = strtoupper(trim($_POST['kode_presensi'] ?? ''));
     
     if (empty($kode_presensi)) {
@@ -155,56 +155,9 @@ if (isset($_GET['success']) && $_GET['success'] == 1) {
     $message = 'success:Presensi berhasil!';
 }
 
-// Now include header AFTER handling POST
-// Pastikan tidak ada output sebelum ini
-while (ob_get_level()) {
-    ob_end_clean();
-}
 require_once '../../includes/header.php';
 
-// Pastikan koneksi database masih aktif (jika belum ditutup)
-if (!isset($conn) || !$conn || $conn->ping() === false) {
-    $conn = getConnection();
-}
-
-// Get active sessions untuk ditampilkan di halaman presensi
-$active_sessions = [];
-if ($sekolah_id) {
-    $table_check = $conn->query("SHOW TABLES LIKE 'sesi_pelajaran'");
-    if ($table_check && $table_check->num_rows > 0) {
-        // Query untuk menampilkan sesi yang aktif dan belum selesai
-        // Hanya menampilkan sesi dari sekolah yang sama dengan siswa
-        $stmt = $conn->prepare("SELECT sp.*, mp.nama_pelajaran, u.nama_lengkap as nama_guru,
-            (SELECT COUNT(*) FROM presensi WHERE sesi_pelajaran_id = sp.id) as jumlah_presensi,
-            CASE 
-                WHEN NOW() < sp.waktu_mulai THEN 'belum_mulai'
-                WHEN NOW() BETWEEN sp.waktu_mulai AND sp.waktu_selesai THEN 'berlangsung'
-                ELSE 'selesai'
-            END as status_waktu,
-            (SELECT COUNT(*) FROM presensi WHERE sesi_pelajaran_id = sp.id AND siswa_id = ?) as sudah_presensi
-            FROM sesi_pelajaran sp 
-            JOIN mata_pelajaran mp ON sp.mata_pelajaran_id = mp.id 
-            JOIN users u ON sp.guru_id = u.id
-            WHERE sp.status = 'aktif' 
-            AND NOW() <= sp.waktu_selesai
-            AND mp.sekolah_id = ?
-            ORDER BY 
-                CASE 
-                    WHEN NOW() BETWEEN sp.waktu_mulai AND sp.waktu_selesai THEN 1
-                    WHEN NOW() < sp.waktu_mulai THEN 2
-                    ELSE 3
-                END,
-                sp.waktu_mulai DESC");
-        if ($stmt) {
-            $stmt->bind_param("ii", $siswa_id, $sekolah_id);
-            $stmt->execute();
-            $active_sessions = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-            $stmt->close();
-        }
-    }
-}
-
-// Get my presensi history
+// Get my presensi history - get all, not limited
 $my_presensi = [];
 $table_check = $conn->query("SHOW TABLES LIKE 'presensi'");
 if ($table_check && $table_check->num_rows > 0) {
@@ -214,8 +167,7 @@ if ($table_check && $table_check->num_rows > 0) {
         JOIN mata_pelajaran mp ON sp.mata_pelajaran_id = mp.id
         JOIN users u ON sp.guru_id = u.id
         WHERE p.siswa_id = ?
-        ORDER BY p.waktu_presensi DESC
-        LIMIT 10");
+        ORDER BY p.waktu_presensi DESC");
     if ($stmt) {
         $stmt->bind_param("i", $siswa_id);
         $stmt->execute();
@@ -272,79 +224,7 @@ $conn->close();
 
 <div class="page-header">
     <h2>Presensi</h2>
-    <p>Ikuti pelajaran aktif dan lakukan presensi</p>
-</div>
-
-<!-- List Mata Pelajaran Sedang Berlangsung -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Pelajaran Sedang Berlangsung</h5>
-            </div>
-            <div class="card-body">
-                <?php if (count($active_sessions) > 0): ?>
-                    <?php foreach ($active_sessions as $session): ?>
-                        <div class="presensi-lesson-item mb-3 pb-3 border-bottom">
-                            <div class="row align-items-center">
-                                <div class="col-md-4">
-                                    <h6 class="mb-1 fw-bold"><?php echo htmlspecialchars($session['nama_pelajaran']); ?></h6>
-                                    <small class="text-muted">
-                                        <i class="bi bi-person"></i> <?php echo htmlspecialchars($session['nama_guru']); ?><br>
-                                        <i class="bi bi-clock"></i> <?php echo date('d/m/Y H:i', strtotime($session['waktu_mulai'])); ?> - <?php echo date('H:i', strtotime($session['waktu_selesai'])); ?>
-                                    </small>
-                                </div>
-                                <div class="col-md-2 text-center">
-                                    <?php 
-                                    $status_waktu = $session['status_waktu'] ?? 'selesai';
-                                    $status_label = $status_waktu == 'berlangsung' ? 'BERLANGSUNG' : 'SELESAI';
-                                    $status_class = $status_waktu == 'berlangsung' ? 'success' : 'secondary';
-                                    ?>
-                                    <span class="badge bg-<?php echo $status_class; ?>"><?php echo $status_label; ?></span>
-                                </div>
-                                <div class="col-md-6">
-                                    <?php if ($session['sudah_presensi'] > 0): ?>
-                                        <div class="alert alert-success mb-0 py-2">
-                                            <i class="bi bi-check-circle"></i> Anda sudah melakukan presensi
-                                        </div>
-                                    <?php else: ?>
-                                        <form method="POST" action="presensi.php" class="presensi-form-inline" id="presensiForm_<?php echo $session['id']; ?>">
-                                            <input type="hidden" name="action" value="presensi">
-                                            <div class="input-group">
-                                                <input type="text" 
-                                                    class="form-control form-control-sm" 
-                                                    name="kode_presensi" 
-                                                    placeholder="Masukkan kode presensi" 
-                                                    maxlength="10" 
-                                                    required 
-                                                    autocomplete="off"
-                                                    style="text-transform: uppercase;">
-                                                <button type="submit" class="btn btn-primary btn-sm btn-presensi-submit">
-                                                    <i class="bi bi-check-circle"></i> Presensi
-                                                </button>
-                                            </div>
-                                        </form>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <div class="text-center py-4">
-                        <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
-                        <p class="text-muted mt-2">Tidak ada pelajaran yang sedang berlangsung</p>
-                        <?php if (!$sekolah_id): ?>
-                            <small class="text-danger d-block mt-2">Anda belum terdaftar di sekolah</small>
-                        <?php else: ?>
-                            <small class="text-muted d-block mt-2">
-                                Pastikan guru sudah memulai pelajaran dan pelajaran masih aktif
-                            </small>
-                        <?php endif; ?>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
+    <p>Lihat riwayat presensi Anda</p>
 </div>
 
 <!-- Riwayat Presensi -->
@@ -408,199 +288,15 @@ $conn->close();
 </div>
 
 <script>
-// Pastikan script dijalankan setelah semua library dimuat
-(function() {
-    function initPresensi() {
-        // Pastikan jQuery sudah dimuat
-        if (typeof jQuery === 'undefined') {
-            console.error('jQuery is not loaded! Retrying...');
-            setTimeout(initPresensi, 100);
-            return;
-        }
-        
-        jQuery(document).ready(function($) {
-            console.log('Presensi page loaded');
-            
-            <?php if (count($my_presensi) > 0): ?>
-            if (typeof initDataTable !== 'undefined') {
-                initDataTable('#presensiTable', {
-                    order: [[0, 'desc']] // Sort by tanggal descending
-                });
-            }
-            <?php endif; ?>
-            
-            // Auto uppercase kode presensi pada semua form inline
-            $('.presensi-form-inline input[name="kode_presensi"]').on('input', function() {
-                this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-            });
-            
-            // Handle form submission dengan AJAX
-            $('.presensi-form-inline').on('submit', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                console.log('Form submitted');
-                
-                const form = $(this);
-                const kodeInput = form.find('input[name="kode_presensi"]');
-                const kode = kodeInput.val().trim().toUpperCase();
-                const btn = form.find('button[type="submit"]');
-                
-                // Update input value
-                kodeInput.val(kode);
-                
-                console.log('Kode:', kode);
-                
-                // Validasi
-                if (!kode || kode.length < 3) {
-                    console.log('Validation failed: kode too short');
-                    if (typeof Swal !== 'undefined') {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Kode presensi minimal 3 karakter!',
-                            timer: 2000
-                        });
-                    } else {
-                        alert('Kode presensi minimal 3 karakter!');
-                    }
-                    return false;
-                }
-                
-                // Disable button
-                btn.prop('disabled', true);
-                const originalHtml = btn.html();
-                btn.html('<span class="spinner-border spinner-border-sm"></span> Memproses...');
-                
-                console.log('Sending AJAX request...');
-                
-                // Submit form dengan AJAX
-                $.ajax({
-                    url: 'presensi.php',
-                    type: 'POST',
-                    data: form.serialize(),
-                    dataType: 'json',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    success: function(response) {
-                        console.log('AJAX Success:', response);
-                        
-                        if (response && response.success) {
-                            // Tampilkan success message
-                            if (typeof Swal !== 'undefined') {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Berhasil!',
-                                    text: response.message || 'Presensi berhasil!',
-                                    timer: 2000
-                                }).then(function() {
-                                    // Reload page untuk update status
-                                    window.location.href = 'presensi.php';
-                                });
-                            } else {
-                                alert(response.message || 'Presensi berhasil!');
-                                window.location.href = 'presensi.php';
-                            }
-                        } else if (response && response.expired) {
-                            // Kode kadaluarsa
-                            console.log('Code expired');
-                            if (typeof Swal !== 'undefined') {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Kode Kadaluarsa',
-                                    text: response.message || 'yahh kode sudah kadaluarsa',
-                                    timer: 3000
-                                });
-                            } else {
-                                alert(response.message || 'yahh kode sudah kadaluarsa');
-                            }
-                            // Re-enable button
-                            btn.prop('disabled', false);
-                            btn.html(originalHtml);
-                        } else {
-                            // Error lainnya
-                            console.log('Error response:', response);
-                            const errorMsg = response && response.message ? response.message : 'Terjadi kesalahan saat melakukan presensi.';
-                            if (typeof Swal !== 'undefined') {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error',
-                                    text: errorMsg,
-                                    timer: 3000
-                                });
-                            } else {
-                                alert(errorMsg);
-                            }
-                            // Re-enable button
-                            btn.prop('disabled', false);
-                            btn.html(originalHtml);
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('AJAX Error:', status, error);
-                        console.error('Response:', xhr.responseText);
-                        console.error('Status:', xhr.status);
-                        
-                        // Re-enable button on error
-                        btn.prop('disabled', false);
-                        btn.html(originalHtml);
-                        
-                        // Cek jika response adalah redirect atau HTML (bukan JSON)
-                        if (xhr.status === 200 && xhr.responseText && !xhr.responseText.trim().startsWith('{')) {
-                            // Response adalah HTML (redirect terjadi), reload page
-                            console.log('Redirect detected, reloading page');
-                            window.location.href = 'presensi.php?success=1';
-                            return;
-                        }
-                        
-                        // Parse error message dari response jika ada
-                        let errorMsg = 'Terjadi kesalahan saat melakukan presensi. Silakan coba lagi.';
-                        try {
-                            if (xhr.responseText) {
-                                const response = JSON.parse(xhr.responseText);
-                                if (response && response.message) {
-                                    errorMsg = response.message;
-                                }
-                            }
-                        } catch(e) {
-                            console.error('Failed to parse JSON:', e);
-                            // Bukan JSON, mungkin HTML error page
-                            errorMsg = 'Terjadi kesalahan. Silakan refresh halaman dan coba lagi.';
-                        }
-                        
-                        if (typeof Swal !== 'undefined') {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: errorMsg,
-                                timer: 3000
-                            });
-                        } else {
-                            alert(errorMsg);
-                        }
-                    }
-                });
-                
-                return false;
-            });
-            
-            // Reload page setelah success untuk update status
-            <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
-            setTimeout(function() {
-                window.location.href = 'presensi.php';
-            }, 2500);
-            <?php endif; ?>
+$(document).ready(function() {
+    <?php if (count($my_presensi) > 0): ?>
+    if (typeof initDataTable !== 'undefined') {
+        initDataTable('#presensiTable', {
+            order: [[0, 'desc']] // Sort by tanggal descending
         });
     }
-    
-    // Coba init langsung, jika gagal tunggu 100ms
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initPresensi);
-    } else {
-        initPresensi();
-    }
-})();
+    <?php endif; ?>
+});
 </script>
 
 <?php require_once '../../includes/footer.php'; ?>
