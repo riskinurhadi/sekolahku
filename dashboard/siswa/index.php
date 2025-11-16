@@ -233,7 +233,7 @@ $conn->close();
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="stat-card info">
             <div class="stat-icon">
-                <i class="bi bi-star"></i>
+                <i class="bi bi-star-fill"></i>
             </div>
             <div class="stat-content">
                 <div class="stat-value"><?php echo $stats['rata_rata_nilai']; ?></div>
