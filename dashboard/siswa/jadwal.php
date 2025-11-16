@@ -211,14 +211,14 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                                             $jadwal_presensi = $presensi_status[$j['id']] ?? null;
                                             $sesi = $jadwal_presensi['sesi'] ?? null;
                                             $sudah_presensi = $jadwal_presensi['sudah_presensi'] ?? false;
-                                            $today = date('Y-m-d');
-                                            $is_today = $jadwal['tanggal'] == $today;
-                                            $is_berlangsung_or_terjadwal = in_array($jadwal['status'], ['berlangsung', 'terjadwal']);
+                                            // Gunakan $current_date yang sudah didefinisikan di atas
+                                            $is_today_check = $current_date == date('Y-m-d');
+                                            $is_berlangsung_or_terjadwal = in_array($j['status'] ?? '', ['berlangsung', 'terjadwal']);
                                             
                                             // Tampilkan form input kode jika:
                                             // 1. Belum presensi DAN
                                             // 2. (Hari ini dengan status berlangsung/terjadwal ATAU ada sesi aktif)
-                                            $show_form = !$sudah_presensi && ($is_today && $is_berlangsung_or_terjadwal || ($sesi && ($sesi['status_waktu'] == 'berlangsung' || $sesi['status_waktu'] == 'belum_mulai')));
+                                            $show_form = !$sudah_presensi && (($is_today_check && $is_berlangsung_or_terjadwal) || ($sesi && ($sesi['status_waktu'] == 'berlangsung' || $sesi['status_waktu'] == 'belum_mulai')));
                                             
                                             if ($sudah_presensi): ?>
                                                 <span class="badge bg-success">
