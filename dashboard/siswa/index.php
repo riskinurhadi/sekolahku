@@ -156,7 +156,7 @@ $conn->close();
     backdrop-filter: blur(20px) saturate(180%); 
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.4);">
+    border: 0.5px solid rgba(255, 255, 255, 0.3);">
     <div id="sliderCarousel" class="carousel slide h-100" data-bs-ride="carousel" data-bs-interval="5000">
         <div class="carousel-indicators">
             <?php foreach ($sliders as $index => $slider): ?>
