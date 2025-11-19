@@ -1217,10 +1217,11 @@ body.login-page {
     margin: 0 !important;
     padding: 0 !important;
     overflow-x: hidden;
-    background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 15%, #ddd6fe 35%, #e0e7ff 55%, #f3f4f6 75%, #ffffff 100%) !important;
-    background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23c4b5fd;stop-opacity:1' /%3E%3Cstop offset='15%25' style='stop-color:%23a78bfa;stop-opacity:1' /%3E%3Cstop offset='35%25' style='stop-color:%23ddd6fe;stop-opacity:1' /%3E%3Cstop offset='55%25' style='stop-color:%23e0e7ff;stop-opacity:1' /%3E%3Cstop offset='75%25' style='stop-color:%23f3f4f6;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23ffffff;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grad)' /%3E%3C/svg%3E") !important;
+    background: #f3f4f6 !important;
+    background-image: url('assets/img/gradientbg.png') !important;
     background-attachment: fixed !important;
     background-size: cover !important;
+    background-position: center center !important;
     background-repeat: no-repeat !important;
     min-height: 100vh !important;
     width: 100% !important;
@@ -1235,10 +1236,11 @@ body.login-page::before {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 15%, #ddd6fe 35%, #e0e7ff 55%, #f3f4f6 75%, #ffffff 100%);
-    background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23c4b5fd;stop-opacity:1' /%3E%3Cstop offset='15%25' style='stop-color:%23a78bfa;stop-opacity:1' /%3E%3Cstop offset='35%25' style='stop-color:%23ddd6fe;stop-opacity:1' /%3E%3Cstop offset='55%25' style='stop-color:%23e0e7ff;stop-opacity:1' /%3E%3Cstop offset='75%25' style='stop-color:%23f3f4f6;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23ffffff;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grad)' /%3E%3C/svg%3E");
+    background: #f3f4f6;
+    background-image: url('assets/img/gradientbg.png');
     background-attachment: fixed;
     background-size: cover;
+    background-position: center center;
     background-repeat: no-repeat;
     z-index: -1;
     pointer-events: none;
