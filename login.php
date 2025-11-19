@@ -163,10 +163,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             opacity: 0.8 !important;
         }
         
-        /* Left Panel - Transparent with glass effect */
+        /* Left Panel - Transparent with glass effect and purple tint */
         .login-left-panel {
             flex: 1 !important;
-            background: rgba(255, 255, 255, 0.1) !important;
+            background: rgba(139, 127, 216, 0.2) !important;
             backdrop-filter: blur(50px) saturate(200%) !important;
             -webkit-backdrop-filter: blur(50px) saturate(200%) !important;
             padding: 60px 50px !important;
@@ -185,7 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             left: 0 !important;
             right: 0 !important;
             bottom: 0 !important;
-            background: radial-gradient(circle at top left, rgba(196, 181, 253, 0.15) 0%, transparent 50%) !important;
+            background: radial-gradient(circle at top left, rgba(139, 127, 216, 0.3) 0%, rgba(139, 127, 216, 0.1) 50%, transparent 100%) !important;
             pointer-events: none !important;
         }
         
@@ -274,26 +274,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .login-system-title {
             font-size: 42px !important;
             font-weight: 700 !important;
-            color: #1e293b !important;
+            color: #6366f1 !important;
             margin-bottom: 12px !important;
-            text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8), 0 1px 2px rgba(255, 255, 255, 0.6) !important;
+            text-shadow: 0 2px 8px rgba(99, 102, 241, 0.3), 0 1px 3px rgba(255, 255, 255, 0.8) !important;
             letter-spacing: -0.5px !important;
         }
         
         .login-system-subtitle {
             font-size: 32px !important;
             font-weight: 600 !important;
-            color: #475569 !important;
+            color: #8b5cf6 !important;
             margin-bottom: 40px !important;
-            text-shadow: 0 1px 3px rgba(255, 255, 255, 0.7) !important;
+            text-shadow: 0 1px 6px rgba(139, 92, 246, 0.25), 0 1px 2px rgba(255, 255, 255, 0.7) !important;
             letter-spacing: -0.3px !important;
         }
         
         .login-system-description {
-            color: #64748b !important;
+            color: #7c3aed !important;
             font-size: 16px !important;
             line-height: 1.7 !important;
-            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6) !important;
+            text-shadow: 0 1px 4px rgba(124, 58, 237, 0.2), 0 1px 2px rgba(255, 255, 255, 0.6) !important;
             max-width: 450px !important;
             margin: 0 auto !important;
         }
