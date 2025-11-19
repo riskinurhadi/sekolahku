@@ -375,10 +375,16 @@ $conn->close();
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     border: 1px solid #e5e7eb;
     margin-bottom: 24px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 400px;
+    max-height: 400px;
 }
 
 .chart-section-header {
     margin-bottom: 24px;
+    flex-shrink: 0;
 }
 
 .chart-section-title {
@@ -396,11 +402,15 @@ $conn->close();
 .chart-container {
     position: relative;
     height: 300px;
+    flex: 1;
+    min-height: 0;
 }
 
 .chart-container-small {
     position: relative;
     height: 200px;
+    flex: 1;
+    min-height: 0;
 }
 
 /* Top List */
@@ -569,16 +579,16 @@ $conn->close();
         </div>
         
         <!-- Charts Row -->
-        <div class="row">
+        <div class="row align-items-stretch">
             <!-- Top Mata Pelajaran -->
-            <div class="col-lg-4 mb-4">
-                <div class="chart-section">
+            <div class="col-lg-4 mb-4 d-flex">
+                <div class="chart-section w-100">
                     <div class="chart-section-header">
                         <h5 class="chart-section-title">Top Mata Pelajaran</h5>
                         <p class="chart-section-desc">Mata pelajaran dengan soal terbanyak yang telah Anda kerjakan.</p>
                     </div>
                     <?php if (!empty($top_pelajaran)): ?>
-                        <ul class="top-list">
+                        <ul class="top-list" style="flex: 1; overflow-y: auto;">
                             <?php foreach ($top_pelajaran as $index => $pel): ?>
                                 <li class="top-list-item">
                                     <span class="top-list-item-name">
@@ -592,7 +602,7 @@ $conn->close();
                             <?php endforeach; ?>
                         </ul>
                     <?php else: ?>
-                        <div class="text-center py-4">
+                        <div class="text-center py-4" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                             <i class="bi bi-book text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
                             <p class="text-muted mt-3 mb-0">Belum ada data</p>
                         </div>
@@ -601,8 +611,8 @@ $conn->close();
             </div>
             
             <!-- Presensi Donut Chart -->
-            <div class="col-lg-4 mb-4">
-                <div class="chart-section">
+            <div class="col-lg-4 mb-4 d-flex">
+                <div class="chart-section w-100">
                     <div class="chart-section-header">
                         <h5 class="chart-section-title">Presensi Minggu Ini</h5>
                         <p class="chart-section-desc">Persentase kehadiran Anda dalam pembelajaran minggu ini.</p>
@@ -611,7 +621,7 @@ $conn->close();
                         <canvas id="chartPresensi"></canvas>
                     </div>
                     <?php if ($presensi_stats['total'] > 0): ?>
-                        <div class="row text-center mt-3 pt-3 border-top">
+                        <div class="row text-center mt-3 pt-3 border-top" style="flex-shrink: 0;">
                             <div class="col-4">
                                 <div class="py-2">
                                     <h4 class="text-success mb-0" style="font-size: 1.5rem;"><?php echo $presensi_stats['hadir']; ?></h4>
@@ -631,13 +641,18 @@ $conn->close();
                                 </div>
                             </div>
                         </div>
+                    <?php else: ?>
+                        <div class="text-center py-4" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                            <i class="bi bi-clipboard-check text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
+                            <p class="text-muted mt-3 mb-0">Belum ada data presensi</p>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
             
             <!-- Jadwal Besok -->
-            <div class="col-lg-4 mb-4">
-                <div class="chart-section">
+            <div class="col-lg-4 mb-4 d-flex">
+                <div class="chart-section w-100">
                     <div class="chart-section-header d-flex justify-content-between align-items-center">
                         <div>
                             <h5 class="chart-section-title">Jadwal Besok</h5>
@@ -646,7 +661,7 @@ $conn->close();
                         <a href="jadwal.php" class="text-decoration-none small text-primary">Lihat <i class="bi bi-arrow-right"></i></a>
                     </div>
                     <?php if (!empty($jadwal_besok)): ?>
-                        <div style="max-height: 200px; overflow-y: auto;">
+                        <div style="flex: 1; overflow-y: auto; min-height: 0;">
                             <?php foreach (array_slice($jadwal_besok, 0, 5) as $j): ?>
                                 <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
                                     <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; margin-right: 12px;">
@@ -664,7 +679,7 @@ $conn->close();
                             <?php endforeach; ?>
                         </div>
                     <?php else: ?>
-                        <div class="text-center py-4">
+                        <div class="text-center py-4" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                             <i class="bi bi-calendar-x text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
                             <p class="text-muted mt-3 mb-0">Tidak ada jadwal besok</p>
                         </div>
@@ -792,7 +807,7 @@ $conn->close();
                         <a href="presensi.php" class="text-decoration-none small text-primary">Lihat Detail <i class="bi bi-arrow-right"></i></a>
                     </div>
                     <?php if ($presensi_stats['total'] > 0): ?>
-                        <div class="text-center py-4">
+                        <div class="text-center py-4" style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
                             <h1 class="text-primary mb-2 fw-bold" style="font-size: 4rem;">
                                 <?php echo $presensi_stats['persentase']; ?>%
                             </h1>
@@ -819,7 +834,7 @@ $conn->close();
                             </div>
                         </div>
                     <?php else: ?>
-                        <div class="text-center py-5">
+                        <div class="text-center py-5" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                             <i class="bi bi-clipboard-check text-muted" style="font-size: 4rem; opacity: 0.3;"></i>
                             <p class="text-muted mt-3 mb-0">Belum ada data presensi minggu ini</p>
                         </div>

@@ -70,18 +70,18 @@ body::before {
     position: relative;
 }
 
-/* Sidebar - Dark Blue Solid Background */
+/* Sidebar - White Background with Blue Text */
 .sidebar {
     width: var(--sidebar-width);
     min-width: var(--sidebar-width);
-    background: #1e3a8a;
+    background: #ffffff;
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
     z-index: 1000;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-right: 1px solid #e5e7eb;
     overflow-y: auto;
     overflow-x: hidden;
     display: flex;
@@ -91,12 +91,12 @@ body::before {
 
 .sidebar-header {
     padding: 24px 20px;
-    background: #1e3a8a;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .sidebar-header h4 {
-    color: #ffffff;
+    color: #2563eb;
     margin: 0;
     font-weight: 700;
     font-size: 22px;
@@ -125,7 +125,7 @@ body::before {
     font-size: 14px;
     display: flex;
     align-items: center;
-    color: rgba(255, 255, 255, 0.8);
+    color: #64748b;
     text-decoration: none;
     transition: all 0.2s ease;
     border-radius: 0;
@@ -136,13 +136,13 @@ body::before {
 }
 
 .sidebar .components a:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.1);
+    color: #2563eb;
+    background: rgba(37, 99, 235, 0.1);
 }
 
 .sidebar .components a.active {
-    color: #ffffff;
-    background: rgba(59, 130, 246, 0.3);
+    color: #2563eb;
+    background: rgba(37, 99, 235, 0.15);
     font-weight: 600;
 }
 
@@ -160,8 +160,8 @@ body::before {
     left: 0;
     right: 0;
     padding: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    background: #1e3a8a;
+    border-top: 1px solid #e5e7eb;
+    background: #ffffff;
 }
 
 .sidebar-logout-btn {
@@ -993,6 +993,10 @@ body::before {
 
 .sidebar::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
+}
+
+.sidebar .components a i {
+    color: inherit;
 }
 
 /* Responsive */
