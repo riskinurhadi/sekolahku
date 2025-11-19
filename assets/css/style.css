@@ -76,10 +76,10 @@ body::before {
     min-width: var(--sidebar-width);
     background: #ffffff;
     position: fixed;
-    top: 0;
+    top: var(--header-height);
     left: 0;
-    height: 100vh;
-    z-index: 1000;
+    height: calc(100vh - var(--header-height));
+    z-index: 999;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
     border-right: 1px solid #e5e7eb;
     overflow-y: auto;
@@ -130,7 +130,7 @@ body::before {
     transition: all 0.2s ease;
     border-radius: 0;
     position: relative;
-    font-weight: 500;
+    font-weight: 700;
     margin: 0 12px;
     border-radius: 8px;
 }
@@ -198,7 +198,8 @@ body::before {
 .content {
     flex: 1;
     margin-left: var(--sidebar-width);
-    min-height: 100vh;
+    margin-top: var(--header-height);
+    min-height: calc(100vh - var(--header-height));
     background: #ffffff;
     transition: all 0.3s ease;
 }
@@ -206,7 +207,7 @@ body::before {
 /* Top Header */
 .dashboard-top-header {
     background: #ffffff;
-    padding: 0 32px;
+    padding: 0 32px 0 calc(var(--sidebar-width) + 32px);
     height: var(--header-height);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     border-bottom: 1px solid #e5e7eb;
@@ -214,9 +215,12 @@ body::before {
     align-items: center;
     justify-content: space-between;
     gap: 24px;
-    position: sticky;
+    position: fixed;
     top: 0;
-    z-index: 100;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    width: 100%;
 }
 
 .dashboard-top-header .logo-section {
@@ -246,6 +250,13 @@ body::before {
     color: #2563eb;
     margin: 0;
     letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dashboard-top-header .logo-section .logo-text i {
+    font-size: 24px;
 }
 
 .dashboard-top-header .search-section {

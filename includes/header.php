@@ -98,10 +98,6 @@ if ($table_check && $table_check->num_rows > 0) {
     <div class="wrapper">
         <!-- Sidebar -->
         <nav id="sidebar" class="sidebar">
-            <div class="sidebar-header">
-                <h4><i class="bi bi-mortarboard-fill"></i> <?php echo isset($user['sekolah_id']) && $user['sekolah_id'] ? 'Sekolah' : 'Portal'; ?>ku</h4>
-            </div>
-            
             <ul class="list-unstyled components">
                 <li>
                     <a href="<?php echo getBasePath(); ?>dashboard/<?php echo $_SESSION['user_role']; ?>/index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">
@@ -241,8 +237,9 @@ if ($table_check && $table_check->num_rows > 0) {
             <!-- Top Header -->
             <div class="dashboard-top-header">
                 <div class="logo-section"> 
-                    <!-- <div class="logo-icon">IA</div> -->
-                    <h4 class="logo-text me-5"></h4>
+                    <h4 class="logo-text me-5">
+                        <i class="bi bi-mortarboard-fill"></i> <?php echo isset($user['sekolah_id']) && $user['sekolah_id'] ? 'Sekolah' : 'Portal'; ?>ku
+                    </h4>
                 </div>
                 <div class="search-section">
                     <div class="search-wrapper">
