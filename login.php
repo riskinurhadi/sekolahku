@@ -65,9 +65,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             margin: 0 !important;
             padding: 0 !important;
             overflow-x: hidden;
-            background: linear-gradient(135deg, #f3f0ff 0%, #eef2ff 30%, #ffffff 100%) !important;
+            background: linear-gradient(135deg, #ede9fe 0%, #e0e7ff 25%, #f3f4f6 50%, #ffffff 100%) !important;
             background-attachment: fixed !important;
+            min-height: 100vh !important;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        html {
+            background: linear-gradient(135deg, #ede9fe 0%, #e0e7ff 25%, #f3f4f6 50%, #ffffff 100%) !important;
+            background-attachment: fixed !important;
+            min-height: 100vh !important;
         }
         
         body.login-page .login-container {
