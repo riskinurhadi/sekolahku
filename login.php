@@ -388,8 +388,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <!-- Left Panel: System Info -->
             <div class="login-left-panel">
                 <div class="login-logo-section">
-                    <img src="assets/img/sekolahku.png" alt="Sekolahku" style="max-width: 200px; height: auto; margin-bottom: 30px; filter: brightness(0) invert(1);">
-                    <h1 class="login-system-title">Sekolahku</h1>
+                    <img src="assets/img/sekolahku-login.png" alt="Sekolahku" style="max-width: 250px; height: auto; margin-bottom: 30px;">
                     
                     <p class="login-system-description">
                         Portal pembelajaran online untuk mengelola kegiatan belajar mengajar dengan mudah dan efisien.
