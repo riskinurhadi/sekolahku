@@ -233,6 +233,13 @@ body::before {
     padding-left: 20px;
 }
 
+.dashboard-top-header .logo-section .logo-image {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+}
+
 .dashboard-top-header .logo-section .logo-icon {
     width: 44px;
     height: 44px;

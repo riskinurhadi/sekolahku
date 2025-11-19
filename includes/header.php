@@ -237,9 +237,7 @@ if ($table_check && $table_check->num_rows > 0) {
             <!-- Top Header -->
             <div class="dashboard-top-header">
                 <div class="logo-section"> 
-                    <h4 class="logo-text me-5">
-                        <i class="bi bi-mortarboard-fill"></i> <?php echo isset($user['sekolah_id']) && $user['sekolah_id'] ? 'Sekolah' : 'Portal'; ?>ku
-                    </h4>
+                    <img src="<?php echo getBasePath(); ?>assets/img/sekolahku.png" alt="Sekolahku" class="logo-image me-5">
                 </div>
                 <div class="search-section">
                     <div class="search-wrapper">
