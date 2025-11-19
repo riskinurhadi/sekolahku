@@ -20,6 +20,17 @@
     box-sizing: border-box;
 }
 
+html {
+    background: #f3f4f6;
+    background-image: url('assets/img/gradientbg.png');
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    width: 100%;
+}
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     background: #f3f4f6;
@@ -34,6 +45,7 @@ body {
     overflow-x: hidden;
     min-height: 100vh;
     position: relative;
+    width: 100%;
 }
 
 body::before {
@@ -57,6 +69,8 @@ body::before {
     display: flex;
     width: 100%;
     min-height: 100vh;
+    background: transparent;
+    position: relative;
 }
 
 /* Sidebar - Light Theme with Glass Effect */
