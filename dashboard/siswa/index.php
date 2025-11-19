@@ -24,21 +24,27 @@ $stats = [
     'rata_rata_nilai' => 0
 ];
 
+// Soal aktif: soal dengan status aktif dan sudah mulai (tanggal_mulai <= sekarang) dan belum selesai (tanggal_selesai >= sekarang atau null)
+$now = date('Y-m-d H:i:s');
 $stmt = $conn->prepare("SELECT COUNT(*) as total FROM soal s 
     JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id 
-    WHERE mp.sekolah_id = ? AND s.status = 'aktif'");
-$stmt->bind_param("i", $sekolah_id);
+    WHERE mp.sekolah_id = ? AND s.status = 'aktif' 
+    AND (s.tanggal_mulai IS NULL OR s.tanggal_mulai <= ?)
+    AND (s.tanggal_selesai IS NULL OR s.tanggal_selesai >= ?)");
+$stmt->bind_param("iss", $sekolah_id, $now, $now);
 $stmt->execute();
 $stats['total_soal_aktif'] = $stmt->get_result()->fetch_assoc()['total'];
 $stmt->close();
 
+// Soal selesai: hasil ujian dengan status selesai
 $stmt = $conn->prepare("SELECT COUNT(*) as total FROM hasil_ujian WHERE siswa_id = ? AND status = 'selesai'");
 $stmt->bind_param("i", $siswa_id);
 $stmt->execute();
 $stats['total_soal_selesai'] = $stmt->get_result()->fetch_assoc()['total'];
 $stmt->close();
 
-$stmt = $conn->prepare("SELECT AVG(nilai) as avg FROM hasil_ujian WHERE siswa_id = ? AND status = 'selesai'");
+// Rata-rata nilai: dari hasil ujian yang selesai
+$stmt = $conn->prepare("SELECT AVG(nilai) as avg FROM hasil_ujian WHERE siswa_id = ? AND status = 'selesai' AND nilai IS NOT NULL");
 $stmt->bind_param("i", $siswa_id);
 $stmt->execute();
 $result = $stmt->get_result()->fetch_assoc();
@@ -110,22 +116,35 @@ if ($kelas_id) {
 }
 
 // Get hasil ujian terbaru
-$hasil_terbaru = $conn->query("SELECT hu.*, s.judul, mp.nama_pelajaran, mp.kode_pelajaran
+$stmt = $conn->prepare("SELECT hu.*, s.judul, mp.nama_pelajaran, mp.kode_pelajaran
     FROM hasil_ujian hu
     JOIN soal s ON hu.soal_id = s.id
     JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id
-    WHERE hu.siswa_id = $siswa_id AND hu.status = 'selesai'
+    WHERE hu.siswa_id = ? AND hu.status = 'selesai'
     ORDER BY hu.waktu_selesai DESC
-    LIMIT 5")->fetch_all(MYSQLI_ASSOC);
+    LIMIT 5");
+$stmt->bind_param("i", $siswa_id);
+$stmt->execute();
+$hasil_terbaru = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
 
-// Get active soal
-$active_soal = $conn->query("SELECT s.*, mp.nama_pelajaran, 
-    (SELECT COUNT(*) FROM hasil_ujian hu WHERE hu.soal_id = s.id AND hu.siswa_id = $siswa_id) as sudah_dikerjakan
+// Get active soal: soal aktif yang sudah mulai dan belum selesai, dan belum dikerjakan oleh siswa
+$stmt = $conn->prepare("SELECT s.*, mp.nama_pelajaran, 
+    CASE 
+        WHEN EXISTS (SELECT 1 FROM hasil_ujian hu WHERE hu.soal_id = s.id AND hu.siswa_id = ? AND hu.status = 'selesai') THEN 1
+        ELSE 0
+    END as sudah_dikerjakan
     FROM soal s 
     JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id 
-    WHERE mp.sekolah_id = $sekolah_id AND s.status = 'aktif' 
+    WHERE mp.sekolah_id = ? AND s.status = 'aktif' 
+    AND (s.tanggal_mulai IS NULL OR s.tanggal_mulai <= ?)
+    AND (s.tanggal_selesai IS NULL OR s.tanggal_selesai >= ?)
     ORDER BY s.created_at DESC 
-    LIMIT 5")->fetch_all(MYSQLI_ASSOC);
+    LIMIT 5");
+$stmt->bind_param("iiss", $siswa_id, $sekolah_id, $now, $now);
+$stmt->execute();
+$active_soal = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
 
 // Get slider images
 $sliders = [];
@@ -156,12 +175,15 @@ $trend_data = [
 
 for ($i = 6; $i >= 0; $i--) {
     $date = date('Y-m-d', strtotime("-$i days"));
+    $date_datetime = $date . ' 23:59:59';
     
-    // Soal aktif (total aktif pada tanggal tersebut)
+    // Soal aktif (total aktif pada tanggal tersebut - soal yang sudah mulai dan belum selesai)
     $stmt = $conn->prepare("SELECT COUNT(*) as total FROM soal s 
         JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id 
-        WHERE mp.sekolah_id = ? AND s.status = 'aktif' AND DATE(s.created_at) <= ?");
-    $stmt->bind_param("is", $sekolah_id, $date);
+        WHERE mp.sekolah_id = ? AND s.status = 'aktif' 
+        AND (s.tanggal_mulai IS NULL OR s.tanggal_mulai <= ?)
+        AND (s.tanggal_selesai IS NULL OR s.tanggal_selesai >= ?)");
+    $stmt->bind_param("iss", $sekolah_id, $date_datetime, $date_datetime);
     $stmt->execute();
     $trend_data['soal_aktif'][] = $stmt->get_result()->fetch_assoc()['total'];
     $stmt->close();
@@ -176,28 +198,41 @@ for ($i = 6; $i >= 0; $i--) {
     
     // Rata-rata nilai (rata-rata nilai sampai tanggal tersebut)
     $stmt = $conn->prepare("SELECT AVG(nilai) as avg FROM hasil_ujian 
-        WHERE siswa_id = ? AND status = 'selesai' AND DATE(waktu_selesai) <= ?");
+        WHERE siswa_id = ? AND status = 'selesai' AND nilai IS NOT NULL AND DATE(waktu_selesai) <= ?");
     $stmt->bind_param("is", $siswa_id, $date);
     $stmt->execute();
     $avg = $stmt->get_result()->fetch_assoc()['avg'];
     $trend_data['rata_nilai'][] = $avg ? round($avg, 1) : 0;
     $stmt->close();
     
-    // Belum dikerjakan
+    // Belum dikerjakan: soal aktif yang belum ada di hasil_ujian untuk siswa ini
     $aktif = $trend_data['soal_aktif'][count($trend_data['soal_aktif']) - 1];
-    $selesai = $trend_data['soal_selesai'][count($trend_data['soal_selesai']) - 1];
-    $trend_data['belum_dikerjakan'][] = max(0, $aktif - $selesai);
+    $stmt = $conn->prepare("SELECT COUNT(*) as total FROM soal s
+        JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id
+        WHERE mp.sekolah_id = ? AND s.status = 'aktif'
+        AND (s.tanggal_mulai IS NULL OR s.tanggal_mulai <= ?)
+        AND (s.tanggal_selesai IS NULL OR s.tanggal_selesai >= ?)
+        AND NOT EXISTS (SELECT 1 FROM hasil_ujian hu WHERE hu.soal_id = s.id AND hu.siswa_id = ? AND hu.status = 'selesai')");
+    $stmt->bind_param("issi", $sekolah_id, $date_datetime, $date_datetime, $siswa_id);
+    $stmt->execute();
+    $belum_dikerjakan = $stmt->get_result()->fetch_assoc()['total'];
+    $trend_data['belum_dikerjakan'][] = $belum_dikerjakan;
+    $stmt->close();
 }
 
 // Get data untuk distribusi per mata pelajaran (top 5)
-$top_pelajaran = $conn->query("SELECT mp.nama_pelajaran, COUNT(hu.id) as total_soal, AVG(hu.nilai) as avg_nilai
+$stmt = $conn->prepare("SELECT mp.nama_pelajaran, COUNT(hu.id) as total_soal, AVG(hu.nilai) as avg_nilai
     FROM hasil_ujian hu
     JOIN soal s ON hu.soal_id = s.id
     JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id
-    WHERE hu.siswa_id = $siswa_id AND hu.status = 'selesai'
+    WHERE hu.siswa_id = ? AND hu.status = 'selesai' AND hu.nilai IS NOT NULL
     GROUP BY mp.id, mp.nama_pelajaran
     ORDER BY total_soal DESC
-    LIMIT 5")->fetch_all(MYSQLI_ASSOC);
+    LIMIT 5");
+$stmt->bind_param("i", $siswa_id);
+$stmt->execute();
+$top_pelajaran = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
 
 // Get data untuk line graph (nilai over time - 30 hari terakhir)
 $nilai_trend = [];
@@ -207,7 +242,7 @@ for ($i = 29; $i >= 0; $i--) {
     $nilai_labels[] = date('d M', strtotime($date));
     
     $stmt = $conn->prepare("SELECT AVG(nilai) as avg FROM hasil_ujian 
-        WHERE siswa_id = ? AND status = 'selesai' AND DATE(waktu_selesai) = ?");
+        WHERE siswa_id = ? AND status = 'selesai' AND nilai IS NOT NULL AND DATE(waktu_selesai) = ?");
     $stmt->bind_param("is", $siswa_id, $date);
     $stmt->execute();
     $avg = $stmt->get_result()->fetch_assoc()['avg'];
@@ -245,16 +280,28 @@ foreach ($pelajaran_result as $p) {
     $soal_per_pelajaran[] = $soal_data;
 }
 
+// Calculate total soal belum dikerjakan (soal aktif yang belum ada di hasil_ujian untuk siswa ini)
+$stmt = $conn->prepare("SELECT COUNT(*) as total FROM soal s
+    JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id
+    WHERE mp.sekolah_id = ? AND s.status = 'aktif'
+    AND (s.tanggal_mulai IS NULL OR s.tanggal_mulai <= ?)
+    AND (s.tanggal_selesai IS NULL OR s.tanggal_selesai >= ?)
+    AND NOT EXISTS (SELECT 1 FROM hasil_ujian hu WHERE hu.soal_id = s.id AND hu.siswa_id = ? AND hu.status = 'selesai')");
+$stmt->bind_param("issi", $sekolah_id, $now, $now, $siswa_id);
+$stmt->execute();
+$stats['total_belum_dikerjakan'] = $stmt->get_result()->fetch_assoc()['total'];
+$stmt->close();
+
 // Calculate percentage changes untuk stat cards
 $prev_soal_aktif = count($trend_data['soal_aktif']) > 1 ? $trend_data['soal_aktif'][count($trend_data['soal_aktif']) - 2] : $stats['total_soal_aktif'];
 $prev_soal_selesai = count($trend_data['soal_selesai']) > 1 ? $trend_data['soal_selesai'][count($trend_data['soal_selesai']) - 2] : $stats['total_soal_selesai'];
 $prev_rata_nilai = count($trend_data['rata_nilai']) > 1 ? $trend_data['rata_nilai'][count($trend_data['rata_nilai']) - 2] : $stats['rata_rata_nilai'];
-$prev_belum_dikerjakan = count($trend_data['belum_dikerjakan']) > 1 ? $trend_data['belum_dikerjakan'][count($trend_data['belum_dikerjakan']) - 2] : ($stats['total_soal_aktif'] - $stats['total_soal_selesai']);
+$prev_belum_dikerjakan = count($trend_data['belum_dikerjakan']) > 1 ? $trend_data['belum_dikerjakan'][count($trend_data['belum_dikerjakan']) - 2] : $stats['total_belum_dikerjakan'];
 
 $change_soal_aktif = $prev_soal_aktif > 0 ? round((($stats['total_soal_aktif'] - $prev_soal_aktif) / $prev_soal_aktif) * 100, 1) : 0;
 $change_soal_selesai = $prev_soal_selesai > 0 ? round((($stats['total_soal_selesai'] - $prev_soal_selesai) / $prev_soal_selesai) * 100, 1) : 0;
 $change_rata_nilai = $prev_rata_nilai > 0 ? round((($stats['rata_rata_nilai'] - $prev_rata_nilai) / $prev_rata_nilai) * 100, 1) : 0;
-$change_belum_dikerjakan = $prev_belum_dikerjakan > 0 ? round((($stats['total_soal_aktif'] - $stats['total_soal_selesai'] - $prev_belum_dikerjakan) / $prev_belum_dikerjakan) * 100, 1) : 0;
+$change_belum_dikerjakan = $prev_belum_dikerjakan > 0 ? round((($stats['total_belum_dikerjakan'] - $prev_belum_dikerjakan) / $prev_belum_dikerjakan) * 100, 1) : 0;
 
 $conn->close();
 ?>
@@ -564,7 +611,7 @@ $conn->close();
                     <div class="metric-card-header">
                         <div>
                             <div class="metric-title">Belum Dikerjakan</div>
-                            <div class="metric-value"><?php echo max(0, $stats['total_soal_aktif'] - $stats['total_soal_selesai']); ?></div>
+                            <div class="metric-value"><?php echo $stats['total_belum_dikerjakan']; ?></div>
                             <div class="metric-change <?php echo $change_belum_dikerjakan >= 0 ? 'negative' : 'positive'; ?>">
                                 <i class="bi bi-arrow-<?php echo $change_belum_dikerjakan >= 0 ? 'up' : 'down'; ?>"></i>
                                 <?php echo abs($change_belum_dikerjakan); ?>%
