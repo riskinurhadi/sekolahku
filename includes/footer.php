@@ -28,6 +28,12 @@
     <?php if (isset($additional_scripts)): ?>
         <?php echo $additional_scripts; ?>
     <?php endif; ?>
+    
+    <!-- Watermark -->
+    <div class="watermark">
+        <span>Develop by </span>
+        <a href="https://instagram.com/elfauzan/" target="_blank" rel="noopener noreferrer">Elfauzan</a>
+    </div>
 </body>
 </html>
 
