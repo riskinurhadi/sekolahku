@@ -391,8 +391,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <!-- Left Panel: System Info -->
             <div class="login-left-panel">
                 <div class="login-logo-section">
-                    <h1 class="login-system-title">Sistem Informasi</h1>
-                    <h2 class="login-system-subtitle">Sekolahku</h2>
+                    <h2 class="login-system-subtitle">Sistem Informasi</h2>
+                    <h1 class="login-system-title">Sekolahku</h1>
+                    
                     <p class="login-system-description">
                         Portal pembelajaran online untuk mengelola kegiatan belajar mengajar dengan mudah dan efisien.
                     </p>
