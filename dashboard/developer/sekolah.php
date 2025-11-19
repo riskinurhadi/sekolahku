@@ -7,7 +7,46 @@ require_once '../../includes/header.php';
 $conn = getConnection();
 $message = '';
 
-// Handle form submission
+// Handle AJAX request
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['ajax'])) {
+    header('Content-Type: application/json');
+    
+    if (isset($_POST['action'])) {
+        if ($_POST['action'] == 'add') {
+            $nama_sekolah = $_POST['nama_sekolah'];
+            $alamat = $_POST['alamat'] ?? '';
+            $telepon = $_POST['telepon'] ?? '';
+            $email = $_POST['email'] ?? '';
+            
+            $stmt = $conn->prepare("INSERT INTO sekolah (nama_sekolah, alamat, telepon, email) VALUES (?, ?, ?, ?)");
+            $stmt->bind_param("ssss", $nama_sekolah, $alamat, $telepon, $email);
+            
+            if ($stmt->execute()) {
+                echo json_encode(['success' => true, 'message' => 'Sekolah berhasil ditambahkan!']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Gagal menambahkan sekolah!']);
+            }
+            $stmt->close();
+            $conn->close();
+            exit;
+        } elseif ($_POST['action'] == 'delete') {
+            $id = $_POST['id'];
+            $stmt = $conn->prepare("DELETE FROM sekolah WHERE id = ?");
+            $stmt->bind_param("i", $id);
+            
+            if ($stmt->execute()) {
+                echo json_encode(['success' => true, 'message' => 'Sekolah berhasil dihapus!']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Gagal menghapus sekolah!']);
+            }
+            $stmt->close();
+            $conn->close();
+            exit;
+        }
+    }
+}
+
+// Handle form submission (non-AJAX fallback)
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['action'])) {
         if ($_POST['action'] == 'add') {
@@ -54,10 +93,10 @@ $conn->close();
         <?php 
         $msg = explode(':', $message);
         if ($msg[0] == 'success') {
-            echo "showSuccess('" . addslashes($msg[1]) . "');";
+            echo "Swal.fire({ icon: 'success', title: 'Berhasil', text: '" . addslashes($msg[1]) . "', timer: 1500, showConfirmButton: false });";
             echo "setTimeout(function(){ window.location.reload(); }, 1500);";
         } else {
-            echo "showError('" . addslashes($msg[1]) . "');";
+            echo "Swal.fire({ icon: 'error', title: 'Gagal', text: '" . addslashes($msg[1]) . "' });";
         }
         ?>
     </script>
@@ -72,7 +111,7 @@ $conn->close();
 <div class="row">
     <div class="col-12">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="bi bi-building"></i> Daftar Sekolah</h5>
                 <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addSchoolModal">
                     <i class="bi bi-plus-circle"></i> Tambah Sekolah
@@ -106,13 +145,9 @@ $conn->close();
                                     <td><?php echo htmlspecialchars($school['telepon'] ?? '-'); ?></td>
                                     <td><?php echo htmlspecialchars($school['email'] ?? '-'); ?></td>
                                     <td>
-                                        <form method="POST" style="display: inline;" onsubmit="event.preventDefault(); confirmDelete('sekolah').then(result => { if(result) this.submit(); }); return false;">
-                                            <input type="hidden" name="action" value="delete">
-                                            <input type="hidden" name="id" value="<?php echo $school['id']; ?>">
-                                            <button type="submit" class="btn btn-sm btn-danger">
-                                                <i class="bi bi-trash"></i> Hapus
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="deleteSchool(<?php echo $school['id']; ?>)">
+                                            <i class="bi bi-trash"></i> Hapus
+                                        </button>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -128,8 +163,9 @@ $conn->close();
 <div class="modal fade" id="addSchoolModal" tabindex="-1" aria-labelledby="addSchoolModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form method="POST" id="addSchoolForm">
+            <form id="addSchoolForm">
                 <input type="hidden" name="action" value="add">
+                <input type="hidden" name="ajax" value="1">
                 <div class="modal-header">
                     <h5 class="modal-title" id="addSchoolModalLabel">
                         <i class="bi bi-plus-circle"></i> Tambah Sekolah Baru
@@ -184,10 +220,106 @@ $(document).ready(function() {
     $('#addSchoolModal').on('hidden.bs.modal', function () {
         $(this).find('form')[0].reset();
     });
+    
+    // Handle form submission with AJAX
+    $('#addSchoolForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        var formData = $(this).serialize();
+        var submitBtn = $(this).find('button[type="submit"]');
+        var originalText = submitBtn.html();
+        
+        // Disable submit button
+        submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...');
+        
+        $.ajax({
+            url: '',
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: response.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(function() {
+                        $('#addSchoolModal').modal('hide');
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: response.message
+                    });
+                    submitBtn.prop('disabled', false).html(originalText);
+                }
+            },
+            error: function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Terjadi kesalahan saat menyimpan data'
+                });
+                submitBtn.prop('disabled', false).html(originalText);
+            }
+        });
+    });
 });
 
-function confirmDelete(type) {
-    return confirm('Apakah Anda yakin ingin menghapus ' + type + ' ini?');
+function deleteSchool(id) {
+    Swal.fire({
+        title: 'Apakah Anda yakin?',
+        text: "Data sekolah akan dihapus secara permanen!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '',
+                type: 'POST',
+                data: {
+                    action: 'delete',
+                    id: id,
+                    ajax: 1
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: response.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(function() {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: response.message
+                        });
+                    }
+                },
+                error: function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Terjadi kesalahan saat menghapus data'
+                    });
+                }
+            });
+        }
+    });
 }
 </script>
 
