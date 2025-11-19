@@ -22,7 +22,7 @@
 
 html {
     background: #f3f4f6;
-    background-image: url('assets/img/gradientbg.png');
+    background-image: url('../img/gradientbg.png');
     background-attachment: fixed;
     background-size: cover;
     background-position: center center;
@@ -34,7 +34,7 @@ html {
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     background: #f3f4f6;
-    background-image: url('assets/img/gradientbg.png');
+    background-image: url('../img/gradientbg.png');
     background-attachment: fixed;
     background-size: cover;
     background-position: center center;
@@ -56,7 +56,7 @@ body::before {
     width: 100%;
     height: 100%;
     background: #f3f4f6;
-    background-image: url('assets/img/gradientbg.png');
+    background-image: url('../img/gradientbg.png');
     background-attachment: fixed;
     background-size: cover;
     background-position: center center;
