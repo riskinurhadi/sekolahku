@@ -146,407 +146,985 @@ if ($sekolah_id) {
     $stmt->close();
 }
 
+// Get data untuk trend charts (7 hari terakhir)
+$trend_data = [
+    'soal_aktif' => [],
+    'soal_selesai' => [],
+    'rata_nilai' => [],
+    'belum_dikerjakan' => []
+];
+
+for ($i = 6; $i >= 0; $i--) {
+    $date = date('Y-m-d', strtotime("-$i days"));
+    
+    // Soal aktif (total aktif pada tanggal tersebut)
+    $stmt = $conn->prepare("SELECT COUNT(*) as total FROM soal s 
+        JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id 
+        WHERE mp.sekolah_id = ? AND s.status = 'aktif' AND DATE(s.created_at) <= ?");
+    $stmt->bind_param("is", $sekolah_id, $date);
+    $stmt->execute();
+    $trend_data['soal_aktif'][] = $stmt->get_result()->fetch_assoc()['total'];
+    $stmt->close();
+    
+    // Soal selesai (selesai pada tanggal tersebut)
+    $stmt = $conn->prepare("SELECT COUNT(*) as total FROM hasil_ujian 
+        WHERE siswa_id = ? AND status = 'selesai' AND DATE(waktu_selesai) = ?");
+    $stmt->bind_param("is", $siswa_id, $date);
+    $stmt->execute();
+    $trend_data['soal_selesai'][] = $stmt->get_result()->fetch_assoc()['total'];
+    $stmt->close();
+    
+    // Rata-rata nilai (rata-rata nilai sampai tanggal tersebut)
+    $stmt = $conn->prepare("SELECT AVG(nilai) as avg FROM hasil_ujian 
+        WHERE siswa_id = ? AND status = 'selesai' AND DATE(waktu_selesai) <= ?");
+    $stmt->bind_param("is", $siswa_id, $date);
+    $stmt->execute();
+    $avg = $stmt->get_result()->fetch_assoc()['avg'];
+    $trend_data['rata_nilai'][] = $avg ? round($avg, 1) : 0;
+    $stmt->close();
+    
+    // Belum dikerjakan
+    $aktif = $trend_data['soal_aktif'][count($trend_data['soal_aktif']) - 1];
+    $selesai = $trend_data['soal_selesai'][count($trend_data['soal_selesai']) - 1];
+    $trend_data['belum_dikerjakan'][] = max(0, $aktif - $selesai);
+}
+
+// Get data untuk distribusi per mata pelajaran (top 5)
+$top_pelajaran = $conn->query("SELECT mp.nama_pelajaran, COUNT(hu.id) as total_soal, AVG(hu.nilai) as avg_nilai
+    FROM hasil_ujian hu
+    JOIN soal s ON hu.soal_id = s.id
+    JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id
+    WHERE hu.siswa_id = $siswa_id AND hu.status = 'selesai'
+    GROUP BY mp.id, mp.nama_pelajaran
+    ORDER BY total_soal DESC
+    LIMIT 5")->fetch_all(MYSQLI_ASSOC);
+
+// Get data untuk line graph (nilai over time - 30 hari terakhir)
+$nilai_trend = [];
+$nilai_labels = [];
+for ($i = 29; $i >= 0; $i--) {
+    $date = date('Y-m-d', strtotime("-$i days"));
+    $nilai_labels[] = date('d M', strtotime($date));
+    
+    $stmt = $conn->prepare("SELECT AVG(nilai) as avg FROM hasil_ujian 
+        WHERE siswa_id = ? AND status = 'selesai' AND DATE(waktu_selesai) = ?");
+    $stmt->bind_param("is", $siswa_id, $date);
+    $stmt->execute();
+    $avg = $stmt->get_result()->fetch_assoc()['avg'];
+    $nilai_trend[] = $avg ? round($avg, 1) : null;
+    $stmt->close();
+}
+
+// Get data untuk stacked bar (soal per mata pelajaran - 30 hari terakhir)
+$soal_per_pelajaran = [];
+$pelajaran_list = [];
+$stmt = $conn->prepare("SELECT DISTINCT mp.id, mp.nama_pelajaran 
+    FROM hasil_ujian hu
+    JOIN soal s ON hu.soal_id = s.id
+    JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id
+    WHERE hu.siswa_id = ? AND hu.status = 'selesai' AND DATE(hu.waktu_selesai) >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+    ORDER BY mp.nama_pelajaran");
+$stmt->bind_param("i", $siswa_id);
+$stmt->execute();
+$pelajaran_result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+
+foreach ($pelajaran_result as $p) {
+    $pelajaran_list[] = $p['nama_pelajaran'];
+    $soal_data = [];
+    for ($i = 29; $i >= 0; $i--) {
+        $date = date('Y-m-d', strtotime("-$i days"));
+        $stmt = $conn->prepare("SELECT COUNT(*) as total FROM hasil_ujian hu
+            JOIN soal s ON hu.soal_id = s.id
+            WHERE hu.siswa_id = ? AND s.mata_pelajaran_id = ? AND DATE(hu.waktu_selesai) = ?");
+        $stmt->bind_param("iis", $siswa_id, $p['id'], $date);
+        $stmt->execute();
+        $soal_data[] = $stmt->get_result()->fetch_assoc()['total'];
+        $stmt->close();
+    }
+    $soal_per_pelajaran[] = $soal_data;
+}
+
+// Calculate percentage changes untuk stat cards
+$prev_soal_aktif = count($trend_data['soal_aktif']) > 1 ? $trend_data['soal_aktif'][count($trend_data['soal_aktif']) - 2] : $stats['total_soal_aktif'];
+$prev_soal_selesai = count($trend_data['soal_selesai']) > 1 ? $trend_data['soal_selesai'][count($trend_data['soal_selesai']) - 2] : $stats['total_soal_selesai'];
+$prev_rata_nilai = count($trend_data['rata_nilai']) > 1 ? $trend_data['rata_nilai'][count($trend_data['rata_nilai']) - 2] : $stats['rata_rata_nilai'];
+$prev_belum_dikerjakan = count($trend_data['belum_dikerjakan']) > 1 ? $trend_data['belum_dikerjakan'][count($trend_data['belum_dikerjakan']) - 2] : ($stats['total_soal_aktif'] - $stats['total_soal_selesai']);
+
+$change_soal_aktif = $prev_soal_aktif > 0 ? round((($stats['total_soal_aktif'] - $prev_soal_aktif) / $prev_soal_aktif) * 100, 1) : 0;
+$change_soal_selesai = $prev_soal_selesai > 0 ? round((($stats['total_soal_selesai'] - $prev_soal_selesai) / $prev_soal_selesai) * 100, 1) : 0;
+$change_rata_nilai = $prev_rata_nilai > 0 ? round((($stats['rata_rata_nilai'] - $prev_rata_nilai) / $prev_rata_nilai) * 100, 1) : 0;
+$change_belum_dikerjakan = $prev_belum_dikerjakan > 0 ? round((($stats['total_soal_aktif'] - $stats['total_soal_selesai'] - $prev_belum_dikerjakan) / $prev_belum_dikerjakan) * 100, 1) : 0;
+
 $conn->close();
 ?>
 
-<!-- Slider Section -->
-<?php if (!empty($sliders)): ?>
-<div class="slider-container mb-4" style="position: relative; height: 200px; border-radius: 20px; overflow: hidden;
-    background: rgba(255, 255, 255, 0.15); 
-    backdrop-filter: blur(60px) saturate(200%); 
-    -webkit-backdrop-filter: blur(60px) saturate(200%);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.7);">
-    <div id="sliderCarousel" class="carousel slide h-100" data-bs-ride="carousel" data-bs-interval="5000">
-        <div class="carousel-indicators">
-            <?php foreach ($sliders as $index => $slider): ?>
-                <button type="button" data-bs-target="#sliderCarousel" data-bs-slide-to="<?php echo $index; ?>" 
-                        class="<?php echo $index === 0 ? 'active' : ''; ?>" 
-                        aria-current="<?php echo $index === 0 ? 'true' : 'false'; ?>"
-                        aria-label="Slide <?php echo $index + 1; ?>"></button>
-            <?php endforeach; ?>
+<style>
+/* Dashboard Modern Style */
+.dashboard-greeting {
+    margin-bottom: 32px;
+}
+
+.dashboard-greeting h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.dashboard-greeting p {
+    font-size: 16px;
+    color: #64748b;
+    margin-bottom: 24px;
+}
+
+.dashboard-tabs {
+    border-bottom: 2px solid #e5e7eb;
+    margin-bottom: 24px;
+}
+
+.dashboard-tabs .nav-link {
+    color: #64748b;
+    font-weight: 600;
+    padding: 12px 24px;
+    border: none;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    transition: all 0.2s ease;
+}
+
+.dashboard-tabs .nav-link:hover {
+    color: #3b82f6;
+    border-bottom-color: rgba(59, 130, 246, 0.3);
+}
+
+.dashboard-tabs .nav-link.active {
+    color: #3b82f6;
+    border-bottom-color: #3b82f6;
+    background: transparent;
+}
+
+/* Stat Cards dengan Mini Charts */
+.metric-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.metric-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    border-color: #3b82f6;
+}
+
+.metric-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.metric-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 8px;
+}
+
+.metric-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.metric-change {
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.metric-change.positive {
+    color: #10b981;
+}
+
+.metric-change.negative {
+    color: #ef4444;
+}
+
+.metric-chart {
+    height: 60px;
+    margin-top: 16px;
+    position: relative;
+}
+
+/* Chart Sections */
+.chart-section {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+    margin-bottom: 24px;
+}
+
+.chart-section-header {
+    margin-bottom: 24px;
+}
+
+.chart-section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.chart-section-desc {
+    font-size: 14px;
+    color: #64748b;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+.chart-container-small {
+    position: relative;
+    height: 200px;
+}
+
+/* Top List */
+.top-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.top-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.top-list-item:last-child {
+    border-bottom: none;
+}
+
+.top-list-item-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.top-list-item-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #3b82f6;
+}
+
+/* Date Range Selector */
+.date-range-selector {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    color: #64748b;
+}
+
+.date-range-selector .date-text {
+    font-weight: 600;
+    color: #1e293b;
+}
+</style>
+
+<!-- Greeting Section -->
+<div class="dashboard-greeting">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1>Hai, selamat datang kembali!</h1>
+            <p>Dashboard monitoring pembelajaran Anda.</p>
         </div>
-        <div class="carousel-inner h-100">
-            <?php foreach ($sliders as $index => $slider): ?>
-                <div class="carousel-item h-100 <?php echo $index === 0 ? 'active' : ''; ?>" data-bs-interval="5000">
-                    <?php if ($slider['link']): ?>
-                        <a href="<?php echo htmlspecialchars($slider['link']); ?>" target="_blank" style="display: block; height: 100%;">
-                    <?php endif; ?>
-                    <img src="<?php echo getBasePath(); ?>uploads/slider/<?php echo htmlspecialchars($slider['gambar']); ?>" 
-                         class="d-block w-100 h-100" 
-                         style="object-fit: cover;" 
-                         alt="<?php echo htmlspecialchars($slider['judul'] ?? 'Slider'); ?>">
-                    <?php if ($slider['judul'] || $slider['deskripsi']): ?>
-                        <div class="carousel-caption d-none d-md-block" style="background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); padding: 2rem; border-radius: 0 0 12px 12px;">
-                            <?php if ($slider['judul']): ?>
-                                <h5 style="font-weight: 600; margin-bottom: 0.5rem;"><?php echo htmlspecialchars($slider['judul']); ?></h5>
-                            <?php endif; ?>
-                            <?php if ($slider['deskripsi']): ?>
-                                <p style="margin-bottom: 0;"><?php echo htmlspecialchars($slider['deskripsi']); ?></p>
-                            <?php endif; ?>
+        <div class="col-md-4 text-md-end">
+            <div class="date-range-selector">
+                <span class="date-text"><?php echo date('d M Y'); ?></span>
+                <span><?php echo date('l'); ?></span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tabs -->
+    <ul class="nav dashboard-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
+                Ringkasan
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="nilai-tab" data-bs-toggle="tab" data-bs-target="#nilai" type="button" role="tab">
+                Nilai
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="presensi-tab" data-bs-toggle="tab" data-bs-target="#presensi" type="button" role="tab">
+                Presensi
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="notifikasi-tab" data-bs-toggle="tab" data-bs-target="#notifikasi" type="button" role="tab">
+                Notifikasi
+            </button>
+        </li>
+    </ul>
+</div>
+
+<!-- Tab Content -->
+<div class="tab-content" id="dashboardTabsContent">
+    <!-- Overview Tab -->
+    <div class="tab-pane fade show active" id="overview" role="tabpanel">
+        <!-- Statistics Cards dengan Mini Charts -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="metric-card">
+                    <div class="metric-card-header">
+                        <div>
+                            <div class="metric-title">Soal Aktif</div>
+                            <div class="metric-value"><?php echo $stats['total_soal_aktif']; ?></div>
+                            <div class="metric-change <?php echo $change_soal_aktif >= 0 ? 'positive' : 'negative'; ?>">
+                                <i class="bi bi-arrow-<?php echo $change_soal_aktif >= 0 ? 'up' : 'down'; ?>"></i>
+                                <?php echo abs($change_soal_aktif); ?>%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="metric-chart">
+                        <canvas id="chartSoalAktif"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="metric-card">
+                    <div class="metric-card-header">
+                        <div>
+                            <div class="metric-title">Soal Selesai</div>
+                            <div class="metric-value"><?php echo $stats['total_soal_selesai']; ?></div>
+                            <div class="metric-change <?php echo $change_soal_selesai >= 0 ? 'positive' : 'negative'; ?>">
+                                <i class="bi bi-arrow-<?php echo $change_soal_selesai >= 0 ? 'up' : 'down'; ?>"></i>
+                                <?php echo abs($change_soal_selesai); ?>%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="metric-chart">
+                        <canvas id="chartSoalSelesai"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="metric-card">
+                    <div class="metric-card-header">
+                        <div>
+                            <div class="metric-title">Rata-rata Nilai</div>
+                            <div class="metric-value"><?php echo $stats['rata_rata_nilai']; ?></div>
+                            <div class="metric-change <?php echo $change_rata_nilai >= 0 ? 'positive' : 'negative'; ?>">
+                                <i class="bi bi-arrow-<?php echo $change_rata_nilai >= 0 ? 'up' : 'down'; ?>"></i>
+                                <?php echo abs($change_rata_nilai); ?>%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="metric-chart">
+                        <canvas id="chartRataNilai"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="metric-card">
+                    <div class="metric-card-header">
+                        <div>
+                            <div class="metric-title">Belum Dikerjakan</div>
+                            <div class="metric-value"><?php echo max(0, $stats['total_soal_aktif'] - $stats['total_soal_selesai']); ?></div>
+                            <div class="metric-change <?php echo $change_belum_dikerjakan >= 0 ? 'negative' : 'positive'; ?>">
+                                <i class="bi bi-arrow-<?php echo $change_belum_dikerjakan >= 0 ? 'up' : 'down'; ?>"></i>
+                                <?php echo abs($change_belum_dikerjakan); ?>%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="metric-chart">
+                        <canvas id="chartBelumDikerjakan"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Charts Row -->
+        <div class="row">
+            <!-- Top Mata Pelajaran -->
+            <div class="col-lg-4 mb-4">
+                <div class="chart-section">
+                    <div class="chart-section-header">
+                        <h5 class="chart-section-title">Top Mata Pelajaran</h5>
+                        <p class="chart-section-desc">Mata pelajaran dengan soal terbanyak yang telah Anda kerjakan.</p>
+                    </div>
+                    <?php if (!empty($top_pelajaran)): ?>
+                        <ul class="top-list">
+                            <?php foreach ($top_pelajaran as $index => $pel): ?>
+                                <li class="top-list-item">
+                                    <span class="top-list-item-name">
+                                        <span style="display: inline-block; width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; text-align: center; line-height: 24px; font-size: 12px; font-weight: 700; margin-right: 12px;">
+                                            <?php echo $index + 1; ?>
+                                        </span>
+                                        <?php echo htmlspecialchars($pel['nama_pelajaran']); ?>
+                                    </span>
+                                    <span class="top-list-item-value"><?php echo $pel['total_soal']; ?></span>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    <?php else: ?>
+                        <div class="text-center py-4">
+                            <i class="bi bi-book text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
+                            <p class="text-muted mt-3 mb-0">Belum ada data</p>
                         </div>
                     <?php endif; ?>
-                    <?php if ($slider['link']): ?>
-                        </a>
+                </div>
+            </div>
+            
+            <!-- Presensi Donut Chart -->
+            <div class="col-lg-4 mb-4">
+                <div class="chart-section">
+                    <div class="chart-section-header">
+                        <h5 class="chart-section-title">Presensi Minggu Ini</h5>
+                        <p class="chart-section-desc">Persentase kehadiran Anda dalam pembelajaran minggu ini.</p>
+                    </div>
+                    <div class="chart-container-small">
+                        <canvas id="chartPresensi"></canvas>
+                    </div>
+                    <?php if ($presensi_stats['total'] > 0): ?>
+                        <div class="row text-center mt-3 pt-3 border-top">
+                            <div class="col-4">
+                                <div class="py-2">
+                                    <h4 class="text-success mb-0" style="font-size: 1.5rem;"><?php echo $presensi_stats['hadir']; ?></h4>
+                                    <small class="text-muted">Hadir</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="py-2">
+                                    <h4 class="text-warning mb-0" style="font-size: 1.5rem;"><?php echo $presensi_stats['terlambat']; ?></h4>
+                                    <small class="text-muted">Terlambat</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="py-2">
+                                    <h4 class="text-danger mb-0" style="font-size: 1.5rem;"><?php echo $presensi_stats['tidak_hadir']; ?></h4>
+                                    <small class="text-muted">Tidak Hadir</small>
+                                </div>
+                            </div>
+                        </div>
                     <?php endif; ?>
                 </div>
-            <?php endforeach; ?>
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#sliderCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#sliderCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
-    </div>
-</div>
-<?php endif; ?>
-
-<!-- Statistics Cards -->
-<div class="row statistics-row">
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="stat-card primary">
-            <div class="stat-icon">
-                <i class="bi bi-file-earmark-text"></i>
             </div>
-            <div class="stat-content">
-                <div class="stat-value"><?php echo $stats['total_soal_aktif']; ?></div>
-                <div class="stat-label">Soal<br>Aktif</div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="stat-card success">
-            <div class="stat-icon">
-                <i class="bi bi-check-circle"></i>
-            </div>
-            <div class="stat-content">
-                <div class="stat-value"><?php echo $stats['total_soal_selesai']; ?></div>
-                <div class="stat-label">Soal<br>Selesai</div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="stat-card info">
-            <div class="stat-icon">
-                <i class="bi bi-star-fill"></i>
-            </div>
-            <div class="stat-content">
-                <div class="stat-value"><?php echo $stats['rata_rata_nilai']; ?></div>
-                <div class="stat-label">Rata-rata Nilai</div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="stat-card warning">
-            <div class="stat-icon">
-                <i class="bi bi-clock-history"></i>
-            </div>
-            <div class="stat-content">
-                <div class="stat-value"><?php echo $stats['total_soal_aktif'] - $stats['total_soal_selesai']; ?></div>
-                <div class="stat-label">Belum Dikerjakan</div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Jadwal Besok & Ringkasan Jadwal Minggu Ini -->
-<?php if ($kelas_id): ?>
-<div class="row mt-4 align-items-stretch">
-    <!-- Jadwal Besok -->
-    <?php if (!empty($jadwal_besok)): ?>
-        <div class="col-lg-6 mb-4 d-flex">
-            <div class="dashboard-card w-100 d-flex flex-column" style="max-height: 400px;">
-                <div class="card-header bg-info text-white flex-shrink-0">
-                    <h6 class="mb-0"><i class="bi bi-calendar-check"></i> Jadwal Besok</h6>
-                </div>
-                <div class="card-body flex-grow-1 d-flex flex-column" style="overflow: hidden;">
-                    <div class="flex-grow-1" style="overflow-y: auto; min-height: 0;">
-                        <?php 
-                        $icon_styles = [
-                            ['gradient' => 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', 'icon' => 'book'],
-                            ['gradient' => 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 'icon' => 'journal-bookmark'],
-                            ['gradient' => 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', 'icon' => 'book-half'],
-                            ['gradient' => 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', 'icon' => 'journal-text']
-                        ];
-                        $index = 0;
-                        foreach ($jadwal_besok as $j): 
-                            $style = $icon_styles[$index % count($icon_styles)];
-                            $index++;
-                        ?>
-                            <div class="history-task-item mb-2 p-2 bg-white rounded border" style="border-color: #e2e8f0 !important; transition: all 0.2s ease;">
-                                <div class="d-flex align-items-start">
-                                    <div class="history-icon-wrapper me-3 flex-shrink-0" style="width: 42px; height: 42px; border-radius: 10px; background: <?php echo $style['gradient']; ?>; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
-                                        <i class="bi bi-<?php echo $style['icon']; ?> text-white" style="font-size: 1.1rem;"></i>
+            
+            <!-- Jadwal Besok -->
+            <div class="col-lg-4 mb-4">
+                <div class="chart-section">
+                    <div class="chart-section-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="chart-section-title">Jadwal Besok</h5>
+                            <p class="chart-section-desc">Pelajaran yang akan berlangsung besok.</p>
+                        </div>
+                        <a href="jadwal.php" class="text-decoration-none small text-primary">Lihat <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                    <?php if (!empty($jadwal_besok)): ?>
+                        <div style="max-height: 200px; overflow-y: auto;">
+                            <?php foreach (array_slice($jadwal_besok, 0, 5) as $j): ?>
+                                <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                                    <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; margin-right: 12px;">
+                                        <i class="bi bi-book"></i>
                                     </div>
                                     <div class="flex-grow-1">
-                                        <h6 class="mb-1 fw-semibold" style="color: #1e293b; font-size: 14px; line-height: 1.3;">
+                                        <h6 class="mb-0" style="font-size: 14px; font-weight: 600; color: #1e293b;">
                                             <?php echo htmlspecialchars($j['nama_pelajaran']); ?>
                                         </h6>
-                                        <p class="mb-0 text-muted" style="font-size: 12px; line-height: 1.4; color: #64748b;">
+                                        <small class="text-muted">
                                             <?php echo date('H:i', strtotime($j['jam_mulai'])); ?> - <?php echo date('H:i', strtotime($j['jam_selesai'])); ?>
-                                        </p>
+                                        </small>
                                     </div>
                                 </div>
-                            </div>
-                        <?php endforeach; ?>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="text-center py-4">
+                            <i class="bi bi-calendar-x text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
+                            <p class="text-muted mt-3 mb-0">Tidak ada jadwal besok</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Charts Row 2 -->
+        <div class="row">
+            <!-- Trend Nilai -->
+            <div class="col-lg-8 mb-4">
+                <div class="chart-section">
+                    <div class="chart-section-header">
+                        <h5 class="chart-section-title">Trend Nilai</h5>
+                        <p class="chart-section-desc">Perkembangan nilai rata-rata Anda selama 30 hari terakhir.</p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chartTrendNilai"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Distribusi Soal per Mata Pelajaran -->
+            <div class="col-lg-4 mb-4">
+                <div class="chart-section">
+                    <div class="chart-section-header">
+                        <h5 class="chart-section-title">Distribusi Soal</h5>
+                        <p class="chart-section-desc">Jumlah soal yang telah dikerjakan per mata pelajaran.</p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chartDistribusiSoal"></canvas>
                     </div>
                 </div>
             </div>
         </div>
-    <?php endif; ?>
-    
-    <!-- Presensi Minggu Ini -->
-    <div class="col-lg-<?php echo !empty($jadwal_besok) ? '6' : '12'; ?> mb-4 d-flex">
-        <div class="dashboard-card w-100 d-flex flex-column" style="max-height: 400px;">
-            <div class="card-header d-flex justify-content-between align-items-center flex-shrink-0">
-                <h6 class="mb-0"><i class="bi bi-clipboard-check"></i> Presensi Minggu Ini</h6>
-                <a href="presensi.php" class="text-decoration-none small">Lihat Detail <i class="bi bi-arrow-right"></i></a>
-            </div>
-            <div class="card-body flex-grow-1 d-flex flex-column justify-content-center">
-                <?php if ($presensi_stats['total'] > 0): ?>
-                    <div class="text-center">
-                        <h1 class="text-primary mb-1 fw-bold" style="font-size: 3.5rem; line-height: 1;">
-                            <?php echo $presensi_stats['persentase']; ?>%
-                        </h1>
-                        <p class="text-muted mb-3" style="font-size: 0.9rem;">Kehadiran</p>
-                        <div class="progress mx-auto mb-3" style="height: 10px; max-width: 280px;">
-                            <div class="progress-bar bg-success" role="progressbar" 
-                                 style="width: <?php echo $presensi_stats['persentase']; ?>%" 
-                                 aria-valuenow="<?php echo $presensi_stats['persentase']; ?>" 
-                                 aria-valuemin="0" aria-valuemax="100"></div>
+        
+        <!-- Charts Row 3 -->
+        <div class="row">
+            <!-- Soal per Mata Pelajaran (Stacked Bar) -->
+            <div class="col-lg-12 mb-4">
+                <div class="chart-section">
+                    <div class="chart-section-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="chart-section-title">Aktivitas Soal per Mata Pelajaran</h5>
+                            <p class="chart-section-desc">Distribusi soal yang dikerjakan per mata pelajaran selama 30 hari terakhir.</p>
                         </div>
-                        <div class="row text-center mt-2 pt-2 border-top">
-                            <div class="col-4">
-                                <div class="py-1">
-                                    <h3 class="text-success mb-1 fw-bold" style="font-size: 2rem;"><?php echo $presensi_stats['hadir']; ?></h3>
-                                    <p class="text-muted mb-0" style="font-size: 0.85rem;">Hadir</p>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="py-1">
-                                    <h3 class="text-warning mb-1 fw-bold" style="font-size: 2rem;"><?php echo $presensi_stats['terlambat']; ?></h3>
-                                    <p class="text-muted mb-0" style="font-size: 0.85rem;">Terlambat</p>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="py-1">
-                                    <h3 class="text-danger mb-1 fw-bold" style="font-size: 2rem;"><?php echo $presensi_stats['tidak_hadir']; ?></h3>
-                                    <p class="text-muted mb-0" style="font-size: 0.85rem;">Tidak Hadir</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mt-2 pt-2 border-top">
-                            <p class="text-muted mb-0" style="font-size: 0.85rem;">Total: <?php echo $presensi_stats['total']; ?> sesi</p>
-                        </div>
+                        <a href="soal_saya.php" class="text-decoration-none small text-primary">Lihat Semua <i class="bi bi-arrow-right"></i></a>
                     </div>
-                <?php else: ?>
-                    <div class="text-center py-5">
-                        <div class="mb-3" style="position: relative; display: inline-block;">
-                            <i class="bi bi-clipboard-check" style="font-size: 4rem; color: #3b82f6; opacity: 0.2;"></i>
-                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; border: 3px dashed #3b82f6; border-radius: 12px; opacity: 0.3;"></div>
-                        </div>
-                        <h6 class="text-muted mb-2" style="font-weight: 600; color: #64748b;">Belum ada data presensi minggu ini</h6>
-                        <p class="text-muted mb-0 small" style="color: #94a3b8;">Data presensi akan muncul setelah Anda melakukan presensi</p>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-</div>
-<?php endif; ?>
-
-<!-- Ringkasan Jadwal & Hasil Terbaru -->
-<?php if ($kelas_id): ?>
-<div class="row mt-4 align-items-stretch">
-    <!-- Ringkasan Jadwal Minggu Ini -->
-    <div class="col-lg-4 mb-4 d-flex">
-        <div class="dashboard-card w-100 d-flex flex-column h-100">
-            <div class="card-header d-flex justify-content-between align-items-center flex-shrink-0">
-                <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Ringkasan Jadwal Minggu Ini</h5>
-                <a href="jadwal.php" class="text-decoration-none small">Lihat Detail <i class="bi bi-arrow-right"></i></a>
-            </div>
-            <div class="card-body flex-grow-1 d-flex flex-column justify-content-center">
-                <div class="row text-center">
-                    <div class="col-6 mb-3">
-                        <div class="p-2">
-                            <h4 class="text-primary mb-0"><?php echo count($jadwal_minggu_ini); ?></h4>
-                            <small class="text-muted">Total Jadwal</small>
-                        </div>
-                    </div>
-                    <div class="col-6 mb-3">
-                        <div class="p-2">
-                            <h4 class="text-success mb-0">
-                                <?php echo count(array_filter($jadwal_minggu_ini, function($j) { return $j['status'] == 'berlangsung'; })); ?>
-                            </h4>
-                            <small class="text-muted">Berlangsung</small>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="p-2">
-                            <h4 class="text-info mb-0">
-                                <?php echo count(array_filter($jadwal_minggu_ini, function($j) { return $j['status'] == 'selesai'; })); ?>
-                            </h4>
-                            <small class="text-muted">Selesai</small>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="p-2">
-                            <h4 class="text-secondary mb-0">
-                                <?php echo count(array_filter($jadwal_minggu_ini, function($j) { return $j['status'] == 'terjadwal'; })); ?>
-                            </h4>
-                            <small class="text-muted">Terjadwal</small>
-                        </div>
+                    <div class="chart-container">
+                        <canvas id="chartSoalPerPelajaran"></canvas>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Hasil Terbaru -->
-    <div class="col-lg-8 mb-4 d-flex">
-        <div class="dashboard-card w-100 d-flex flex-column h-100">
-            <div class="card-header d-flex justify-content-between align-items-center flex-shrink-0">
-                <h5 class="mb-0"><i class="bi bi-trophy"></i> Hasil Terbaru</h5>
-                <a href="hasil.php" class="text-decoration-none">Lihat Semua <i class="bi bi-arrow-right"></i></a>
-            </div>
-            <div class="card-body flex-grow-1 d-flex flex-column">
-                <?php if (count($hasil_terbaru) > 0): ?>
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Mata Pelajaran</th>
-                                    <th>Judul Soal</th>
-                                    <th>Nilai</th>
-                                    <th>Tanggal</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($hasil_terbaru as $hasil): ?>
+    <!-- Nilai Tab -->
+    <div class="tab-pane fade" id="nilai" role="tabpanel">
+        <div class="row">
+            <div class="col-12">
+                <div class="chart-section">
+                    <div class="chart-section-header">
+                        <h5 class="chart-section-title">Hasil Ujian Terbaru</h5>
+                        <p class="chart-section-desc">Daftar hasil ujian yang telah Anda selesaikan.</p>
+                    </div>
+                    <?php if (count($hasil_terbaru) > 0): ?>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
                                     <tr>
-                                        <td>
-                                            <strong><?php echo htmlspecialchars($hasil['nama_pelajaran']); ?></strong>
-                                        </td>
-                                        <td><?php echo htmlspecialchars($hasil['judul']); ?></td>
-                                        <td>
-                                            <?php 
-                                            $nilai = number_format($hasil['nilai'], 1);
-                                            $badge_class = $nilai >= 75 ? 'success' : ($nilai >= 60 ? 'warning' : 'danger');
-                                            ?>
-                                            <span class="badge bg-<?php echo $badge_class; ?> fs-6">
-                                                <?php echo $nilai; ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <small><?php echo date('d/m/Y', strtotime($hasil['waktu_selesai'])); ?></small>
-                                        </td>
-                                        <td>
-                                            <a href="hasil.php?soal_id=<?php echo $hasil['soal_id']; ?>" 
-                                               class="btn btn-sm btn-outline-primary">
-                                                <i class="bi bi-eye"></i> Detail
-                                            </a>
-                                        </td>
+                                        <th>Mata Pelajaran</th>
+                                        <th>Judul Soal</th>
+                                        <th>Nilai</th>
+                                        <th>Tanggal</th>
+                                        <th>Aksi</th>
                                     </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php else: ?>
-                    <div class="text-center py-5">
-                        <div class="mb-3" style="position: relative; display: inline-block;">
-                            <i class="bi bi-trophy" style="font-size: 3.5rem; color: #f59e0b; opacity: 0.2;"></i>
-                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; border: 3px dashed #f59e0b; border-radius: 50%; opacity: 0.3;"></div>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($hasil_terbaru as $hasil): ?>
+                                        <tr>
+                                            <td><strong><?php echo htmlspecialchars($hasil['nama_pelajaran']); ?></strong></td>
+                                            <td><?php echo htmlspecialchars($hasil['judul']); ?></td>
+                                            <td>
+                                                <?php 
+                                                $nilai = number_format($hasil['nilai'], 1);
+                                                $badge_class = $nilai >= 75 ? 'success' : ($nilai >= 60 ? 'warning' : 'danger');
+                                                ?>
+                                                <span class="badge bg-<?php echo $badge_class; ?> fs-6">
+                                                    <?php echo $nilai; ?>
+                                                </span>
+                                            </td>
+                                            <td><?php echo date('d/m/Y', strtotime($hasil['waktu_selesai'])); ?></td>
+                                            <td>
+                                                <a href="hasil.php?soal_id=<?php echo $hasil['soal_id']; ?>" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i> Detail
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
                         </div>
-                        <h6 class="text-muted mb-2" style="font-weight: 600; color: #64748b;">Belum ada hasil ujian</h6>
-                        <p class="text-muted mb-0 small" style="color: #94a3b8;">Hasil ujian akan muncul setelah Anda menyelesaikan soal</p>
+                    <?php else: ?>
+                        <div class="text-center py-5">
+                            <i class="bi bi-trophy text-muted" style="font-size: 3.5rem; opacity: 0.3;"></i>
+                            <p class="text-muted mt-3 mb-0">Belum ada hasil ujian</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Presensi Tab -->
+    <div class="tab-pane fade" id="presensi" role="tabpanel">
+        <div class="row">
+            <div class="col-12">
+                <div class="chart-section">
+                    <div class="chart-section-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="chart-section-title">Presensi Minggu Ini</h5>
+                            <p class="chart-section-desc">Ringkasan kehadiran Anda dalam pembelajaran minggu ini.</p>
+                        </div>
+                        <a href="presensi.php" class="text-decoration-none small text-primary">Lihat Detail <i class="bi bi-arrow-right"></i></a>
                     </div>
-                <?php endif; ?>
+                    <?php if ($presensi_stats['total'] > 0): ?>
+                        <div class="text-center py-4">
+                            <h1 class="text-primary mb-2 fw-bold" style="font-size: 4rem;">
+                                <?php echo $presensi_stats['persentase']; ?>%
+                            </h1>
+                            <p class="text-muted mb-4">Kehadiran</p>
+                            <div class="progress mx-auto mb-4" style="height: 12px; max-width: 400px;">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                     style="width: <?php echo $presensi_stats['persentase']; ?>%" 
+                                     aria-valuenow="<?php echo $presensi_stats['persentase']; ?>" 
+                                     aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="row text-center mt-4">
+                                <div class="col-4">
+                                    <h3 class="text-success mb-1 fw-bold"><?php echo $presensi_stats['hadir']; ?></h3>
+                                    <p class="text-muted mb-0 small">Hadir</p>
+                                </div>
+                                <div class="col-4">
+                                    <h3 class="text-warning mb-1 fw-bold"><?php echo $presensi_stats['terlambat']; ?></h3>
+                                    <p class="text-muted mb-0 small">Terlambat</p>
+                                </div>
+                                <div class="col-4">
+                                    <h3 class="text-danger mb-1 fw-bold"><?php echo $presensi_stats['tidak_hadir']; ?></h3>
+                                    <p class="text-muted mb-0 small">Tidak Hadir</p>
+                                </div>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <div class="text-center py-5">
+                            <i class="bi bi-clipboard-check text-muted" style="font-size: 4rem; opacity: 0.3;"></i>
+                            <p class="text-muted mt-3 mb-0">Belum ada data presensi minggu ini</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notifikasi Tab -->
+    <div class="tab-pane fade" id="notifikasi" role="tabpanel">
+        <div class="row">
+            <div class="col-12">
+                <div class="chart-section">
+                    <div class="chart-section-header">
+                        <h5 class="chart-section-title">Soal Aktif</h5>
+                        <p class="chart-section-desc">Daftar soal yang tersedia untuk dikerjakan.</p>
+                    </div>
+                    <?php if (count($active_soal) > 0): ?>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Judul</th>
+                                        <th>Mata Pelajaran</th>
+                                        <th>Jenis</th>
+                                        <th>Waktu</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($active_soal as $soal): ?>
+                                        <tr>
+                                            <td><strong><?php echo htmlspecialchars($soal['judul']); ?></strong></td>
+                                            <td><?php echo htmlspecialchars($soal['nama_pelajaran']); ?></td>
+                                            <td>
+                                                <?php 
+                                                $jenis_labels = [
+                                                    'quiz' => 'Quiz',
+                                                    'pilihan_ganda' => 'Pilihan Ganda',
+                                                    'isian' => 'Isian'
+                                                ];
+                                                echo $jenis_labels[$soal['jenis']] ?? $soal['jenis'];
+                                                ?>
+                                            </td>
+                                            <td><?php echo $soal['waktu_pengerjaan']; ?> menit</td>
+                                            <td>
+                                                <?php if ($soal['sudah_dikerjakan'] > 0): ?>
+                                                    <span class="badge bg-success">Selesai</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-warning">Belum Dikerjakan</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <?php if ($soal['sudah_dikerjakan'] > 0): ?>
+                                                    <a href="hasil.php?soal_id=<?php echo $soal['id']; ?>" class="btn btn-sm btn-info">
+                                                        <i class="bi bi-eye"></i> Lihat Hasil
+                                                    </a>
+                                                <?php else: ?>
+                                                    <a href="kerjakan_soal.php?id=<?php echo $soal['id']; ?>" class="btn btn-sm btn-primary">
+                                                        <i class="bi bi-pencil"></i> Kerjakan
+                                                    </a>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach;?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php else: ?>
+                        <div class="text-center py-5">
+                            <i class="bi bi-file-earmark-text text-muted" style="font-size: 3.5rem; opacity: 0.3;"></i>
+                            <p class="text-muted mt-3 mb-0">Tidak ada soal aktif</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+// Mini Charts untuk Stat Cards
+const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false }
+    },
+    scales: {
+        x: { display: false },
+        y: { display: false }
+    },
+    elements: {
+        point: { radius: 0 },
+        line: { borderWidth: 2, tension: 0.4 }
+    }
+};
+
+// Chart Soal Aktif
+new Chart(document.getElementById('chartSoalAktif'), {
+    type: 'line',
+    data: {
+        labels: ['', '', '', '', '', '', ''],
+        datasets: [{
+            data: <?php echo json_encode($trend_data['soal_aktif']); ?>,
+            borderColor: '#8b5cf6',
+            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+            fill: true
+        }]
+    },
+    options: chartOptions
+});
+
+// Chart Soal Selesai
+new Chart(document.getElementById('chartSoalSelesai'), {
+    type: 'line',
+    data: {
+        labels: ['', '', '', '', '', '', ''],
+        datasets: [{
+            data: <?php echo json_encode($trend_data['soal_selesai']); ?>,
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            fill: true
+        }]
+    },
+    options: chartOptions
+});
+
+// Chart Rata Nilai
+new Chart(document.getElementById('chartRataNilai'), {
+    type: 'line',
+    data: {
+        labels: ['', '', '', '', '', '', ''],
+        datasets: [{
+            data: <?php echo json_encode($trend_data['rata_nilai']); ?>,
+            borderColor: '#f59e0b',
+            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+            fill: true
+        }]
+    },
+    options: chartOptions
+});
+
+// Chart Belum Dikerjakan
+new Chart(document.getElementById('chartBelumDikerjakan'), {
+    type: 'line',
+    data: {
+        labels: ['', '', '', '', '', '', ''],
+        datasets: [{
+            data: <?php echo json_encode($trend_data['belum_dikerjakan']); ?>,
+            borderColor: '#14b8a6',
+            backgroundColor: 'rgba(20, 184, 166, 0.1)',
+            fill: true
+        }]
+    },
+    options: chartOptions
+});
+
+// Presensi Donut Chart
+<?php if ($presensi_stats['total'] > 0): ?>
+new Chart(document.getElementById('chartPresensi'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Hadir', 'Terlambat', 'Tidak Hadir'],
+        datasets: [{
+            data: [
+                <?php echo $presensi_stats['hadir']; ?>,
+                <?php echo $presensi_stats['terlambat']; ?>,
+                <?php echo $presensi_stats['tidak_hadir']; ?>
+            ],
+            backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    padding: 15,
+                    font: { size: 12 }
+                }
+            }
+        },
+        cutout: '70%'
+    }
+});
 <?php endif; ?>
 
+// Trend Nilai Line Chart
+new Chart(document.getElementById('chartTrendNilai'), {
+    type: 'line',
+    data: {
+        labels: <?php echo json_encode($nilai_labels); ?>,
+        datasets: [{
+            label: 'Rata-rata Nilai',
+            data: <?php echo json_encode($nilai_trend); ?>,
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 4,
+            pointHoverRadius: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100,
+                ticks: {
+                    callback: function(value) {
+                        return value;
+                    }
+                }
+            }
+        }
+    }
+});
 
-<!-- Active Soal -->
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="dashboard-card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Soal Aktif</h5>
-                <a href="soal_saya.php" class="text-decoration-none">Lihat Semua <i class="bi bi-arrow-right"></i></a>
-            </div>
-            <div class="card-body">
-                <?php if (count($active_soal) > 0): ?>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Judul</th>
-                                    <th>Mata Pelajaran</th>
-                                    <th>Jenis</th>
-                                    <th>Waktu</th>
-                                    <th>Status</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($active_soal as $soal): ?>
-                                    <tr>
-                                        <td><strong><?php echo htmlspecialchars($soal['judul']); ?></strong></td>
-                                        <td><?php echo htmlspecialchars($soal['nama_pelajaran']); ?></td>
-                                        <td>
-                                            <?php 
-                                            $jenis_labels = [
-                                                'quiz' => 'Quiz',
-                                                'pilihan_ganda' => 'Pilihan Ganda',
-                                                'isian' => 'Isian'
-                                            ];
-                                            echo $jenis_labels[$soal['jenis']] ?? $soal['jenis'];
-                                            ?>
-                                        </td>
-                                        <td><?php echo $soal['waktu_pengerjaan']; ?> menit</td>
-                                        <td>
-                                            <?php if ($soal['sudah_dikerjakan'] > 0): ?>
-                                                <span class="badge bg-success">Selesai</span>
-                                            <?php else: ?>
-                                                <span class="badge bg-warning">Belum Dikerjakan</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <?php if ($soal['sudah_dikerjakan'] > 0): ?>
-                                                <a href="hasil.php?soal_id=<?php echo $soal['id']; ?>" class="btn btn-sm btn-info">
-                                                    <i class="bi bi-eye"></i> Lihat Hasil
-                                                </a>
-                                            <?php else: ?>
-                                                <a href="kerjakan_soal.php?id=<?php echo $soal['id']; ?>" class="btn btn-sm btn-primary">
-                                                    <i class="bi bi-pencil"></i> Kerjakan
-                                                </a>
-                                            <?php endif; ?>
-                                        </td>
-                                    </tr>
-                                <?php endforeach;?> 
-                            </tbody> 
-                        </table>
-                    </div>
-                <?php else: ?>
-                    <div class="empty-state">
-                        <i class="bi bi-file-earmark-text"></i>
-                        <h5>Tidak ada soal aktif</h5>
-                        <p>Belum ada soal yang tersedia untuk dikerjakan saat ini.</p>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-</div>
+// Distribusi Soal Pie Chart
+<?php if (!empty($top_pelajaran)): ?>
+new Chart(document.getElementById('chartDistribusiSoal'), {
+    type: 'pie',
+    data: {
+        labels: <?php echo json_encode(array_column($top_pelajaran, 'nama_pelajaran')); ?>,
+        datasets: [{
+            data: <?php echo json_encode(array_column($top_pelajaran, 'total_soal')); ?>,
+            backgroundColor: [
+                '#3b82f6',
+                '#10b981',
+                '#f59e0b',
+                '#8b5cf6',
+                '#14b8a6'
+            ],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    padding: 15,
+                    font: { size: 11 }
+                }
+            }
+        }
+    }
+});
+<?php endif; ?>
+
+// Soal per Mata Pelajaran Stacked Bar Chart
+<?php if (!empty($pelajaran_list)): ?>
+const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#14b8a6', '#ef4444'];
+const datasets = <?php echo json_encode($pelajaran_list); ?>.map((pelajaran, index) => ({
+    label: pelajaran,
+    data: <?php echo json_encode($soal_per_pelajaran); ?>[index] || [],
+    backgroundColor: colors[index % colors.length]
+}));
+
+new Chart(document.getElementById('chartSoalPerPelajaran'), {
+    type: 'bar',
+    data: {
+        labels: <?php echo json_encode(array_slice($nilai_labels, -7)); ?>,
+        datasets: datasets
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top'
+            }
+        },
+        scales: {
+            x: {
+                stacked: true
+            },
+            y: {
+                stacked: true,
+                beginAtZero: true
+            }
+        }
+    }
+});
+<?php endif; ?>
+});
+</script>
 
 <?php require_once '../../includes/footer.php'; ?>
-
