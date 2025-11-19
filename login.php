@@ -123,16 +123,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         
         body.login-page .login-card {
-            background: rgba(255, 255, 255, 0.15) !important;
-            backdrop-filter: blur(60px) saturate(200%) !important;
-            -webkit-backdrop-filter: blur(60px) saturate(200%) !important;
+            background: #ffffff !important;
             border-radius: 24px !important;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 
-                        0 4px 20px rgba(0, 0, 0, 0.08),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.9),
-                        inset 0 -1px 0 rgba(255, 255, 255, 0.5),
-                        0 0 0 1px rgba(255, 255, 255, 0.6) !important;
-            border: 1px solid rgba(255, 255, 255, 0.7) !important;
+                        0 4px 20px rgba(0, 0, 0, 0.08) !important;
+            border: 1px solid #e5e7eb !important;
             width: 100% !important;
             max-width: 1100px !important;
             display: flex !important;
@@ -141,23 +136,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             min-height: 650px !important;
             margin: 0 auto !important;
             position: relative !important;
-        }
-        
-        body.login-page .login-card::before {
-            content: '' !important;
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            height: 2px !important;
-            background: linear-gradient(90deg, 
-                transparent 0%, 
-                rgba(255, 255, 255, 0.9) 20%, 
-                rgba(255, 255, 255, 1) 50%,
-                rgba(255, 255, 255, 0.9) 80%,
-                transparent 100%) !important;
-            z-index: 1 !important;
-            opacity: 0.8 !important;
         }
         
         /* Left Panel - Blue solid background */
@@ -185,9 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         .login-right-panel {
             flex: 1 !important;
-            background: rgba(255, 255, 255, 0.1) !important;
-            backdrop-filter: blur(50px) saturate(200%) !important;
-            -webkit-backdrop-filter: blur(50px) saturate(200%) !important;
+            background: #ffffff !important;
             padding: 60px 50px !important;
             display: flex !important;
             align-items: center !important;
@@ -200,6 +176,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             z-index: 1 !important;
             width: 100% !important;
             text-align: center !important;
+        }
+        
+        .login-form-wrapper {
+            width: 100%;
+            max-width: 400px;
         }
         
         /* Logo Kemenag - Soft purple to match dashboard */
@@ -294,56 +275,62 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         
         .login-form-title {
-            color: #ffffff !important;
+            color: #1e3a8a !important;
             font-weight: 700 !important;
             font-size: 32px !important;
             margin-bottom: 8px !important;
         }
         
         .login-form-subtitle {
-            color: rgba(255, 255, 255, 0.8) !important;
+            color: #64748b !important;
             font-size: 15px !important;
             margin-bottom: 35px !important;
         }
         
-        /* Input with glassmorphism effect */
+        /* Input with clean white background */
         .login-form .input-group {
-            background: rgba(255, 255, 255, 0.4) !important;
-            backdrop-filter: blur(30px) saturate(200%) !important;
-            -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
+            background: #ffffff !important;
             border-radius: 12px !important;
-            border: 1px solid rgba(255, 255, 255, 0.7) !important;
+            border: 1px solid #e5e7eb !important;
             overflow: hidden !important;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+            transition: all 0.2s ease !important;
+        }
+        
+        .login-form .input-group:hover {
+            border-color: #cbd5e1 !important;
         }
         
         .login-form .input-group-text {
-            background: transparent !important;
+            background: #f8fafc !important;
             border: none !important;
-            color: rgba(255, 255, 255, 0.7) !important;
+            border-right: 1px solid #e5e7eb !important;
+            color: #64748b !important;
             padding: 12px 16px !important;
         }
         
         .login-form .form-control {
-            background: transparent !important;
+            background: #ffffff !important;
             border: none !important;
             padding: 12px 16px !important;
-            color: #ffffff !important;
+            color: #1e293b !important;
+            font-size: 15px !important;
         }
         
         .login-form .form-control::placeholder {
-            color: rgba(255, 255, 255, 0.5) !important;
+            color: #94a3b8 !important;
         }
         
-        /* Input focus - Soft blue to match dashboard */
+        /* Input focus - Blue to match dashboard */
         .login-form .input-group:focus-within {
-            border-color: rgba(59, 130, 246, 0.5) !important;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+            border-color: #1e3a8a !important;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1) !important;
         }
         
         .login-form .input-group:focus-within .input-group-text {
-            color: #3b82f6 !important;
+            background: #f1f5f9 !important;
+            color: #1e3a8a !important;
+            border-right-color: #1e3a8a !important;
         }
         
         .login-form .form-control:focus {
@@ -351,34 +338,47 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             box-shadow: none !important;
         }
         
-        /* Button - Soft blue gradient matching dashboard */
+        /* Button - Blue gradient matching dashboard */
         .btn-login {
             width: 100% !important;
             padding: 14px 20px !important;
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%) !important;
             border: none !important;
             border-radius: 12px !important;
             color: #ffffff !important;
-            font-weight: 600 !important;
+            font-weight: 700 !important;
             font-size: 16px !important;
             cursor: pointer !important;
             transition: all 0.3s ease !important;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3) !important;
         }
         
         .btn-login:hover {
-            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%) !important;
             transform: translateY(-2px) !important;
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4) !important;
+            box-shadow: 0 6px 20px rgba(30, 58, 138, 0.4) !important;
         }
         
         .login-footer {
             margin-top: 35px !important;
             padding-top: 20px !important;
-            border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+            border-top: 1px solid #e5e7eb !important;
             text-align: center !important;
-            color: rgba(255, 255, 255, 0.7) !important;
+            color: #64748b !important;
             font-size: 13px !important;
+        }
+        
+        .alert-danger {
+            background: #fef2f2 !important;
+            border: 1px solid #fecaca !important;
+            color: #991b1b !important;
+            border-radius: 12px !important;
+            padding: 12px 16px !important;
+            margin-bottom: 24px !important;
+        }
+        
+        .alert-danger i {
+            margin-right: 8px;
         }
     </style>
 </head>
@@ -388,7 +388,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <!-- Left Panel: System Info -->
             <div class="login-left-panel">
                 <div class="login-logo-section">
-                    <!-- <h2 class="login-system-subtitle">Sistem Informasi</h2> -->
+                    <img src="assets/img/sekolahku.png" alt="Sekolahku" style="max-width: 200px; height: auto; margin-bottom: 30px; filter: brightness(0) invert(1);">
                     <h1 class="login-system-title">Sekolahku</h1>
                     
                     <p class="login-system-description">
