@@ -346,9 +346,13 @@ $conn->close();
                         </div>
                     </div>
                 <?php else: ?>
-                    <div class="text-center py-4">
-                        <i class="bi bi-clipboard-check text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
-                        <p class="text-muted mt-3 mb-0">Belum ada data presensi minggu ini</p>
+                    <div class="text-center py-5">
+                        <div class="mb-3" style="position: relative; display: inline-block;">
+                            <i class="bi bi-clipboard-check" style="font-size: 4rem; color: #3b82f6; opacity: 0.2;"></i>
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; border: 3px dashed #3b82f6; border-radius: 12px; opacity: 0.3;"></div>
+                        </div>
+                        <h6 class="text-muted mb-2" style="font-weight: 600; color: #64748b;">Belum ada data presensi minggu ini</h6>
+                        <p class="text-muted mb-0 small" style="color: #94a3b8;">Data presensi akan muncul setelah Anda melakukan presensi</p>
                     </div>
                 <?php endif; ?>
             </div>
@@ -455,9 +459,13 @@ $conn->close();
                         </table>
                     </div>
                 <?php else: ?>
-                    <div class="text-center py-4">
-                        <i class="bi bi-trophy text-muted" style="font-size: 2.5rem; opacity: 0.3;"></i>
-                        <p class="text-muted mt-2 mb-0">Belum ada hasil ujian</p>
+                    <div class="text-center py-5">
+                        <div class="mb-3" style="position: relative; display: inline-block;">
+                            <i class="bi bi-trophy" style="font-size: 3.5rem; color: #f59e0b; opacity: 0.2;"></i>
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; border: 3px dashed #f59e0b; border-radius: 50%; opacity: 0.3;"></div>
+                        </div>
+                        <h6 class="text-muted mb-2" style="font-weight: 600; color: #64748b;">Belum ada hasil ujian</h6>
+                        <p class="text-muted mb-0 small" style="color: #94a3b8;">Hasil ujian akan muncul setelah Anda menyelesaikan soal</p>
                     </div>
                 <?php endif; ?>
             </div>
