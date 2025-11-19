@@ -61,20 +61,51 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="stylesheet" href="assets/css/style.css?v=<?php echo time(); ?>">
     <style>
         /* Login page styles - Matching dashboard color scheme with glassmorphism */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            background: linear-gradient(135deg, #ddd6fe 0%, #c7d2fe 20%, #e0e7ff 40%, #f3f4f6 60%, #ffffff 100%) !important;
+            background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23ddd6fe;stop-opacity:1' /%3E%3Cstop offset='20%25' style='stop-color:%23c7d2fe;stop-opacity:1' /%3E%3Cstop offset='40%25' style='stop-color:%23e0e7ff;stop-opacity:1' /%3E%3Cstop offset='60%25' style='stop-color:%23f3f4f6;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23ffffff;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grad)' /%3E%3C/svg%3E") !important;
+            background-attachment: fixed !important;
+            background-size: cover !important;
+            background-repeat: no-repeat !important;
+            min-height: 100vh !important;
+            width: 100% !important;
+        }
+        
         body.login-page {
             margin: 0 !important;
             padding: 0 !important;
             overflow-x: hidden;
-            background: linear-gradient(135deg, #ede9fe 0%, #e0e7ff 25%, #f3f4f6 50%, #ffffff 100%) !important;
+            background: linear-gradient(135deg, #ddd6fe 0%, #c7d2fe 20%, #e0e7ff 40%, #f3f4f6 60%, #ffffff 100%) !important;
+            background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23ddd6fe;stop-opacity:1' /%3E%3Cstop offset='20%25' style='stop-color:%23c7d2fe;stop-opacity:1' /%3E%3Cstop offset='40%25' style='stop-color:%23e0e7ff;stop-opacity:1' /%3E%3Cstop offset='60%25' style='stop-color:%23f3f4f6;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23ffffff;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grad)' /%3E%3C/svg%3E") !important;
             background-attachment: fixed !important;
+            background-size: cover !important;
+            background-repeat: no-repeat !important;
             min-height: 100vh !important;
+            width: 100% !important;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            position: relative;
         }
         
-        html {
-            background: linear-gradient(135deg, #ede9fe 0%, #e0e7ff 25%, #f3f4f6 50%, #ffffff 100%) !important;
-            background-attachment: fixed !important;
-            min-height: 100vh !important;
+        body.login-page::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ddd6fe 0%, #c7d2fe 20%, #e0e7ff 40%, #f3f4f6 60%, #ffffff 100%);
+            background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23ddd6fe;stop-opacity:1' /%3E%3Cstop offset='20%25' style='stop-color:%23c7d2fe;stop-opacity:1' /%3E%3Cstop offset='40%25' style='stop-color:%23e0e7ff;stop-opacity:1' /%3E%3Cstop offset='60%25' style='stop-color:%23f3f4f6;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23ffffff;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grad)' /%3E%3C/svg%3E");
+            background-attachment: fixed;
+            background-size: cover;
+            background-repeat: no-repeat;
+            z-index: -1;
+            pointer-events: none;
         }
         
         body.login-page .login-container {
@@ -87,6 +118,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             width: 100% !important;
             box-sizing: border-box !important;
             margin: 0 !important;
+            position: relative;
+            z-index: 1;
         }
         
         body.login-page .login-card {
