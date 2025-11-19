@@ -136,8 +136,8 @@ body::before {
 }
 
 .sidebar .components a:hover {
-    color: #1e3a8a;
-    background: rgba(30, 58, 138, 0.1);
+    color: #ffffff;
+    background: #1e3a8a;
 }
 
 .sidebar .components a.active {
