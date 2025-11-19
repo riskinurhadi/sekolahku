@@ -68,8 +68,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         
         html {
-            background: linear-gradient(135deg, #ddd6fe 0%, #c7d2fe 20%, #e0e7ff 40%, #f3f4f6 60%, #ffffff 100%) !important;
-            background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23ddd6fe;stop-opacity:1' /%3E%3Cstop offset='20%25' style='stop-color:%23c7d2fe;stop-opacity:1' /%3E%3Cstop offset='40%25' style='stop-color:%23e0e7ff;stop-opacity:1' /%3E%3Cstop offset='60%25' style='stop-color:%23f3f4f6;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23ffffff;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grad)' /%3E%3C/svg%3E") !important;
+            background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 15%, #ddd6fe 35%, #e0e7ff 55%, #f3f4f6 75%, #ffffff 100%) !important;
+            background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23c4b5fd;stop-opacity:1' /%3E%3Cstop offset='15%25' style='stop-color:%23a78bfa;stop-opacity:1' /%3E%3Cstop offset='35%25' style='stop-color:%23ddd6fe;stop-opacity:1' /%3E%3Cstop offset='55%25' style='stop-color:%23e0e7ff;stop-opacity:1' /%3E%3Cstop offset='75%25' style='stop-color:%23f3f4f6;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23ffffff;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grad)' /%3E%3C/svg%3E") !important;
             background-attachment: fixed !important;
             background-size: cover !important;
             background-repeat: no-repeat !important;
@@ -81,8 +81,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             margin: 0 !important;
             padding: 0 !important;
             overflow-x: hidden;
-            background: linear-gradient(135deg, #ddd6fe 0%, #c7d2fe 20%, #e0e7ff 40%, #f3f4f6 60%, #ffffff 100%) !important;
-            background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23ddd6fe;stop-opacity:1' /%3E%3Cstop offset='20%25' style='stop-color:%23c7d2fe;stop-opacity:1' /%3E%3Cstop offset='40%25' style='stop-color:%23e0e7ff;stop-opacity:1' /%3E%3Cstop offset='60%25' style='stop-color:%23f3f4f6;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23ffffff;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grad)' /%3E%3C/svg%3E") !important;
+            background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 15%, #ddd6fe 35%, #e0e7ff 55%, #f3f4f6 75%, #ffffff 100%) !important;
+            background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23c4b5fd;stop-opacity:1' /%3E%3Cstop offset='15%25' style='stop-color:%23a78bfa;stop-opacity:1' /%3E%3Cstop offset='35%25' style='stop-color:%23ddd6fe;stop-opacity:1' /%3E%3Cstop offset='55%25' style='stop-color:%23e0e7ff;stop-opacity:1' /%3E%3Cstop offset='75%25' style='stop-color:%23f3f4f6;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23ffffff;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grad)' /%3E%3C/svg%3E") !important;
             background-attachment: fixed !important;
             background-size: cover !important;
             background-repeat: no-repeat !important;
@@ -99,8 +99,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #ddd6fe 0%, #c7d2fe 20%, #e0e7ff 40%, #f3f4f6 60%, #ffffff 100%);
-            background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23ddd6fe;stop-opacity:1' /%3E%3Cstop offset='20%25' style='stop-color:%23c7d2fe;stop-opacity:1' /%3E%3Cstop offset='40%25' style='stop-color:%23e0e7ff;stop-opacity:1' /%3E%3Cstop offset='60%25' style='stop-color:%23f3f4f6;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23ffffff;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grad)' /%3E%3C/svg%3E");
+            background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 15%, #ddd6fe 35%, #e0e7ff 55%, #f3f4f6 75%, #ffffff 100%);
+            background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23c4b5fd;stop-opacity:1' /%3E%3Cstop offset='15%25' style='stop-color:%23a78bfa;stop-opacity:1' /%3E%3Cstop offset='35%25' style='stop-color:%23ddd6fe;stop-opacity:1' /%3E%3Cstop offset='55%25' style='stop-color:%23e0e7ff;stop-opacity:1' /%3E%3Cstop offset='75%25' style='stop-color:%23f3f4f6;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23ffffff;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grad)' /%3E%3C/svg%3E");
             background-attachment: fixed;
             background-size: cover;
             background-repeat: no-repeat;
@@ -159,26 +159,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             opacity: 0.8 !important;
         }
         
-        /* Left Panel - Purple/Indigo gradient matching dashboard with glass effect */
+        /* Left Panel - Transparent with glass effect */
         .login-left-panel {
             flex: 1 !important;
-            background: linear-gradient(135deg, #8b7fd8 0%, #7c6dd4 50%, #6d5dd0 100%) !important;
+            background: rgba(255, 255, 255, 0.2) !important;
+            backdrop-filter: blur(30px) saturate(180%) !important;
+            -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
             padding: 60px 50px !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
             position: relative !important;
             overflow: hidden !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.3) !important;
         }
         
         .login-left-panel::before {
             content: '' !important;
             position: absolute !important;
-            top: -50% !important;
-            right: -50% !important;
-            width: 200% !important;
-            height: 200% !important;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%) !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            background: radial-gradient(circle at top left, rgba(196, 181, 253, 0.15) 0%, transparent 50%) !important;
             pointer-events: none !important;
         }
         
@@ -192,6 +195,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             align-items: center !important;
             justify-content: center !important;
             position: relative !important;
+        }
+        
+        .login-logo-section {
+            position: relative !important;
+            z-index: 1 !important;
+            width: 100% !important;
         }
         
         .login-logo-wrapper {
@@ -270,6 +279,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-weight: 700 !important;
             color: #ffffff !important;
             margin-bottom: 8px !important;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2) !important;
         }
         
         .login-system-subtitle {
@@ -277,6 +287,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-weight: 600 !important;
             color: #ffffff !important;
             margin-bottom: 35px !important;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        .login-system-description {
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.25) !important;
         }
         
         .login-form-title {

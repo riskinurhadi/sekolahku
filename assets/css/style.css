@@ -556,11 +556,11 @@ body {
     border-color: rgba(255, 255, 255, 0.4);
 }
 
-.dashboard-card:hover::before {
+.dashboard-card:hover::before { 
     opacity: 1;
 }
 
-.dashboard-card .card-header {
+.dashboard-card .card-header { 
     background: rgba(255, 255, 255, 0.3);
     backdrop-filter: blur(15px) saturate(180%);
     -webkit-backdrop-filter: blur(15px) saturate(180%);
@@ -1217,8 +1217,8 @@ body.login-page {
     margin: 0 !important;
     padding: 0 !important;
     overflow-x: hidden;
-    background: linear-gradient(135deg, #ddd6fe 0%, #c7d2fe 20%, #e0e7ff 40%, #f3f4f6 60%, #ffffff 100%) !important;
-    background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23ddd6fe;stop-opacity:1' /%3E%3Cstop offset='20%25' style='stop-color:%23c7d2fe;stop-opacity:1' /%3E%3Cstop offset='40%25' style='stop-color:%23e0e7ff;stop-opacity:1' /%3E%3Cstop offset='60%25' style='stop-color:%23f3f4f6;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23ffffff;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grad)' /%3E%3C/svg%3E") !important;
+    background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 15%, #ddd6fe 35%, #e0e7ff 55%, #f3f4f6 75%, #ffffff 100%) !important;
+    background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23c4b5fd;stop-opacity:1' /%3E%3Cstop offset='15%25' style='stop-color:%23a78bfa;stop-opacity:1' /%3E%3Cstop offset='35%25' style='stop-color:%23ddd6fe;stop-opacity:1' /%3E%3Cstop offset='55%25' style='stop-color:%23e0e7ff;stop-opacity:1' /%3E%3Cstop offset='75%25' style='stop-color:%23f3f4f6;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23ffffff;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grad)' /%3E%3C/svg%3E") !important;
     background-attachment: fixed !important;
     background-size: cover !important;
     background-repeat: no-repeat !important;
@@ -1235,8 +1235,8 @@ body.login-page::before {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #ddd6fe 0%, #c7d2fe 20%, #e0e7ff 40%, #f3f4f6 60%, #ffffff 100%);
-    background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23ddd6fe;stop-opacity:1' /%3E%3Cstop offset='20%25' style='stop-color:%23c7d2fe;stop-opacity:1' /%3E%3Cstop offset='40%25' style='stop-color:%23e0e7ff;stop-opacity:1' /%3E%3Cstop offset='60%25' style='stop-color:%23f3f4f6;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23ffffff;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grad)' /%3E%3C/svg%3E");
+    background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 15%, #ddd6fe 35%, #e0e7ff 55%, #f3f4f6 75%, #ffffff 100%);
+    background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23c4b5fd;stop-opacity:1' /%3E%3Cstop offset='15%25' style='stop-color:%23a78bfa;stop-opacity:1' /%3E%3Cstop offset='35%25' style='stop-color:%23ddd6fe;stop-opacity:1' /%3E%3Cstop offset='55%25' style='stop-color:%23e0e7ff;stop-opacity:1' /%3E%3Cstop offset='75%25' style='stop-color:%23f3f4f6;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23ffffff;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grad)' /%3E%3C/svg%3E");
     background-attachment: fixed;
     background-size: cover;
     background-repeat: no-repeat;
@@ -1273,10 +1273,12 @@ body.login-page .login-card {
     margin: 0 auto;
 }
 
-/* Left Panel - Green Background with Logos */
+/* Left Panel - Transparent with Glass Effect */
 .login-left-panel {
     flex: 1;
-    background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
     padding: 60px 50px;
     display: flex;
     align-items: center;
@@ -1284,6 +1286,7 @@ body.login-page .login-card {
     position: relative;
     overflow: hidden;
     min-width: 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .login-logo-section {
