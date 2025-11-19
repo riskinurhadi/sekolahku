@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             margin: 0 !important;
             padding: 0 !important;
             overflow-x: hidden;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e8ecf1 100%) !important;
+            background: linear-gradient(135deg, #f3f0ff 0%, #eef2ff 30%, #ffffff 100%) !important;
             background-attachment: fixed !important;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
@@ -83,15 +83,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         
         body.login-page .login-card {
-            background: rgba(255, 255, 255, 0.4) !important;
-            backdrop-filter: blur(30px) saturate(200%) !important;
-            -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
+            background: rgba(255, 255, 255, 0.35) !important;
+            backdrop-filter: blur(40px) saturate(180%) !important;
+            -webkit-backdrop-filter: blur(40px) saturate(180%) !important;
             border-radius: 24px !important;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 
-                        0 2px 16px rgba(0, 0, 0, 0.06),
-                        inset 0 2px 4px rgba(255, 255, 255, 0.9),
-                        inset 0 -1px 2px rgba(255, 255, 255, 0.5) !important;
-            border: 0.5px solid rgba(255, 255, 255, 0.3) !important;
+            box-shadow: 0 8px 32px rgba(139, 127, 216, 0.15), 
+                        0 2px 16px rgba(139, 127, 216, 0.1),
+                        inset 0 2px 4px rgba(255, 255, 255, 0.8),
+                        inset 0 -1px 2px rgba(255, 255, 255, 0.4) !important;
+            border: 1px solid rgba(255, 255, 255, 0.5) !important;
             width: 100% !important;
             max-width: 1100px !important;
             display: flex !important;
@@ -144,9 +144,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         .login-right-panel {
             flex: 1 !important;
-            background: rgba(255, 255, 255, 0.3) !important;
-            backdrop-filter: blur(15px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
+            background: rgba(255, 255, 255, 0.25) !important;
+            backdrop-filter: blur(20px) saturate(180%) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
             padding: 60px 50px !important;
             display: flex !important;
             align-items: center !important;
@@ -254,12 +254,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         /* Input with glassmorphism effect */
         .login-form .input-group {
-            background: rgba(255, 255, 255, 0.6) !important;
-            backdrop-filter: blur(10px) !important;
-            -webkit-backdrop-filter: blur(10px) !important;
+            background: rgba(255, 255, 255, 0.7) !important;
+            backdrop-filter: blur(15px) saturate(180%) !important;
+            -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
             border-radius: 12px !important;
-            border: 0.5px solid rgba(255, 255, 255, 0.4) !important;
+            border: 1px solid rgba(255, 255, 255, 0.6) !important;
             overflow: hidden !important;
+            box-shadow: 0 2px 8px rgba(139, 127, 216, 0.08) !important;
         }
         
         .login-form .input-group-text {
