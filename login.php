@@ -201,14 +201,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             position: relative !important;
             z-index: 1 !important;
             width: 100% !important;
-        }
-        
-        .login-logo-wrapper {
-            display: flex !important;
-            align-items: flex-start !important;
-            justify-content: center !important;
-            gap: 30px !important;
-            margin-bottom: 50px !important;
+            text-align: center !important;
         }
         
         /* Logo Kemenag - Soft purple to match dashboard */
@@ -275,23 +268,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         
         .login-system-title {
-            font-size: 36px !important;
+            font-size: 42px !important;
             font-weight: 700 !important;
-            color: #ffffff !important;
-            margin-bottom: 8px !important;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+            color: #1e293b !important;
+            margin-bottom: 12px !important;
+            text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8), 0 1px 2px rgba(255, 255, 255, 0.6) !important;
+            letter-spacing: -0.5px !important;
         }
         
         .login-system-subtitle {
-            font-size: 28px !important;
+            font-size: 32px !important;
             font-weight: 600 !important;
-            color: #ffffff !important;
-            margin-bottom: 35px !important;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+            color: #475569 !important;
+            margin-bottom: 40px !important;
+            text-shadow: 0 1px 3px rgba(255, 255, 255, 0.7) !important;
+            letter-spacing: -0.3px !important;
         }
         
         .login-system-description {
-            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.25) !important;
+            color: #64748b !important;
+            font-size: 16px !important;
+            line-height: 1.7 !important;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6) !important;
+            max-width: 450px !important;
+            margin: 0 auto !important;
         }
         
         .login-form-title {
@@ -385,32 +385,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body class="login-page">
     <div class="login-container">
         <div class="login-card">
-            <!-- Left Panel: System Info & Logo -->
+            <!-- Left Panel: System Info -->
             <div class="login-left-panel">
                 <div class="login-logo-section">
-                    <div class="login-logo-wrapper">
-                        <!-- Logo Kementerian Agama -->
-                        <div class="logo-kemenag">
-                            <div class="logo-kemenag-shape">
-                                <div class="logo-kemenag-inner">
-                                    <i class="bi bi-book-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                </div>
-                            </div>
-                            <div class="logo-kemenag-text">IKHLAS BERAMAL</div>
-                        </div>
-                        
-                        <!-- Logo Sekolahku -->
-                        <div class="logo-waykanan">
-                            <div class="logo-waykanan-shape">
-                                <div class="logo-waykanan-inner">
-                                    <i class="bi bi-mortarboard-fill"></i>
-                                </div>
-                            </div>
-                            <div class="logo-waykanan-text">SEKOLAHKU</div>
-                        </div>
-                    </div>
-                    
                     <h1 class="login-system-title">Sistem Informasi</h1>
                     <h2 class="login-system-subtitle">Sekolahku</h2>
                     <p class="login-system-description">
