@@ -8,7 +8,73 @@ $conn = getConnection();
 $sekolah_id = $_SESSION['sekolah_id'];
 $message = '';
 
-// Handle form submission
+// Handle AJAX request
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['ajax'])) {
+    header('Content-Type: application/json');
+    
+    if (isset($_POST['action'])) {
+        if ($_POST['action'] == 'add') {
+            $username = $_POST['username'];
+            $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+            $nama_lengkap = $_POST['nama_lengkap'];
+            $email = $_POST['email'] ?? '';
+            $role = $_POST['role'] ?? 'guru';
+            $spesialisasi = $_POST['spesialisasi'] ?? '';
+            
+            // Validasi role hanya boleh guru atau akademik
+            if (!in_array($role, ['guru', 'akademik'])) {
+                $role = 'guru';
+            }
+            
+            // Jika role adalah guru, spesialisasi wajib diisi
+            if ($role == 'guru' && empty($spesialisasi)) {
+                echo json_encode(['success' => false, 'message' => 'Spesialisasi wajib diisi untuk guru!']);
+                $conn->close();
+                exit;
+            }
+            
+            // Check if username already exists
+            $checkStmt = $conn->prepare("SELECT id FROM users WHERE username = ?");
+            $checkStmt->bind_param("s", $username);
+            $checkStmt->execute();
+            if ($checkStmt->get_result()->num_rows > 0) {
+                $checkStmt->close();
+                echo json_encode(['success' => false, 'message' => 'Username sudah digunakan!']);
+                $conn->close();
+                exit;
+            }
+            $checkStmt->close();
+            
+            $stmt = $conn->prepare("INSERT INTO users (username, password, nama_lengkap, email, role, sekolah_id, spesialisasi) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("sssssis", $username, $password, $nama_lengkap, $email, $role, $sekolah_id, $spesialisasi);
+            
+            if ($stmt->execute()) {
+                $role_text = $role == 'akademik' ? 'Akademik' : 'Guru';
+                echo json_encode(['success' => true, 'message' => $role_text . ' berhasil ditambahkan!']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Gagal menambahkan user!']);
+            }
+            $stmt->close();
+            $conn->close();
+            exit;
+        } elseif ($_POST['action'] == 'delete') {
+            $id = $_POST['id'];
+            $stmt = $conn->prepare("DELETE FROM users WHERE id = ? AND role IN ('guru', 'akademik') AND sekolah_id = ?");
+            $stmt->bind_param("ii", $id, $sekolah_id);
+            
+            if ($stmt->execute()) {
+                echo json_encode(['success' => true, 'message' => 'User berhasil dihapus!']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Gagal menghapus user!']);
+            }
+            $stmt->close();
+            $conn->close();
+            exit;
+        }
+    }
+}
+
+// Handle form submission (non-AJAX fallback)
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['action'])) {
         if ($_POST['action'] == 'add') {
@@ -68,10 +134,10 @@ $conn->close();
         <?php 
         $msg = explode(':', $message);
         if ($msg[0] == 'success') {
-            echo "showSuccess('" . addslashes($msg[1]) . "');";
+            echo "Swal.fire({ icon: 'success', title: 'Berhasil', text: '" . addslashes($msg[1]) . "', timer: 1500, showConfirmButton: false });";
             echo "setTimeout(function(){ window.location.reload(); }, 1500);";
         } else {
-            echo "showError('" . addslashes($msg[1]) . "');";
+            echo "Swal.fire({ icon: 'error', title: 'Gagal', text: '" . addslashes($msg[1]) . "' });";
         }
         ?>
     </script>
@@ -86,7 +152,7 @@ $conn->close();
 <div class="row">
     <div class="col-12">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="bi bi-person-workspace"></i> Daftar Guru</h5>
                 <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addTeacherModal">
                     <i class="bi bi-plus-circle"></i> Tambah Guru
@@ -136,13 +202,9 @@ $conn->close();
                                     <td><?php echo htmlspecialchars($teacher['email'] ?? '-'); ?></td>
                                     <td><?php echo date('d/m/Y', strtotime($teacher['created_at'])); ?></td>
                                     <td>
-                                        <form method="POST" style="display: inline;" onsubmit="event.preventDefault(); confirmDelete('user').then(result => { if(result) this.submit(); }); return false;">
-                                            <input type="hidden" name="action" value="delete">
-                                            <input type="hidden" name="id" value="<?php echo $teacher['id']; ?>">
-                                            <button type="submit" class="btn btn-sm btn-danger">
-                                                <i class="bi bi-trash"></i> Hapus
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="deleteTeacher(<?php echo $teacher['id']; ?>)">
+                                            <i class="bi bi-trash"></i> Hapus
+                                        </button>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -156,10 +218,11 @@ $conn->close();
 
 <!-- Add Teacher Modal -->
 <div class="modal fade" id="addTeacherModal" tabindex="-1" aria-labelledby="addTeacherModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
-            <form method="POST" id="addTeacherForm">
+            <form id="addTeacherForm">
                 <input type="hidden" name="action" value="add">
+                <input type="hidden" name="ajax" value="1">
                 <div class="modal-header">
                     <h5 class="modal-title" id="addTeacherModalLabel">
                         <i class="bi bi-plus-circle"></i> Tambah Guru/Staf Baru
@@ -243,12 +306,10 @@ function toggleSpesialisasi() {
     }
 }
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    toggleSpesialisasi();
-});
-
 $(document).ready(function() {
+    // Initialize toggle on page load
+    toggleSpesialisasi();
+    
     $('#teachersTable').DataTable({
         language: {
             url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
@@ -259,7 +320,113 @@ $(document).ready(function() {
         lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
         dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
     });
+    
+    // Reset form when modal is closed
+    $('#addTeacherModal').on('hidden.bs.modal', function () {
+        $(this).find('form')[0].reset();
+        toggleSpesialisasi();
+    });
+    
+    // Handle form submission with AJAX
+    $('#addTeacherForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        var formData = $(this).serialize();
+        var submitBtn = $(this).find('button[type="submit"]');
+        var originalText = submitBtn.html();
+        
+        // Disable submit button
+        submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...');
+        
+        $.ajax({
+            url: '',
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: response.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(function() {
+                        $('#addTeacherModal').modal('hide');
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: response.message
+                    });
+                    submitBtn.prop('disabled', false).html(originalText);
+                }
+            },
+            error: function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Terjadi kesalahan saat menyimpan data'
+                });
+                submitBtn.prop('disabled', false).html(originalText);
+            }
+        });
+    });
 });
+
+function deleteTeacher(id) {
+    Swal.fire({
+        title: 'Apakah Anda yakin?',
+        text: "Data user akan dihapus secara permanen!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '',
+                type: 'POST',
+                data: {
+                    action: 'delete',
+                    id: id,
+                    ajax: 1
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: response.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(function() {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: response.message
+                        });
+                    }
+                },
+                error: function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Terjadi kesalahan saat menghapus data'
+                    });
+                }
+            });
+        }
+    });
+}
 </script>
 
 <?php require_once '../../includes/footer.php'; ?>

@@ -8,7 +8,86 @@ $conn = getConnection();
 $sekolah_id = $_SESSION['sekolah_id'];
 $message = '';
 
-// Handle form submission
+// Handle AJAX request
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['ajax'])) {
+    header('Content-Type: application/json');
+    
+    if (isset($_POST['action'])) {
+        if ($_POST['action'] == 'add') {
+            $nama_kelas = $_POST['nama_kelas'];
+            $tingkat = $_POST['tingkat'];
+            
+            // Check if kelas already exists
+            $checkStmt = $conn->prepare("SELECT id FROM kelas WHERE nama_kelas = ? AND sekolah_id = ?");
+            $checkStmt->bind_param("si", $nama_kelas, $sekolah_id);
+            $checkStmt->execute();
+            if ($checkStmt->get_result()->num_rows > 0) {
+                $checkStmt->close();
+                echo json_encode(['success' => false, 'message' => 'Kelas dengan nama ini sudah ada!']);
+                $conn->close();
+                exit;
+            }
+            $checkStmt->close();
+            
+            $stmt = $conn->prepare("INSERT INTO kelas (nama_kelas, tingkat, sekolah_id) VALUES (?, ?, ?)");
+            $stmt->bind_param("sii", $nama_kelas, $tingkat, $sekolah_id);
+            
+            if ($stmt->execute()) {
+                echo json_encode(['success' => true, 'message' => 'Kelas berhasil ditambahkan!']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Gagal menambahkan kelas!']);
+            }
+            $stmt->close();
+            $conn->close();
+            exit;
+        } elseif ($_POST['action'] == 'edit') {
+            $id = $_POST['id'];
+            $nama_kelas = $_POST['nama_kelas'];
+            $tingkat = $_POST['tingkat'];
+            
+            $stmt = $conn->prepare("UPDATE kelas SET nama_kelas = ?, tingkat = ? WHERE id = ? AND sekolah_id = ?");
+            $stmt->bind_param("siii", $nama_kelas, $tingkat, $id, $sekolah_id);
+            
+            if ($stmt->execute()) {
+                echo json_encode(['success' => true, 'message' => 'Kelas berhasil diupdate!']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Gagal mengupdate kelas!']);
+            }
+            $stmt->close();
+            $conn->close();
+            exit;
+        } elseif ($_POST['action'] == 'delete') {
+            $id = $_POST['id'];
+            
+            // Cek apakah ada siswa di kelas ini
+            $check_stmt = $conn->prepare("SELECT COUNT(*) as total FROM users WHERE kelas_id = ?");
+            $check_stmt->bind_param("i", $id);
+            $check_stmt->execute();
+            $check_result = $check_stmt->get_result()->fetch_assoc();
+            $check_stmt->close();
+            
+            if ($check_result['total'] > 0) {
+                echo json_encode(['success' => false, 'message' => 'Kelas tidak bisa dihapus karena masih ada siswa di kelas ini!']);
+                $conn->close();
+                exit;
+            }
+            
+            $stmt = $conn->prepare("DELETE FROM kelas WHERE id = ? AND sekolah_id = ?");
+            $stmt->bind_param("ii", $id, $sekolah_id);
+            
+            if ($stmt->execute()) {
+                echo json_encode(['success' => true, 'message' => 'Kelas berhasil dihapus!']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Gagal menghapus kelas!']);
+            }
+            $stmt->close();
+            $conn->close();
+            exit;
+        }
+    }
+}
+
+// Handle form submission (non-AJAX fallback)
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['action'])) {
         if ($_POST['action'] == 'add') {
@@ -97,8 +176,8 @@ $conn->close();
 <!-- Classes List -->
 <div class="row">
     <div class="col-12">
-        <div class="dashboard-card">
-            <div class="card-header">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="bi bi-building"></i> Daftar Kelas</h5>
                 <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addKelasModal">
                     <i class="bi bi-plus-circle"></i> Tambah Kelas
@@ -131,13 +210,9 @@ $conn->close();
                                         <button type="button" class="btn btn-sm btn-info" onclick="editKelas(<?php echo htmlspecialchars(json_encode($k)); ?>)">
                                             <i class="bi bi-pencil"></i> Edit
                                         </button>
-                                        <form method="POST" style="display: inline;" onsubmit="return confirm('Yakin ingin menghapus kelas ini? Pastikan tidak ada siswa di kelas ini.');">
-                                            <input type="hidden" name="action" value="delete">
-                                            <input type="hidden" name="id" value="<?php echo $k['id']; ?>">
-                                            <button type="submit" class="btn btn-sm btn-danger">
-                                                <i class="bi bi-trash"></i> Hapus
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="deleteKelas(<?php echo $k['id']; ?>)">
+                                            <i class="bi bi-trash"></i> Hapus
+                                        </button>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -150,18 +225,18 @@ $conn->close();
 </div>
 
 <!-- Add/Edit Kelas Modal -->
-<div class="modal fade" id="addKelasModal" tabindex="-1">
-    <div class="modal-dialog">
+<div class="modal fade" id="addKelasModal" tabindex="-1" aria-labelledby="addKelasModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">Tambah Kelas</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="POST" id="kelasForm">
+            <form id="kelasForm">
+                <input type="hidden" name="action" id="formAction" value="add">
+                <input type="hidden" name="id" id="formId">
+                <input type="hidden" name="ajax" value="1">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Tambah Kelas</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
                 <div class="modal-body">
-                    <input type="hidden" name="action" id="formAction" value="add">
-                    <input type="hidden" name="id" id="formId">
-                    
                     <div class="mb-3">
                         <label class="form-label">Tingkat <span class="text-danger">*</span></label>
                         <select class="form-select" name="tingkat" id="tingkat" required>
@@ -180,7 +255,9 @@ $conn->close();
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Simpan
+                    </button>
                 </div>
             </form>
         </div>
@@ -199,13 +276,57 @@ function editKelas(kelas) {
     modal.show();
 }
 
-// Reset form when modal is closed
-document.getElementById('addKelasModal').addEventListener('hidden.bs.modal', function () {
-    document.getElementById('kelasForm').reset();
-    document.getElementById('modalTitle').textContent = 'Tambah Kelas';
-    document.getElementById('formAction').value = 'add';
-    document.getElementById('formId').value = '';
-});
+function deleteKelas(id) {
+    Swal.fire({
+        title: 'Apakah Anda yakin?',
+        text: "Kelas akan dihapus secara permanen! Pastikan tidak ada siswa di kelas ini.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '',
+                type: 'POST',
+                data: {
+                    action: 'delete',
+                    id: id,
+                    ajax: 1
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: response.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(function() {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: response.message
+                        });
+                    }
+                },
+                error: function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Terjadi kesalahan saat menghapus data'
+                    });
+                }
+            });
+        }
+    });
+}
 
 $(document).ready(function() {
     $('#kelasTable').DataTable({
@@ -218,8 +339,64 @@ $(document).ready(function() {
         lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
         dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
     });
+    
+    // Reset form when modal is closed
+    $('#addKelasModal').on('hidden.bs.modal', function () {
+        $(this).find('form')[0].reset();
+        document.getElementById('modalTitle').textContent = 'Tambah Kelas';
+        document.getElementById('formAction').value = 'add';
+        document.getElementById('formId').value = '';
+    });
+    
+    // Handle form submission with AJAX
+    $('#kelasForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        var formData = $(this).serialize();
+        var submitBtn = $(this).find('button[type="submit"]');
+        var originalText = submitBtn.html();
+        var action = $('#formAction').val();
+        
+        // Disable submit button
+        submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...');
+        
+        $.ajax({
+            url: '',
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: response.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(function() {
+                        $('#addKelasModal').modal('hide');
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: response.message
+                    });
+                    submitBtn.prop('disabled', false).html(originalText);
+                }
+            },
+            error: function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Terjadi kesalahan saat menyimpan data'
+                });
+                submitBtn.prop('disabled', false).html(originalText);
+            }
+        });
+    });
 });
 </script>
 
 <?php require_once '../../includes/footer.php'; ?>
-
