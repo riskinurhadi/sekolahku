@@ -234,8 +234,8 @@ body::before {
 }
 
 .dashboard-top-header .logo-section .logo-image {
-    height: 42px;
-    max-width: 150px;
+    height: 50px;
+    max-width: 200px;
     width: auto;
     object-fit: contain;
     display: block;
