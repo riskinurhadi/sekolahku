@@ -126,15 +126,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         
         body.login-page .login-card {
-            background: rgba(255, 255, 255, 0.35) !important;
-            backdrop-filter: blur(40px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(40px) saturate(180%) !important;
+            background: rgba(255, 255, 255, 0.15) !important;
+            backdrop-filter: blur(60px) saturate(200%) !important;
+            -webkit-backdrop-filter: blur(60px) saturate(200%) !important;
             border-radius: 24px !important;
-            box-shadow: 0 8px 32px rgba(139, 127, 216, 0.15), 
-                        0 2px 16px rgba(139, 127, 216, 0.1),
-                        inset 0 2px 4px rgba(255, 255, 255, 0.8),
-                        inset 0 -1px 2px rgba(255, 255, 255, 0.4) !important;
-            border: 1px solid rgba(255, 255, 255, 0.5) !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 
+                        0 4px 20px rgba(0, 0, 0, 0.08),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+                        inset 0 -1px 0 rgba(255, 255, 255, 0.5),
+                        0 0 0 1px rgba(255, 255, 255, 0.6) !important;
+            border: 1px solid rgba(255, 255, 255, 0.7) !important;
             width: 100% !important;
             max-width: 1100px !important;
             display: flex !important;
@@ -165,16 +166,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         /* Left Panel - Transparent with glass effect */
         .login-left-panel {
             flex: 1 !important;
-            background: rgba(255, 255, 255, 0.2) !important;
-            backdrop-filter: blur(30px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
+            background: rgba(255, 255, 255, 0.1) !important;
+            backdrop-filter: blur(50px) saturate(200%) !important;
+            -webkit-backdrop-filter: blur(50px) saturate(200%) !important;
             padding: 60px 50px !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
             position: relative !important;
             overflow: hidden !important;
-            border-right: 1px solid rgba(255, 255, 255, 0.3) !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.5) !important;
         }
         
         .login-left-panel::before {
@@ -190,9 +191,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         .login-right-panel {
             flex: 1 !important;
-            background: rgba(255, 255, 255, 0.25) !important;
-            backdrop-filter: blur(20px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+            background: rgba(255, 255, 255, 0.12) !important;
+            backdrop-filter: blur(50px) saturate(200%) !important;
+            -webkit-backdrop-filter: blur(50px) saturate(200%) !important;
             padding: 60px 50px !important;
             display: flex !important;
             align-items: center !important;
@@ -312,13 +313,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         /* Input with glassmorphism effect */
         .login-form .input-group {
-            background: rgba(255, 255, 255, 0.7) !important;
-            backdrop-filter: blur(15px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
+            background: rgba(255, 255, 255, 0.4) !important;
+            backdrop-filter: blur(30px) saturate(200%) !important;
+            -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
             border-radius: 12px !important;
-            border: 1px solid rgba(255, 255, 255, 0.6) !important;
+            border: 1px solid rgba(255, 255, 255, 0.7) !important;
             overflow: hidden !important;
-            box-shadow: 0 2px 8px rgba(139, 127, 216, 0.08) !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
         }
         
         .login-form .input-group-text {
