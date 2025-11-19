@@ -228,6 +228,8 @@ body::before {
     align-items: center;
     gap: 12px;
     flex-shrink: 0;
+    margin-left: calc(-1 * var(--sidebar-width));
+    padding-left: 20px;
 }
 
 .dashboard-top-header .logo-section .logo-icon {
