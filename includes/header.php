@@ -262,7 +262,16 @@ if ($table_check && $table_check->num_rows > 0) {
                     </div>
                     <div class="user-profile-info">
                         <div class="user-avatar">
-                            <?php echo strtoupper(substr($user['nama_lengkap'], 0, 1)); ?>
+                            <?php 
+                            $foto_profil = '';
+                            if (!empty($user['foto_profil']) && file_exists(__DIR__ . '/../uploads/profil/' . $user['foto_profil'])) {
+                                $foto_profil = getBasePath() . 'uploads/profil/' . $user['foto_profil'];
+                            }
+                            if ($foto_profil): ?>
+                                <img src="<?php echo htmlspecialchars($foto_profil); ?>" alt="Foto Profil" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                            <?php else: ?>
+                                <?php echo strtoupper(substr($user['nama_lengkap'], 0, 1)); ?>
+                            <?php endif; ?>
                         </div>
                         <div class="user-details">
                             <p class="user-name"><?php echo htmlspecialchars($user['nama_lengkap']); ?></p>
