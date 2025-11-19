@@ -68,8 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         
         html {
-            background: #f3f4f6 !important;
-            background-image: url('assets/img/gradientbg.png') !important;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%) !important;
             background-attachment: fixed !important;
             background-size: cover !important;
             background-position: center center !important;
@@ -82,8 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             margin: 0 !important;
             padding: 0 !important;
             overflow-x: hidden;
-            background: #f3f4f6 !important;
-            background-image: url('assets/img/gradientbg.png') !important;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%) !important;
             background-attachment: fixed !important;
             background-size: cover !important;
             background-position: center center !important;
@@ -101,8 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             left: 0;
             width: 100%;
             height: 100%;
-            background: #f3f4f6;
-            background-image: url('assets/img/gradientbg.png');
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%);
             background-attachment: fixed;
             background-size: cover;
             background-position: center center;
@@ -163,10 +160,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             opacity: 0.8 !important;
         }
         
-        /* Left Panel - Purple solid background */
+        /* Left Panel - Blue solid background */
         .login-left-panel {
             flex: 1 !important;
-            background: linear-gradient(135deg, #8b7fd8 0%, #7c6dd4 50%, #6d5dd0 100%) !important;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%) !important;
             padding: 60px 50px !important;
             display: flex !important;
             align-items: center !important;
@@ -188,7 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         .login-right-panel {
             flex: 1 !important;
-            background: rgba(255, 255, 255, 0.12) !important;
+            background: rgba(255, 255, 255, 0.1) !important;
             backdrop-filter: blur(50px) saturate(200%) !important;
             -webkit-backdrop-filter: blur(50px) saturate(200%) !important;
             padding: 60px 50px !important;
@@ -297,14 +294,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         
         .login-form-title {
-            color: #1e293b !important;
+            color: #ffffff !important;
             font-weight: 700 !important;
             font-size: 32px !important;
             margin-bottom: 8px !important;
         }
         
         .login-form-subtitle {
-            color: #64748b !important;
+            color: rgba(255, 255, 255, 0.8) !important;
             font-size: 15px !important;
             margin-bottom: 35px !important;
         }
@@ -324,7 +321,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .login-form .input-group-text {
             background: transparent !important;
             border: none !important;
-            color: #64748b !important;
+            color: rgba(255, 255, 255, 0.7) !important;
             padding: 12px 16px !important;
         }
         
@@ -332,21 +329,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             background: transparent !important;
             border: none !important;
             padding: 12px 16px !important;
-            color: #1e293b !important;
+            color: #ffffff !important;
         }
         
         .login-form .form-control::placeholder {
-            color: #94a3b8 !important;
+            color: rgba(255, 255, 255, 0.5) !important;
         }
         
-        /* Input focus - Soft purple to match dashboard */
+        /* Input focus - Soft blue to match dashboard */
         .login-form .input-group:focus-within {
-            border-color: rgba(139, 127, 216, 0.5) !important;
-            box-shadow: 0 0 0 3px rgba(139, 127, 216, 0.1) !important;
+            border-color: rgba(59, 130, 246, 0.5) !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
         }
         
         .login-form .input-group:focus-within .input-group-text {
-            color: #8b7fd8 !important;
+            color: #3b82f6 !important;
         }
         
         .login-form .form-control:focus {
@@ -354,11 +351,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             box-shadow: none !important;
         }
         
-        /* Button - Soft purple gradient matching dashboard */
+        /* Button - Soft blue gradient matching dashboard */
         .btn-login {
             width: 100% !important;
             padding: 14px 20px !important;
-            background: linear-gradient(135deg, #8b7fd8 0%, #7c6dd4 100%) !important;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
             border: none !important;
             border-radius: 12px !important;
             color: #ffffff !important;
@@ -366,21 +363,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-size: 16px !important;
             cursor: pointer !important;
             transition: all 0.3s ease !important;
-            box-shadow: 0 4px 12px rgba(139, 127, 216, 0.3) !important;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
         }
         
         .btn-login:hover {
-            background: linear-gradient(135deg, #7c6dd4 0%, #6d5dd0 100%) !important;
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
             transform: translateY(-2px) !important;
-            box-shadow: 0 6px 20px rgba(139, 127, 216, 0.4) !important;
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4) !important;
         }
         
         .login-footer {
             margin-top: 35px !important;
             padding-top: 20px !important;
-            border-top: 1px solid #e9ecef !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
             text-align: center !important;
-            color: #64748b !important;
+            color: rgba(255, 255, 255, 0.7) !important;
             font-size: 13px !important;
         }
     </style>

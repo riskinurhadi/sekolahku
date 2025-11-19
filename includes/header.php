@@ -82,15 +82,15 @@ if ($table_check && $table_check->num_rows > 0) {
     <!-- Custom CSS -->
     <link rel="stylesheet" href="<?php echo getBasePath(); ?>assets/css/style.css">
     <style>
-        /* Background gradient image untuk semua dashboard */
+        /* Background blue gradient untuk semua dashboard */
         html {
-            background-image: url('<?php echo getBasePath(); ?>assets/img/gradientbg.png') !important;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%) !important;
         }
         body {
-            background-image: url('<?php echo getBasePath(); ?>assets/img/gradientbg.png') !important;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%) !important;
         }
         body::before {
-            background-image: url('<?php echo getBasePath(); ?>assets/img/gradientbg.png') !important;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%) !important;
         }
     </style>
 </head>
