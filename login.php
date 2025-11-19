@@ -163,29 +163,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             opacity: 0.8 !important;
         }
         
-        /* Left Panel - Transparent with glass effect and purple tint */
+        /* Left Panel - Purple solid background */
         .login-left-panel {
             flex: 1 !important;
-            background: rgba(139, 127, 216, 0.2) !important;
-            backdrop-filter: blur(50px) saturate(200%) !important;
-            -webkit-backdrop-filter: blur(50px) saturate(200%) !important;
+            background: linear-gradient(135deg, #8b7fd8 0%, #7c6dd4 50%, #6d5dd0 100%) !important;
             padding: 60px 50px !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
             position: relative !important;
             overflow: hidden !important;
-            border-right: 1px solid rgba(255, 255, 255, 0.5) !important;
         }
         
         .login-left-panel::before {
             content: '' !important;
             position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            bottom: 0 !important;
-            background: radial-gradient(circle at top left, rgba(139, 127, 216, 0.3) 0%, rgba(139, 127, 216, 0.1) 50%, transparent 100%) !important;
+            top: -50% !important;
+            right: -50% !important;
+            width: 200% !important;
+            height: 200% !important;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%) !important;
             pointer-events: none !important;
         }
         
@@ -274,28 +271,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .login-system-title {
             font-size: 42px !important;
             font-weight: 700 !important;
-            color: #6366f1 !important;
+            color: #ffffff !important;
             margin-bottom: 12px !important;
-            text-shadow: 0 2px 8px rgba(99, 102, 241, 0.3), 0 1px 3px rgba(255, 255, 255, 0.8) !important;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2) !important;
             letter-spacing: -0.5px !important;
         }
         
         .login-system-subtitle {
             font-size: 32px !important;
             font-weight: 600 !important;
-            color: #8b5cf6 !important;
+            color: #ffffff !important;
             margin-bottom: 40px !important;
-            text-shadow: 0 1px 6px rgba(139, 92, 246, 0.25), 0 1px 2px rgba(255, 255, 255, 0.7) !important;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2) !important;
             letter-spacing: -0.3px !important;
         }
         
         .login-system-description {
-            color: #7c3aed !important;
+            color: #ffffff !important;
             font-size: 16px !important;
             line-height: 1.7 !important;
-            text-shadow: 0 1px 4px rgba(124, 58, 237, 0.2), 0 1px 2px rgba(255, 255, 255, 0.6) !important;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.25) !important;
             max-width: 450px !important;
             margin: 0 auto !important;
+            opacity: 0.95 !important;
         }
         
         .login-form-title {
