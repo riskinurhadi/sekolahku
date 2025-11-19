@@ -268,7 +268,7 @@ $conn->close();
 .dashboard-greeting h1 {
     font-size: 32px;
     font-weight: 700;
-    color: #1e293b;
+    color: #1e3a8a;
     margin-bottom: 8px;
 }
 
