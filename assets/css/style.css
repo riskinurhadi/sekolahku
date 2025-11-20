@@ -1027,18 +1027,20 @@ form.hidden textarea,
     pointer-events: none !important; /* Modal container tidak menerima klik, hanya backdrop */
     visibility: visible !important;
     opacity: 1 !important;
-    z-index: 1060 !important; /* Lebih tinggi dari watermark */
+    z-index: 1065 !important; /* Lebih tinggi dari backdrop dan watermark */
 }
 
 /* Modal dialog dan content harus bisa menerima klik */
 .modal.show .modal-dialog {
     pointer-events: auto !important;
-    z-index: 1061 !important;
+    z-index: 1070 !important; /* Jauh lebih tinggi dari backdrop */
+    position: relative;
 }
 
 .modal.show .modal-content {
     pointer-events: auto !important;
-    z-index: 1062 !important;
+    z-index: 1071 !important; /* Paling tinggi */
+    position: relative;
 }
 
 .modal-backdrop {
@@ -1068,7 +1070,7 @@ form.hidden textarea,
 }
 
 .modal-dialog {
-    z-index: 1061 !important; /* Lebih tinggi dari backdrop dan watermark */
+    z-index: 1070 !important; /* Jauh lebih tinggi dari backdrop */
     margin: 1.75rem auto !important;
     position: relative !important;
     pointer-events: auto !important;
@@ -1083,6 +1085,8 @@ form.hidden textarea,
     align-items: center !important;
     min-height: calc(100% - 3.5rem) !important;
     pointer-events: auto !important;
+    z-index: 1070 !important;
+    position: relative;
 }
 
 .modal-content {
@@ -1091,7 +1095,7 @@ form.hidden textarea,
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     background: #ffffff;
     position: relative;
-    z-index: 1062 !important; /* Paling tinggi, di atas semua */
+    z-index: 1071 !important; /* Paling tinggi, di atas semua */
     pointer-events: auto !important;
 }
 
@@ -1105,9 +1109,13 @@ form.hidden textarea,
 .modal-content textarea,
 .modal-content button,
 .modal-content a,
-.modal-content .btn {
+.modal-content .btn,
+.modal-content label,
+.modal-content .form-label,
+.modal-content .form-control,
+.modal-content .form-select {
     pointer-events: auto !important;
-    z-index: 1063 !important; /* Paling tinggi untuk elemen interaktif */
+    z-index: 1072 !important; /* Paling tinggi untuk elemen interaktif */
     position: relative;
 }
 
@@ -1116,6 +1124,9 @@ form.hidden textarea,
     border-bottom: 1px solid #e5e7eb;
     padding: 20px 24px;
     border-radius: 16px 16px 0 0;
+    position: relative;
+    z-index: 1072 !important;
+    pointer-events: auto !important;
 }
 
 .modal-title {
@@ -1127,11 +1138,17 @@ form.hidden textarea,
 .modal-body {
     padding: 24px;
     color: #1e293b;
+    position: relative;
+    z-index: 1072 !important;
+    pointer-events: auto !important;
 }
 
 .modal-footer {
     border-top: 1px solid #e5e7eb;
     padding: 16px 24px;
+    position: relative;
+    z-index: 1072 !important;
+    pointer-events: auto !important;
 }
 
 /* Scrollbar */
