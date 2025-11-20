@@ -326,13 +326,6 @@ if ($table_check && $table_check->num_rows > 0) {
                     <?php endif; ?>
                 </div>
             <?php endif; ?>
-            
-            <!-- Logout Button -->
-            <div class="sidebar-footer">
-                <a href="https://sekolahku.rnara.my.id/logout.php" class="sidebar-logout-btn">
-                    <i class="bi bi-box-arrow-right"></i> Keluar
-                </a>
-            </div>
         </nav>
         
         <!-- Page Content -->
@@ -361,31 +354,47 @@ if ($table_check && $table_check->num_rows > 0) {
                             <?php endif; ?>
                         </a>
                     </div>
-                    <div class="user-profile-info">
-                        <div class="user-avatar">
-                            <?php 
-                            $foto_profil = '';
-                            if (!empty($user['foto_profil']) && file_exists(__DIR__ . '/../uploads/profil/' . $user['foto_profil'])) {
-                                $foto_profil = getBasePath() . 'uploads/profil/' . $user['foto_profil'];
-                            }
-                            if ($foto_profil): ?>
-                                <img src="<?php echo htmlspecialchars($foto_profil); ?>" alt="Foto Profil" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
-                            <?php else: ?>
-                                <?php echo strtoupper(substr($user['nama_lengkap'], 0, 1)); ?>
-                            <?php endif; ?>
+                    <div class="dropdown">
+                        <div class="user-profile-info dropdown-toggle" id="userProfileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="user-avatar">
+                                <?php 
+                                $foto_profil = '';
+                                if (!empty($user['foto_profil']) && file_exists(__DIR__ . '/../uploads/profil/' . $user['foto_profil'])) {
+                                    $foto_profil = getBasePath() . 'uploads/profil/' . $user['foto_profil'];
+                                }
+                                if ($foto_profil): ?>
+                                    <img src="<?php echo htmlspecialchars($foto_profil); ?>" alt="Foto Profil" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                <?php else: ?>
+                                    <?php echo strtoupper(substr($user['nama_lengkap'], 0, 1)); ?>
+                                <?php endif; ?>
+                            </div>
+                            <div class="user-details">
+                                <p class="user-name"><?php echo htmlspecialchars($user['nama_lengkap']); ?></p>
+                                <p class="user-role"><?php 
+                                    $role_labels = [
+                                        'developer' => 'Developer',
+                                        'kepala_sekolah' => 'Kepala Sekolah',
+                                        'guru' => 'Guru',
+                                        'siswa' => 'Siswa'
+                                    ];
+                                    echo $role_labels[$_SESSION['user_role']] ?? ucfirst($_SESSION['user_role']);
+                                ?></p>
+                            </div>
+                            <i class="bi bi-chevron-down dropdown-arrow"></i>
                         </div>
-                        <div class="user-details">
-                            <p class="user-name"><?php echo htmlspecialchars($user['nama_lengkap']); ?></p>
-                            <p class="user-role"><?php 
-                                $role_labels = [
-                                    'developer' => 'Developer',
-                                    'kepala_sekolah' => 'Kepala Sekolah',
-                                    'guru' => 'Guru',
-                                    'siswa' => 'Siswa'
-                                ];
-                                echo $role_labels[$_SESSION['user_role']] ?? ucfirst($_SESSION['user_role']);
-                            ?></p>
-                        </div>
+                        <ul class="dropdown-menu user-profile-dropdown dropdown-menu-end" aria-labelledby="userProfileDropdown">
+                            <li>
+                                <a class="dropdown-item" href="<?php echo getBasePath(); ?>dashboard/<?php echo $user_role; ?>/profil.php">
+                                    <i class="bi bi-person-circle"></i> Profil
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="https://sekolahku.rnara.my.id/logout.php">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                </a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
