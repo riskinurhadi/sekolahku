@@ -12,6 +12,11 @@ $message = '';
 // Get filter mata pelajaran
 $filter_mata_pelajaran = isset($_GET['mata_pelajaran_id']) ? intval($_GET['mata_pelajaran_id']) : 0;
 
+// Pagination
+$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$per_page = 5; // Jumlah sesi per halaman
+$offset = ($page - 1) * $per_page;
+
 // Get all mata pelajaran untuk filter
 $stmt = $conn->prepare("SELECT id, nama_pelajaran FROM mata_pelajaran WHERE guru_id = ? ORDER BY nama_pelajaran ASC");
 $stmt->bind_param("i", $guru_id);
@@ -44,14 +49,43 @@ if ($filter_mata_pelajaran > 0) {
     $types .= "i";
 }
 
-$query .= " ORDER BY sp.waktu_mulai DESC LIMIT 50";
+$query .= " ORDER BY sp.waktu_mulai DESC";
+
+// Get total count untuk pagination
+$count_query = "SELECT COUNT(*) as total
+    FROM sesi_pelajaran sp
+    JOIN mata_pelajaran mp ON sp.mata_pelajaran_id = mp.id
+    WHERE sp.guru_id = ? AND (sp.status = 'selesai' OR sp.status = 'aktif')";
+
+$count_params = [$guru_id];
+$count_types = "i";
+
+if ($filter_mata_pelajaran > 0) {
+    $count_query .= " AND sp.mata_pelajaran_id = ?";
+    $count_params[] = $filter_mata_pelajaran;
+    $count_types .= "i";
+}
+
+$count_stmt = $conn->prepare($count_query);
+if (count($count_params) > 1) {
+    $count_stmt->bind_param($count_types, ...$count_params);
+} else {
+    $count_stmt->bind_param($count_types, $count_params[0]);
+}
+$count_stmt->execute();
+$total_sesi = $count_stmt->get_result()->fetch_assoc()['total'];
+$count_stmt->close();
+
+$total_pages = ceil($total_sesi / $per_page);
+
+// Add limit and offset
+$query .= " LIMIT ? OFFSET ?";
+$params[] = $per_page;
+$params[] = $offset;
+$types .= "ii";
 
 $stmt = $conn->prepare($query);
-if (count($params) > 1) {
-    $stmt->bind_param($types, ...$params);
-} else {
-    $stmt->bind_param($types, $params[0]);
-}
+$stmt->bind_param($types, ...$params);
 $stmt->execute();
 $sesi_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
@@ -222,25 +256,25 @@ $conn->close();
                         <!-- Summary Stats -->
                         <div class="row mb-4">
                             <div class="col-md-3 mb-3 mb-md-0">
-                                <div class="text-center p-4 rounded" style="background: #d1fae5; border: 2px solid #10b981;">
+                                <div class="text-center p-4 rounded" style="background: #d1fae5;">
                                     <h3 class="mb-0" style="color: #10b981; font-size: 2.5rem; font-weight: 700;"><?php echo count($presensi['hadir']); ?></h3>
                                     <small class="text-muted" style="font-weight: 600; font-size: 0.9rem;">Hadir</small>
                                 </div>
                             </div>
                             <div class="col-md-3 mb-3 mb-md-0">
-                                <div class="text-center p-4 rounded" style="background: #fed7aa; border: 2px solid #f97316;">
+                                <div class="text-center p-4 rounded" style="background: #fed7aa;">
                                     <h3 class="mb-0" style="color: #f97316; font-size: 2.5rem; font-weight: 700;"><?php echo count($presensi['terlambat']); ?></h3>
                                     <small class="text-muted" style="font-weight: 600; font-size: 0.9rem;">Terlambat</small>
                                 </div>
                             </div>
                             <div class="col-md-3 mb-3 mb-md-0">
-                                <div class="text-center p-4 rounded" style="background: #fecdd3; border: 2px solid #f43f5e;">
+                                <div class="text-center p-4 rounded" style="background: #fecdd3;">
                                     <h3 class="mb-0" style="color: #f43f5e; font-size: 2.5rem; font-weight: 700;"><?php echo count($presensi['tidak_hadir']); ?></h3>
                                     <small class="text-muted" style="font-weight: 600; font-size: 0.9rem;">Tidak Hadir</small>
                                 </div>
                             </div>
                             <div class="col-md-3">
-                                <div class="text-center p-4 rounded" style="background: #dbeafe; border: 2px solid #3b82f6;">
+                                <div class="text-center p-4 rounded" style="background: #dbeafe;">
                                     <h3 class="mb-0" style="color: #3b82f6; font-size: 2.5rem; font-weight: 700;"><?php echo $total_siswa; ?></h3>
                                     <small class="text-muted" style="font-weight: 600; font-size: 0.9rem;">Total Siswa</small>
                                 </div>
@@ -351,6 +385,73 @@ $conn->close();
             </div>
         </div>
     <?php endforeach; ?>
+    
+    <!-- Pagination -->
+    <?php if ($total_pages > 1): ?>
+        <div class="row mt-4">
+            <div class="col-12">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        <!-- Previous Button -->
+                        <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
+                            <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $filter_mata_pelajaran > 0 ? '&mata_pelajaran_id=' . $filter_mata_pelajaran : ''; ?>" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        
+                        <!-- Page Numbers -->
+                        <?php
+                        $start_page = max(1, $page - 2);
+                        $end_page = min($total_pages, $page + 2);
+                        
+                        if ($start_page > 1): ?>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1<?php echo $filter_mata_pelajaran > 0 ? '&mata_pelajaran_id=' . $filter_mata_pelajaran : ''; ?>">1</a>
+                            </li>
+                            <?php if ($start_page > 2): ?>
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                        
+                        <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+                            <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
+                                <a class="page-link" href="?page=<?php echo $i; ?><?php echo $filter_mata_pelajaran > 0 ? '&mata_pelajaran_id=' . $filter_mata_pelajaran : ''; ?>">
+                                    <?php echo $i; ?>
+                                </a>
+                            </li>
+                        <?php endfor; ?>
+                        
+                        <?php if ($end_page < $total_pages): ?>
+                            <?php if ($end_page < $total_pages - 1): ?>
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            <?php endif; ?>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=<?php echo $total_pages; ?><?php echo $filter_mata_pelajaran > 0 ? '&mata_pelajaran_id=' . $filter_mata_pelajaran : ''; ?>">
+                                    <?php echo $total_pages; ?>
+                                </a>
+                            </li>
+                        <?php endif; ?>
+                        
+                        <!-- Next Button -->
+                        <li class="page-item <?php echo $page >= $total_pages ? 'disabled' : ''; ?>">
+                            <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $filter_mata_pelajaran > 0 ? '&mata_pelajaran_id=' . $filter_mata_pelajaran : ''; ?>" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="text-center mt-2">
+                    <small class="text-muted">
+                        Menampilkan <?php echo count($sesi_list); ?> dari <?php echo $total_sesi; ?> sesi (Halaman <?php echo $page; ?> dari <?php echo $total_pages; ?>)
+                    </small>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
 <?php endif; ?>
 
 <?php require_once '../../includes/footer.php'; ?>
