@@ -21,8 +21,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->bind_param("ssii", $nama_pelajaran, $kode_pelajaran, $sekolah_id, $guru_id);
         
         if ($stmt->execute()) {
-            $message = 'success:Mata pelajaran berhasil ditambahkan!';
-            header('Location: mata_pelajaran.php?success=1');
+            $_SESSION['success_message'] = 'Mata pelajaran berhasil ditambahkan!';
+            $stmt->close();
+            $conn->close();
+            echo '<script>window.location.href = "mata_pelajaran.php?success=1";</script>';
             exit;
         } else {
             $message = 'error:Gagal menambahkan mata pelajaran!';

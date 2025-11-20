@@ -23,8 +23,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bind_param("iiissssss", $mata_pelajaran_id, $sekolah_id, $kelas_id, $tanggal, $jam_mulai, $jam_selesai, $ruangan, $status, $keterangan);
     
     if ($stmt->execute()) {
-        $message = 'success:Jadwal pelajaran berhasil ditambahkan!';
-        header('Location: jadwal.php?success=1');
+        $_SESSION['success_message'] = 'Jadwal pelajaran berhasil ditambahkan!';
+        $stmt->close();
+        $conn->close();
+        echo '<script>window.location.href = "jadwal.php?success=1";</script>';
         exit;
     } else {
         $message = 'error:Gagal menambahkan jadwal pelajaran!';

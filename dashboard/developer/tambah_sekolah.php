@@ -18,8 +18,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bind_param("ssss", $nama_sekolah, $alamat, $telepon, $email);
     
     if ($stmt->execute()) {
-        $message = 'success:Sekolah berhasil ditambahkan!';
-        header('Location: sekolah.php?success=1');
+        $_SESSION['success_message'] = 'Sekolah berhasil ditambahkan!';
+        $stmt->close();
+        $conn->close();
+        echo '<script>window.location.href = "sekolah.php?success=1";</script>';
         exit;
     } else {
         $message = 'error:Gagal menambahkan sekolah!';

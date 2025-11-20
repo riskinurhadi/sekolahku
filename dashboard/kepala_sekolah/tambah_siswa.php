@@ -30,8 +30,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->bind_param("ssssii", $username, $password, $nama_lengkap, $email, $sekolah_id, $kelas_id);
         
         if ($stmt->execute()) {
-            $message = 'success:Siswa berhasil ditambahkan!';
-            header('Location: siswa.php?success=1');
+            $_SESSION['success_message'] = 'Siswa berhasil ditambahkan!';
+            $stmt->close();
+            $conn->close();
+            echo '<script>window.location.href = "siswa.php?success=1";</script>';
             exit;
         } else {
             $message = 'error:Gagal menambahkan siswa!';

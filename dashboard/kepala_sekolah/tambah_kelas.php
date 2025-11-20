@@ -27,8 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->bind_param("sii", $nama_kelas, $tingkat, $sekolah_id);
         
         if ($stmt->execute()) {
-            $message = 'success:Kelas berhasil ditambahkan!';
-            header('Location: kelas.php?success=1');
+            $_SESSION['success_message'] = 'Kelas berhasil ditambahkan!';
+            $stmt->close();
+            $conn->close();
+            echo '<script>window.location.href = "kelas.php?success=1";</script>';
             exit;
         } else {
             $message = 'error:Gagal menambahkan kelas!';

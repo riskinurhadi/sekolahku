@@ -12,7 +12,7 @@ $message = '';
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 if ($id == 0) {
-    header('Location: mata_pelajaran.php');
+    echo '<script>window.location.href = "mata_pelajaran.php";</script>';
     exit;
 }
 
@@ -24,7 +24,7 @@ $mata_pelajaran = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 if (!$mata_pelajaran) {
-    header('Location: mata_pelajaran.php');
+    echo '<script>window.location.href = "mata_pelajaran.php";</script>';
     exit;
 }
 
@@ -41,8 +41,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->bind_param("ssiii", $nama_pelajaran, $kode_pelajaran, $guru_id, $id, $sekolah_id);
         
         if ($stmt->execute()) {
-            $message = 'success:Mata pelajaran berhasil diupdate!';
-            header('Location: mata_pelajaran.php?success=1');
+            $_SESSION['success_message'] = 'Mata pelajaran berhasil diupdate!';
+            $stmt->close();
+            $conn->close();
+            echo '<script>window.location.href = "mata_pelajaran.php?success=1";</script>';
             exit;
         } else {
             $message = 'error:Gagal mengupdate mata pelajaran!';

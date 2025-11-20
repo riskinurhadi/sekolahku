@@ -12,7 +12,7 @@ $message = '';
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 if ($id == 0) {
-    header('Location: jadwal.php');
+    echo '<script>window.location.href = "jadwal.php";</script>';
     exit;
 }
 
@@ -24,7 +24,7 @@ $jadwal_data = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 if (!$jadwal_data) {
-    header('Location: jadwal.php');
+    echo '<script>window.location.href = "jadwal.php";</script>';
     exit;
 }
 
@@ -43,8 +43,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bind_param("iissssssii", $mata_pelajaran_id, $kelas_id, $tanggal, $jam_mulai, $jam_selesai, $ruangan, $status, $keterangan, $id, $sekolah_id);
     
     if ($stmt->execute()) {
-        $message = 'success:Jadwal pelajaran berhasil diupdate!';
-        header('Location: jadwal.php?success=1');
+        $_SESSION['success_message'] = 'Jadwal pelajaran berhasil diupdate!';
+        $stmt->close();
+        $conn->close();
+        echo '<script>window.location.href = "jadwal.php?success=1";</script>';
         exit;
     } else {
         $message = 'error:Gagal mengupdate jadwal pelajaran!';

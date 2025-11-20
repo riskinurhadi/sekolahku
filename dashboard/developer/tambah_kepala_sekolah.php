@@ -48,8 +48,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $stmt2->execute();
                 $stmt2->close();
                 
-                $message = 'success:Kepala sekolah berhasil ditambahkan!';
-                header('Location: kepala_sekolah.php?success=1');
+                $_SESSION['success_message'] = 'Kepala sekolah berhasil ditambahkan!';
+                $stmt->close();
+                $conn->close();
+                echo '<script>window.location.href = "kepala_sekolah.php?success=1";</script>';
                 exit;
             } else {
                 $message = 'error:Gagal menambahkan kepala sekolah!';

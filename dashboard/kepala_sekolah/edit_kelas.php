@@ -12,7 +12,7 @@ $message = '';
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 if ($id == 0) {
-    header('Location: kelas.php');
+    echo '<script>window.location.href = "kelas.php";</script>';
     exit;
 }
 
@@ -24,7 +24,7 @@ $kelas_data = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 if (!$kelas_data) {
-    header('Location: kelas.php');
+    echo '<script>window.location.href = "kelas.php";</script>';
     exit;
 }
 
@@ -37,8 +37,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bind_param("siii", $nama_kelas, $tingkat, $id, $sekolah_id);
     
     if ($stmt->execute()) {
-        $message = 'success:Kelas berhasil diupdate!';
-        header('Location: kelas.php?success=1');
+        $_SESSION['success_message'] = 'Kelas berhasil diupdate!';
+        $stmt->close();
+        $conn->close();
+        echo '<script>window.location.href = "kelas.php?success=1";</script>';
         exit;
     } else {
         $message = 'error:Gagal mengupdate kelas!';

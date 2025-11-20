@@ -41,8 +41,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             
             if ($stmt->execute()) {
                 $role_text = $role == 'akademik' ? 'Akademik' : 'Guru';
-                $message = 'success:' . $role_text . ' berhasil ditambahkan!';
-                header('Location: guru.php?success=1');
+                $_SESSION['success_message'] = $role_text . ' berhasil ditambahkan!';
+                $stmt->close();
+                $conn->close();
+                echo '<script>window.location.href = "guru.php?success=1";</script>';
                 exit;
             } else {
                 $message = 'error:Gagal menambahkan user!';
