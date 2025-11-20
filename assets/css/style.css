@@ -86,7 +86,7 @@ body::before {
     overflow-x: hidden;
     display: flex;
     flex-direction: column;
-    padding-bottom: 180px;
+    padding-bottom: 200px;
 }
 
 .sidebar-header {
@@ -156,41 +156,43 @@ body::before {
 
 /* Active Users Section */
 .sidebar-active-users {
-    position: absolute;
-    bottom: 70px;
+    position: fixed;
+    bottom: 64px;
     left: 0;
-    right: 0;
+    width: var(--sidebar-width);
     padding: 16px 20px;
     background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    z-index: 10;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    z-index: 1000;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .active-users-header {
-    margin-bottom: 12px;
+    margin-bottom: 14px;
 }
 
 .active-users-title {
     color: #fbbf24;
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 700;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
     text-transform: uppercase;
+    display: block;
 }
 
 .active-users-list {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
 .active-user-avatar {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     overflow: hidden;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 3px solid #ffffff;
     background: #ffffff;
     display: flex;
     align-items: center;
@@ -198,12 +200,13 @@ body::before {
     flex-shrink: 0;
     cursor: pointer;
     transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .active-user-avatar:hover {
-    transform: scale(1.1);
+    transform: scale(1.05);
     border-color: #fbbf24;
-    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
+    box-shadow: 0 4px 8px rgba(251, 191, 36, 0.5);
 }
 
 .active-user-avatar img {
@@ -215,7 +218,7 @@ body::before {
 .active-user-avatar .avatar-initials {
     color: #0f766e;
     font-weight: 700;
-    font-size: 16px;
+    font-size: 18px;
 }
 
 .active-user-more {
@@ -226,36 +229,39 @@ body::before {
 .active-user-more .avatar-more {
     color: #ffffff;
     font-weight: 700;
-    font-size: 14px;
+    font-size: 15px;
 }
 
 /* Sidebar Footer - Logout Button */
 .sidebar-footer {
-    position: absolute;
+    position: fixed;
     bottom: 0;
     left: 0;
-    right: 0;
-    padding: 12px 20px;
+    width: var(--sidebar-width);
+    padding: 16px 20px;
     border-top: 1px solid #e5e7eb;
     background: #ffffff;
+    z-index: 1001;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .sidebar-logout-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 8px 16px;
+    gap: 10px;
+    padding: 12px 20px;
     width: 100%;
     background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     color: #ffffff;
     text-decoration: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-weight: 600;
-    font-size: 12px;
+    font-size: 14px;
     transition: all 0.2s ease;
     border: none;
     cursor: pointer;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
 }
 
 .sidebar-logout-btn:hover {
@@ -266,8 +272,8 @@ body::before {
 }
 
 .sidebar-logout-btn i {
-    font-size: 14px;
-    width: 16px;
+    font-size: 16px;
+    width: 18px;
     text-align: center;
 }
 
