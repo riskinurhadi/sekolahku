@@ -332,6 +332,14 @@ $(document).ready(function() {
         $('.modal-backdrop').remove();
     }
     
+    // Pastikan saat modal dibuka, semua elemen di dalamnya bisa diklik
+    $(document).on('shown.bs.modal', '.modal', function() {
+        $(this).find('.modal-dialog, .modal-content, input, select, textarea, button, .btn').css({
+            'pointer-events': 'auto',
+            'z-index': '1057'
+        });
+    });
+    
     $('#mataPelajaranTable').DataTable({
         language: {
             url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'

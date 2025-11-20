@@ -1024,9 +1024,18 @@ form.hidden textarea,
 
 .modal.show {
     display: block !important;
-    pointer-events: auto !important;
+    pointer-events: none !important; /* Modal container tidak menerima klik, hanya backdrop */
     visibility: visible !important;
     opacity: 1 !important;
+}
+
+/* Modal dialog dan content harus bisa menerima klik */
+.modal.show .modal-dialog {
+    pointer-events: auto !important;
+}
+
+.modal.show .modal-content {
+    pointer-events: auto !important;
 }
 
 .modal-backdrop {
@@ -1052,12 +1061,29 @@ form.hidden textarea,
     pointer-events: auto !important;
     visibility: visible !important;
     opacity: 1 !important;
+    z-index: 1050 !important;
+}
+
+/* Pastikan backdrop tidak menutupi modal content */
+.modal.show {
+    z-index: 1055 !important;
+}
+
+.modal.show .modal-dialog {
+    z-index: 1056 !important;
+    position: relative;
+}
+
+.modal.show .modal-content {
+    z-index: 1057 !important;
+    position: relative;
 }
 
 .modal-dialog {
     z-index: 1056 !important;
     margin: 1.75rem auto !important;
     position: relative !important;
+    pointer-events: auto !important;
 }
 
 .modal-dialog.modal-lg {
@@ -1068,6 +1094,7 @@ form.hidden textarea,
     display: flex !important;
     align-items: center !important;
     min-height: calc(100% - 3.5rem) !important;
+    pointer-events: auto !important;
 }
 
 .modal-content {
@@ -1077,6 +1104,23 @@ form.hidden textarea,
     background: #ffffff;
     position: relative;
     z-index: 1056 !important;
+    pointer-events: auto !important;
+}
+
+/* Pastikan semua elemen di dalam modal bisa diklik */
+.modal-content * {
+    pointer-events: auto !important;
+}
+
+.modal-content input,
+.modal-content select,
+.modal-content textarea,
+.modal-content button,
+.modal-content a,
+.modal-content .btn {
+    pointer-events: auto !important;
+    z-index: 1057 !important;
+    position: relative;
 }
 
 .modal-header {
