@@ -12,10 +12,11 @@ $message = '';
 // Get filter mata pelajaran
 $filter_mata_pelajaran = isset($_GET['mata_pelajaran_id']) ? intval($_GET['mata_pelajaran_id']) : 0;
 
-// Pagination
-$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$per_page = 5; // Jumlah sesi per halaman
-$offset = ($page - 1) * $per_page;
+// Get filter tanggal (default: hari ini)
+$filter_tanggal = isset($_GET['tanggal']) ? $_GET['tanggal'] : date('Y-m-d');
+
+// Get sesi ID yang dipilih (untuk tab navigation)
+$selected_sesi_id = isset($_GET['sesi_id']) ? intval($_GET['sesi_id']) : 0;
 
 // Get all mata pelajaran untuk filter
 $stmt = $conn->prepare("SELECT id, nama_pelajaran FROM mata_pelajaran WHERE guru_id = ? ORDER BY nama_pelajaran ASC");
@@ -24,74 +25,53 @@ $stmt->execute();
 $mata_pelajaran_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
-// Build query untuk get sesi pelajaran (aktif dan selesai untuk realtime)
-$query = "SELECT sp.*, mp.nama_pelajaran, mp.kode_pelajaran,
+// Build query untuk get semua sesi pelajaran pada tanggal tertentu (untuk tab navigation)
+$query_all_sesi = "SELECT sp.*, mp.nama_pelajaran, mp.kode_pelajaran,
     (SELECT GROUP_CONCAT(DISTINCT k.nama_kelas SEPARATOR ', ')
      FROM jadwal_pelajaran jp
      JOIN kelas k ON jp.kelas_id = k.id
      WHERE jp.mata_pelajaran_id = sp.mata_pelajaran_id 
      AND DATE(jp.tanggal) = DATE(sp.waktu_mulai) 
      AND TIME(jp.jam_mulai) = TIME(sp.waktu_mulai)
-     AND mp.guru_id = sp.guru_id) as nama_kelas_list,
-    (SELECT COUNT(*) FROM presensi WHERE sesi_pelajaran_id = sp.id AND status = 'hadir') as total_hadir,
-    (SELECT COUNT(*) FROM presensi WHERE sesi_pelajaran_id = sp.id AND status = 'terlambat') as total_terlambat,
-    (SELECT COUNT(*) FROM presensi WHERE sesi_pelajaran_id = sp.id AND status = 'tidak_hadir') as total_tidak_hadir
+     AND mp.guru_id = sp.guru_id) as nama_kelas_list
     FROM sesi_pelajaran sp
     JOIN mata_pelajaran mp ON sp.mata_pelajaran_id = mp.id
-    WHERE sp.guru_id = ? AND (sp.status = 'selesai' OR sp.status = 'aktif')";
+    WHERE sp.guru_id = ? AND DATE(sp.waktu_mulai) = ? AND (sp.status = 'selesai' OR sp.status = 'aktif')";
 
-$params = [$guru_id];
-$types = "i";
-
-if ($filter_mata_pelajaran > 0) {
-    $query .= " AND sp.mata_pelajaran_id = ?";
-    $params[] = $filter_mata_pelajaran;
-    $types .= "i";
-}
-
-$query .= " ORDER BY sp.waktu_mulai DESC";
-
-// Get total count untuk pagination
-$count_query = "SELECT COUNT(*) as total
-    FROM sesi_pelajaran sp
-    JOIN mata_pelajaran mp ON sp.mata_pelajaran_id = mp.id
-    WHERE sp.guru_id = ? AND (sp.status = 'selesai' OR sp.status = 'aktif')";
-
-$count_params = [$guru_id];
-$count_types = "i";
+$params_all = [$guru_id, $filter_tanggal];
+$types_all = "is";
 
 if ($filter_mata_pelajaran > 0) {
-    $count_query .= " AND sp.mata_pelajaran_id = ?";
-    $count_params[] = $filter_mata_pelajaran;
-    $count_types .= "i";
+    $query_all_sesi .= " AND sp.mata_pelajaran_id = ?";
+    $params_all[] = $filter_mata_pelajaran;
+    $types_all .= "i";
 }
 
-$count_stmt = $conn->prepare($count_query);
-if (count($count_params) > 1) {
-    $count_stmt->bind_param($count_types, ...$count_params);
-} else {
-    $count_stmt->bind_param($count_types, $count_params[0]);
-}
-$count_stmt->execute();
-$total_sesi = $count_stmt->get_result()->fetch_assoc()['total'];
-$count_stmt->close();
+$query_all_sesi .= " ORDER BY sp.waktu_mulai ASC";
 
-$total_pages = ceil($total_sesi / $per_page);
-
-// Add limit and offset
-$query .= " LIMIT ? OFFSET ?";
-$params[] = $per_page;
-$params[] = $offset;
-$types .= "ii";
-
-$stmt = $conn->prepare($query);
-$stmt->bind_param($types, ...$params);
+$stmt = $conn->prepare($query_all_sesi);
+$stmt->bind_param($types_all, ...$params_all);
 $stmt->execute();
-$sesi_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$all_sesi_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
-// Get detail presensi untuk setiap sesi
+// Jika ada sesi yang dipilih, tampilkan hanya sesi tersebut, jika tidak tampilkan sesi pertama
+if ($selected_sesi_id > 0) {
+    $sesi_list = array_filter($all_sesi_list, function($s) use ($selected_sesi_id) {
+        return $s['id'] == $selected_sesi_id;
+    });
+    $sesi_list = array_values($sesi_list);
+} else {
+    // Tampilkan sesi pertama jika ada
+    $sesi_list = !empty($all_sesi_list) ? [$all_sesi_list[0]] : [];
+    if (!empty($sesi_list)) {
+        $selected_sesi_id = $sesi_list[0]['id'];
+    }
+}
+
+// Get detail presensi untuk sesi yang dipilih
 $presensi_details = [];
+if (!empty($sesi_list)) {
 foreach ($sesi_list as $sesi) {
     $sesi_id = $sesi['id'];
     
@@ -173,6 +153,7 @@ foreach ($sesi_list as $sesi) {
         'tidak_hadir' => $tidak_hadir
     ];
 }
+}
 
 $conn->close();
 ?>
@@ -188,7 +169,11 @@ $conn->close();
         <div class="card">
             <div class="card-body">
                 <form method="GET" class="row align-items-end">
-                    <div class="col-md-4 mb-3 mb-md-0">
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <label for="tanggal" class="form-label">Tanggal</label>
+                        <input type="date" class="form-control" id="tanggal" name="tanggal" value="<?php echo htmlspecialchars($filter_tanggal); ?>" onchange="this.form.submit()">
+                    </div>
+                    <div class="col-md-3 mb-3 mb-md-0">
                         <label for="mata_pelajaran_id" class="form-label">Filter Mata Pelajaran</label>
                         <select class="form-select" id="mata_pelajaran_id" name="mata_pelajaran_id" onchange="this.form.submit()">
                             <option value="0">Semua Mata Pelajaran</option>
@@ -199,16 +184,57 @@ $conn->close();
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <div class="col-md-8 text-md-end">
+                    <div class="col-md-6 text-md-end">
                         <a href="index.php" class="btn btn-secondary">
                             <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
                         </a>
                     </div>
+                    <input type="hidden" name="sesi_id" value="<?php echo $selected_sesi_id; ?>">
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Tab Navigation untuk Sesi Pelajaran -->
+<?php if (!empty($all_sesi_list) && count($all_sesi_list) > 1): ?>
+    <div class="row mb-4">
+        <div class="col-12">
+            <div style="border-bottom: 2px solid #e5e7eb;">
+                <nav>
+                    <ul class="nav justify-content-start" role="tablist" style="border-bottom: none;">
+                        <?php foreach ($all_sesi_list as $index => $sesi_tab): 
+                            $is_active = $sesi_tab['id'] == $selected_sesi_id;
+                            // Format label: Mata Pelajaran Kelas (contoh: Matematika 10D)
+                            $tab_label = htmlspecialchars($sesi_tab['nama_pelajaran']);
+                            if ($sesi_tab['nama_kelas_list']) {
+                                // Jika ada beberapa kelas, tampilkan dengan format: Matematika 10D | Matematika 11A
+                                $kelas_array = explode(', ', $sesi_tab['nama_kelas_list']);
+                                if (count($kelas_array) > 1) {
+                                    $tab_label = '';
+                                    foreach ($kelas_array as $idx => $kelas) {
+                                        if ($idx > 0) $tab_label .= ' | ';
+                                        $tab_label .= htmlspecialchars($sesi_tab['nama_pelajaran']) . ' ' . htmlspecialchars($kelas);
+                                    }
+                                } else {
+                                    $tab_label .= ' ' . htmlspecialchars($kelas_array[0]);
+                                }
+                            }
+                        ?>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" 
+                                   href="?tanggal=<?php echo urlencode($filter_tanggal); ?>&sesi_id=<?php echo $sesi_tab['id']; ?><?php echo $filter_mata_pelajaran > 0 ? '&mata_pelajaran_id=' . $filter_mata_pelajaran : ''; ?>"
+                                   style="<?php echo $is_active ? 'color: #3b82f6; border-bottom: 3px solid #3b82f6; background: transparent;' : 'color: #64748b; border-bottom: 3px solid transparent; background: transparent;'; ?> font-weight: 600; padding: 12px 24px; border: none; transition: all 0.2s ease;">
+                                    <?php echo $tab_label; ?>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
 
 <!-- Sesi List -->
 <?php if (empty($sesi_list)): ?>
@@ -385,73 +411,6 @@ $conn->close();
             </div>
         </div>
     <?php endforeach; ?>
-    
-    <!-- Pagination -->
-    <?php if ($total_pages > 1): ?>
-        <div class="row mt-4">
-            <div class="col-12">
-                <nav aria-label="Page navigation">
-                    <ul class="pagination justify-content-center">
-                        <!-- Previous Button -->
-                        <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
-                            <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $filter_mata_pelajaran > 0 ? '&mata_pelajaran_id=' . $filter_mata_pelajaran : ''; ?>" aria-label="Previous">
-                                <span aria-hidden="true">&laquo;</span>
-                            </a>
-                        </li>
-                        
-                        <!-- Page Numbers -->
-                        <?php
-                        $start_page = max(1, $page - 2);
-                        $end_page = min($total_pages, $page + 2);
-                        
-                        if ($start_page > 1): ?>
-                            <li class="page-item">
-                                <a class="page-link" href="?page=1<?php echo $filter_mata_pelajaran > 0 ? '&mata_pelajaran_id=' . $filter_mata_pelajaran : ''; ?>">1</a>
-                            </li>
-                            <?php if ($start_page > 2): ?>
-                                <li class="page-item disabled">
-                                    <span class="page-link">...</span>
-                                </li>
-                            <?php endif; ?>
-                        <?php endif; ?>
-                        
-                        <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
-                            <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
-                                <a class="page-link" href="?page=<?php echo $i; ?><?php echo $filter_mata_pelajaran > 0 ? '&mata_pelajaran_id=' . $filter_mata_pelajaran : ''; ?>">
-                                    <?php echo $i; ?>
-                                </a>
-                            </li>
-                        <?php endfor; ?>
-                        
-                        <?php if ($end_page < $total_pages): ?>
-                            <?php if ($end_page < $total_pages - 1): ?>
-                                <li class="page-item disabled">
-                                    <span class="page-link">...</span>
-                                </li>
-                            <?php endif; ?>
-                            <li class="page-item">
-                                <a class="page-link" href="?page=<?php echo $total_pages; ?><?php echo $filter_mata_pelajaran > 0 ? '&mata_pelajaran_id=' . $filter_mata_pelajaran : ''; ?>">
-                                    <?php echo $total_pages; ?>
-                                </a>
-                            </li>
-                        <?php endif; ?>
-                        
-                        <!-- Next Button -->
-                        <li class="page-item <?php echo $page >= $total_pages ? 'disabled' : ''; ?>">
-                            <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $filter_mata_pelajaran > 0 ? '&mata_pelajaran_id=' . $filter_mata_pelajaran : ''; ?>" aria-label="Next">
-                                <span aria-hidden="true">&raquo;</span>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-                <div class="text-center mt-2">
-                    <small class="text-muted">
-                        Menampilkan <?php echo count($sesi_list); ?> dari <?php echo $total_sesi; ?> sesi (Halaman <?php echo $page; ?> dari <?php echo $total_pages; ?>)
-                    </small>
-                </div>
-            </div>
-        </div>
-    <?php endif; ?>
 <?php endif; ?>
 
 <?php require_once '../../includes/footer.php'; ?>
