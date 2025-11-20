@@ -19,6 +19,67 @@ if (!$sekolah_id && isset($user['sekolah_id'])) {
     $sekolah_id = $user['sekolah_id'];
 }
 
+// Update last_activity untuk tracking user online
+// Cek apakah kolom last_activity ada
+$check_column = $conn->query("SHOW COLUMNS FROM users LIKE 'last_activity'");
+if ($check_column->num_rows == 0) {
+    // Tambahkan kolom last_activity jika belum ada
+    $conn->query("ALTER TABLE users ADD COLUMN last_activity DATETIME NULL AFTER updated_at");
+}
+
+// Update last_activity untuk user yang sedang login
+$now = date('Y-m-d H:i:s');
+$update_stmt = $conn->prepare("UPDATE users SET last_activity = ? WHERE id = ?");
+$update_stmt->bind_param("si", $now, $user_id);
+$update_stmt->execute();
+$update_stmt->close();
+
+// Get active users berdasarkan role (dalam 5 menit terakhir)
+$active_users = [];
+$total_online = 0;
+$online_threshold = date('Y-m-d H:i:s', strtotime('-5 minutes'));
+
+// Hanya tampilkan untuk role guru dan siswa
+if (in_array($user_role, ['guru', 'siswa']) && $sekolah_id) {
+    // Hitung total user online terlebih dahulu
+    $query_count = "SELECT COUNT(*) as total 
+                    FROM users 
+                    WHERE role = ? 
+                    AND sekolah_id = ? 
+                    AND id != ? 
+                    AND last_activity >= ?";
+    
+    $stmt_count = $conn->prepare($query_count);
+    if ($stmt_count) {
+        $stmt_count->bind_param("siis", $user_role, $sekolah_id, $user_id, $online_threshold);
+        $stmt_count->execute();
+        $result_count = $stmt_count->get_result();
+        $total_online = $result_count->fetch_assoc()['total'];
+        $stmt_count->close();
+    }
+    
+    // Ambil 5 user pertama untuk ditampilkan
+    if ($total_online > 0) {
+        $query_active = "SELECT id, nama_lengkap, foto_profil 
+                         FROM users 
+                         WHERE role = ? 
+                         AND sekolah_id = ? 
+                         AND id != ? 
+                         AND last_activity >= ? 
+                         ORDER BY last_activity DESC 
+                         LIMIT 5";
+        
+        $stmt_active = $conn->prepare($query_active);
+        if ($stmt_active) {
+            $stmt_active->bind_param("siis", $user_role, $sekolah_id, $user_id, $online_threshold);
+            $stmt_active->execute();
+            $result_active = $stmt_active->get_result();
+            $active_users = $result_active->fetch_all(MYSQLI_ASSOC);
+            $stmt_active->close();
+        }
+    }
+}
+
 // Get count of unread informasi akademik
 $unread_count = 0;
 $table_check = $conn->query("SHOW TABLES LIKE 'informasi_akademik'");
@@ -228,6 +289,37 @@ if ($table_check && $table_check->num_rows > 0) {
                     </li>
                 <?php endif; ?>
             </ul>
+            
+            <!-- Active Users Section (hanya untuk guru dan siswa) -->
+            <?php if (in_array($user_role, ['guru', 'siswa']) && $total_online > 0): ?>
+                <div class="sidebar-active-users">
+                    <div class="active-users-header">
+                        <span class="active-users-title">ACTIVE <?php echo strtoupper($user_role == 'guru' ? 'TEACHERS' : 'STUDENTS'); ?></span>
+                    </div>
+                    <div class="active-users-list">
+                        <?php foreach ($active_users as $active_user): 
+                            $foto_profil = '';
+                            if (!empty($active_user['foto_profil']) && file_exists(__DIR__ . '/../uploads/profil/' . $active_user['foto_profil'])) {
+                                $foto_profil = getBasePath() . 'uploads/profil/' . $active_user['foto_profil'];
+                            }
+                            $initials = strtoupper(substr($active_user['nama_lengkap'], 0, 1));
+                        ?>
+                            <div class="active-user-avatar" title="<?php echo htmlspecialchars($active_user['nama_lengkap']); ?>">
+                                <?php if ($foto_profil): ?>
+                                    <img src="<?php echo htmlspecialchars($foto_profil); ?>" alt="<?php echo htmlspecialchars($active_user['nama_lengkap']); ?>">
+                                <?php else: ?>
+                                    <span class="avatar-initials"><?php echo $initials; ?></span>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+                        <?php if (isset($total_online) && $total_online > 5): ?>
+                            <div class="active-user-avatar active-user-more" title="<?php echo ($total_online - 5); ?> more">
+                                <span class="avatar-more">+<?php echo $total_online - 5; ?></span>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
             
             <!-- Logout Button -->
             <div class="sidebar-footer">
