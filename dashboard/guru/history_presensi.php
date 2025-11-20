@@ -1,5 +1,5 @@
 <?php
-$page_title = 'History Presensi';
+$page_title = 'Hasil Presensi';
 require_once '../../config/session.php';
 requireRole(['guru']);
 require_once '../../includes/header.php';
@@ -19,7 +19,7 @@ $stmt->execute();
 $mata_pelajaran_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
-// Build query untuk get sesi pelajaran yang sudah selesai
+// Build query untuk get sesi pelajaran (aktif dan selesai untuk realtime)
 $query = "SELECT sp.*, mp.nama_pelajaran, mp.kode_pelajaran,
     (SELECT GROUP_CONCAT(DISTINCT k.nama_kelas SEPARATOR ', ')
      FROM jadwal_pelajaran jp
@@ -33,7 +33,7 @@ $query = "SELECT sp.*, mp.nama_pelajaran, mp.kode_pelajaran,
     (SELECT COUNT(*) FROM presensi WHERE sesi_pelajaran_id = sp.id AND status = 'tidak_hadir') as total_tidak_hadir
     FROM sesi_pelajaran sp
     JOIN mata_pelajaran mp ON sp.mata_pelajaran_id = mp.id
-    WHERE sp.guru_id = ? AND sp.status = 'selesai'";
+    WHERE sp.guru_id = ? AND (sp.status = 'selesai' OR sp.status = 'aktif')";
 
 $params = [$guru_id];
 $types = "i";
@@ -144,8 +144,8 @@ $conn->close();
 ?>
 
 <div class="page-header">
-    <h2><i class="bi bi-clipboard-check"></i> History Presensi</h2>
-    <p>Lihat history presensi siswa berdasarkan mata pelajaran</p>
+    <h2><i class="bi bi-clipboard-check"></i> Hasil Presensi</h2>
+    <p>Lihat hasil presensi siswa secara realtime berdasarkan mata pelajaran</p>
 </div>
 
 <!-- Filter Section -->
@@ -183,7 +183,7 @@ $conn->close();
             <div class="card">
                 <div class="card-body text-center py-5">
                     <i class="bi bi-inbox text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
-                    <p class="text-muted mt-3 mb-0">Belum ada history presensi</p>
+                    <p class="text-muted mt-3 mb-0">Belum ada hasil presensi</p>
                 </div>
             </div>
         </div>
@@ -196,7 +196,7 @@ $conn->close();
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header bg-primary text-white">
+                    <div class="card-header text-white" style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h5 class="mb-0">
@@ -214,35 +214,35 @@ $conn->close();
                                 </small>
                             </div>
                             <div class="text-end">
-                                <span class="badge bg-light text-dark">Kode: <?php echo htmlspecialchars($sesi['kode_presensi']); ?></span>
+                                <span class="badge bg-white text-dark px-3 py-2" style="border-radius: 8px; font-weight: 600;">KODE: <?php echo htmlspecialchars($sesi['kode_presensi']); ?></span>
                             </div>
                         </div>
                     </div>
                     <div class="card-body">
                         <!-- Summary Stats -->
                         <div class="row mb-4">
-                            <div class="col-md-3">
-                                <div class="text-center p-3 bg-success bg-opacity-10 rounded">
-                                    <h3 class="text-success mb-0"><?php echo count($presensi['hadir']); ?></h3>
-                                    <small class="text-muted">Hadir</small>
+                            <div class="col-md-3 mb-3 mb-md-0">
+                                <div class="text-center p-4 rounded" style="background: #d1fae5; border: 2px solid #10b981;">
+                                    <h3 class="mb-0" style="color: #10b981; font-size: 2.5rem; font-weight: 700;"><?php echo count($presensi['hadir']); ?></h3>
+                                    <small class="text-muted" style="font-weight: 600; font-size: 0.9rem;">Hadir</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3 mb-md-0">
+                                <div class="text-center p-4 rounded" style="background: #fed7aa; border: 2px solid #f97316;">
+                                    <h3 class="mb-0" style="color: #f97316; font-size: 2.5rem; font-weight: 700;"><?php echo count($presensi['terlambat']); ?></h3>
+                                    <small class="text-muted" style="font-weight: 600; font-size: 0.9rem;">Terlambat</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3 mb-md-0">
+                                <div class="text-center p-4 rounded" style="background: #fecdd3; border: 2px solid #f43f5e;">
+                                    <h3 class="mb-0" style="color: #f43f5e; font-size: 2.5rem; font-weight: 700;"><?php echo count($presensi['tidak_hadir']); ?></h3>
+                                    <small class="text-muted" style="font-weight: 600; font-size: 0.9rem;">Tidak Hadir</small>
                                 </div>
                             </div>
                             <div class="col-md-3">
-                                <div class="text-center p-3 bg-warning bg-opacity-10 rounded">
-                                    <h3 class="text-warning mb-0"><?php echo count($presensi['terlambat']); ?></h3>
-                                    <small class="text-muted">Terlambat</small>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="text-center p-3 bg-danger bg-opacity-10 rounded">
-                                    <h3 class="text-danger mb-0"><?php echo count($presensi['tidak_hadir']); ?></h3>
-                                    <small class="text-muted">Tidak Hadir</small>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="text-center p-3 bg-info bg-opacity-10 rounded">
-                                    <h3 class="text-info mb-0"><?php echo $total_siswa; ?></h3>
-                                    <small class="text-muted">Total Siswa</small>
+                                <div class="text-center p-4 rounded" style="background: #dbeafe; border: 2px solid #3b82f6;">
+                                    <h3 class="mb-0" style="color: #3b82f6; font-size: 2.5rem; font-weight: 700;"><?php echo $total_siswa; ?></h3>
+                                    <small class="text-muted" style="font-weight: 600; font-size: 0.9rem;">Total Siswa</small>
                                 </div>
                             </div>
                         </div>
@@ -251,9 +251,9 @@ $conn->close();
                         <div class="row">
                             <!-- Hadir -->
                             <div class="col-md-4 mb-3">
-                                <div class="border rounded p-3 h-100">
-                                    <h6 class="text-success mb-3">
-                                        <i class="bi bi-check-circle"></i> Hadir (<?php echo count($presensi['hadir']); ?>)
+                                <div class="border rounded p-3 h-100" style="border-color: #e5e7eb !important; background: #ffffff;">
+                                    <h6 class="mb-3" style="color: #10b981; font-weight: 600; font-size: 1rem;">
+                                        <i class="bi bi-check-circle-fill" style="color: #10b981;"></i> Hadir (<?php echo count($presensi['hadir']); ?>)
                                     </h6>
                                     <?php if (!empty($presensi['hadir'])): ?>
                                         <div class="list-group list-group-flush">
@@ -278,16 +278,16 @@ $conn->close();
                                             <?php endforeach; ?>
                                         </div>
                                     <?php else: ?>
-                                        <p class="text-muted mb-0">Tidak ada siswa yang hadir</p>
+                                        <p class="text-muted mb-0" style="font-size: 0.9rem;">Tidak ada siswa yang hadir</p>
                                     <?php endif; ?>
                                 </div>
                             </div>
                             
                             <!-- Terlambat -->
                             <div class="col-md-4 mb-3">
-                                <div class="border rounded p-3 h-100">
-                                    <h6 class="text-warning mb-3">
-                                        <i class="bi bi-clock-history"></i> Terlambat (<?php echo count($presensi['terlambat']); ?>)
+                                <div class="border rounded p-3 h-100" style="border-color: #e5e7eb !important; background: #ffffff;">
+                                    <h6 class="mb-3" style="color: #f97316; font-weight: 600; font-size: 1rem;">
+                                        <i class="bi bi-clock-history" style="color: #f97316;"></i> Terlambat (<?php echo count($presensi['terlambat']); ?>)
                                     </h6>
                                     <?php if (!empty($presensi['terlambat'])): ?>
                                         <div class="list-group list-group-flush">
@@ -312,16 +312,16 @@ $conn->close();
                                             <?php endforeach; ?>
                                         </div>
                                     <?php else: ?>
-                                        <p class="text-muted mb-0">Tidak ada siswa yang terlambat</p>
+                                        <p class="text-muted mb-0" style="font-size: 0.9rem;">Tidak ada siswa yang terlambat</p>
                                     <?php endif; ?>
                                 </div>
                             </div>
                             
                             <!-- Tidak Hadir -->
                             <div class="col-md-4 mb-3">
-                                <div class="border rounded p-3 h-100">
-                                    <h6 class="text-danger mb-3">
-                                        <i class="bi bi-x-circle"></i> Tidak Hadir (<?php echo count($presensi['tidak_hadir']); ?>)
+                                <div class="border rounded p-3 h-100" style="border-color: #e5e7eb !important; background: #ffffff;">
+                                    <h6 class="mb-3" style="color: #f43f5e; font-weight: 600; font-size: 1rem;">
+                                        <i class="bi bi-x-circle-fill" style="color: #f43f5e;"></i> Tidak Hadir (<?php echo count($presensi['tidak_hadir']); ?>)
                                     </h6>
                                     <?php if (!empty($presensi['tidak_hadir'])): ?>
                                         <div class="list-group list-group-flush">
@@ -341,7 +341,7 @@ $conn->close();
                                             <?php endforeach; ?>
                                         </div>
                                     <?php else: ?>
-                                        <p class="text-muted mb-0">Semua siswa hadir</p>
+                                        <p class="text-muted mb-0" style="font-size: 0.9rem;">Semua siswa hadir</p>
                                     <?php endif; ?>
                                 </div>
                             </div>
