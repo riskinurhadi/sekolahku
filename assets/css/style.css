@@ -157,24 +157,24 @@ body::before {
 /* Active Users Section */
 .sidebar-active-users {
     position: fixed;
-    bottom: 64px;
+    bottom: 56px;
     left: 0;
     width: var(--sidebar-width);
-    padding: 14px 20px;
-    background: #1e3a8a;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 20px;
+    background: #ffffff;
+    border-top: 1px solid #e5e7eb;
     z-index: 1000;
 }
 
 .active-users-header {
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 .active-users-title {
-    color: #fbbf24;
-    font-size: 9px;
+    color: #64748b;
+    font-size: 8px;
     font-weight: 700;
-    letter-spacing: 1.8px;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
     display: block;
 }
@@ -182,13 +182,13 @@ body::before {
 .active-users-list {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
 }
 
 .active-user-avatar {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     overflow: hidden;
     border: 2px solid #ffffff;
@@ -199,11 +199,12 @@ body::before {
     flex-shrink: 0;
     cursor: pointer;
     transition: all 0.2s ease;
+    box-shadow: 0 0 0 1px #e5e7eb;
 }
 
 .active-user-avatar:hover {
-    transform: scale(1.08);
-    border-color: #fbbf24;
+    transform: scale(1.1);
+    box-shadow: 0 0 0 2px #1e3a8a;
 }
 
 .active-user-avatar img {
@@ -215,18 +216,23 @@ body::before {
 .active-user-avatar .avatar-initials {
     color: #1e3a8a;
     font-weight: 700;
-    font-size: 16px;
+    font-size: 13px;
 }
 
 .active-user-more {
     background: #fbbf24;
     border-color: #fbbf24;
+    box-shadow: 0 0 0 1px #fbbf24;
+}
+
+.active-user-more:hover {
+    box-shadow: 0 0 0 2px #fbbf24;
 }
 
 .active-user-more .avatar-more {
     color: #ffffff;
     font-weight: 700;
-    font-size: 14px;
+    font-size: 11px;
 }
 
 /* Sidebar Footer - Logout Button */
@@ -235,7 +241,7 @@ body::before {
     bottom: 0;
     left: 0;
     width: var(--sidebar-width);
-    padding: 14px 20px;
+    padding: 10px 20px;
     border-top: 1px solid #e5e7eb;
     background: #ffffff;
     z-index: 1001;
@@ -245,15 +251,15 @@ body::before {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 11px 20px;
+    gap: 6px;
+    padding: 8px 16px;
     width: 100%;
     background: #ef4444;
     color: #ffffff;
     text-decoration: none;
-    border-radius: 8px;
+    border-radius: 6px;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 12px;
     transition: all 0.2s ease;
     border: none;
     cursor: pointer;
@@ -266,8 +272,8 @@ body::before {
 }
 
 .sidebar-logout-btn i {
-    font-size: 16px;
-    width: 18px;
+    font-size: 14px;
+    width: 16px;
     text-align: center;
 }
 
