@@ -8,74 +8,7 @@ $conn = getConnection();
 $sekolah_id = $_SESSION['sekolah_id'];
 $message = '';
 
-// Handle AJAX request
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['ajax'])) {
-    header('Content-Type: application/json');
-    
-    if (isset($_POST['action'])) {
-        if ($_POST['action'] == 'add') {
-            $nama_pelajaran = $_POST['nama_pelajaran'];
-            $kode_pelajaran = $_POST['kode_pelajaran'] ?? '';
-            $guru_id = $_POST['guru_id'] ?? null;
-            
-            if (empty($guru_id)) {
-                echo json_encode(['success' => false, 'message' => 'Guru wajib dipilih!']);
-                $conn->close();
-                exit;
-            }
-            
-            $stmt = $conn->prepare("INSERT INTO mata_pelajaran (nama_pelajaran, kode_pelajaran, sekolah_id, guru_id) VALUES (?, ?, ?, ?)");
-            $stmt->bind_param("ssii", $nama_pelajaran, $kode_pelajaran, $sekolah_id, $guru_id);
-            
-            if ($stmt->execute()) {
-                echo json_encode(['success' => true, 'message' => 'Mata pelajaran berhasil ditambahkan!']);
-            } else {
-                echo json_encode(['success' => false, 'message' => 'Gagal menambahkan mata pelajaran!']);
-            }
-            $stmt->close();
-            $conn->close();
-            exit;
-        } elseif ($_POST['action'] == 'update') {
-            $id = $_POST['id'];
-            $nama_pelajaran = $_POST['nama_pelajaran'];
-            $kode_pelajaran = $_POST['kode_pelajaran'] ?? '';
-            $guru_id = $_POST['guru_id'] ?? null;
-            
-            if (empty($guru_id)) {
-                echo json_encode(['success' => false, 'message' => 'Guru wajib dipilih!']);
-                $conn->close();
-                exit;
-            }
-            
-            $stmt = $conn->prepare("UPDATE mata_pelajaran SET nama_pelajaran = ?, kode_pelajaran = ?, guru_id = ? WHERE id = ? AND sekolah_id = ?");
-            $stmt->bind_param("ssiii", $nama_pelajaran, $kode_pelajaran, $guru_id, $id, $sekolah_id);
-            
-            if ($stmt->execute()) {
-                echo json_encode(['success' => true, 'message' => 'Mata pelajaran berhasil diupdate!']);
-            } else {
-                echo json_encode(['success' => false, 'message' => 'Gagal mengupdate mata pelajaran!']);
-            }
-            $stmt->close();
-            $conn->close();
-            exit;
-        } elseif ($_POST['action'] == 'delete') {
-            $id = $_POST['id'];
-            $stmt = $conn->prepare("DELETE FROM mata_pelajaran WHERE id = ? AND sekolah_id = ?");
-            $stmt->bind_param("ii", $id, $sekolah_id);
-            
-            if ($stmt->execute()) {
-                echo json_encode(['success' => true, 'message' => 'Mata pelajaran berhasil dihapus!']);
-            } else {
-                echo json_encode(['success' => false, 'message' => 'Gagal menghapus mata pelajaran!']);
-            }
-            $stmt->close();
-            $conn->close();
-            exit;
-        }
-    }
-}
-
-// Handle form submission (non-AJAX fallback)
+// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['action'])) {
         if ($_POST['action'] == 'add') {
@@ -144,17 +77,18 @@ $conn->close();
 ?>
 
 <?php if ($message): ?>
-    <script>
+    <div class="alert alert-<?php echo strpos($message, 'success') === 0 ? 'success' : 'danger'; ?> alert-dismissible fade show" role="alert">
         <?php 
         $msg = explode(':', $message);
-        if ($msg[0] == 'success') {
-            echo "Swal.fire({ icon: 'success', title: 'Berhasil', text: '" . addslashes($msg[1]) . "', timer: 1500, showConfirmButton: false });";
-            echo "setTimeout(function(){ window.location.reload(); }, 1500);";
-        } else {
-            echo "Swal.fire({ icon: 'error', title: 'Gagal', text: '" . addslashes($msg[1]) . "' });";
-        }
+        echo htmlspecialchars($msg[1]); 
         ?>
-    </script>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php if (strpos($message, 'success') === 0): ?>
+        <script>
+            setTimeout(function(){ window.location.reload(); }, 1500);
+        </script>
+    <?php endif; ?>
 <?php endif; ?>
 
 <div class="page-header">
@@ -219,29 +153,28 @@ $conn->close();
 
 <!-- Add Mata Pelajaran Modal -->
 <div class="modal fade" id="addMataPelajaranModal" tabindex="-1" aria-labelledby="addMataPelajaranModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <form id="addMataPelajaranForm">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addMataPelajaranModalLabel">
+                    <i class="bi bi-plus-circle"></i> Tambah Mata Pelajaran Baru
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" id="addMataPelajaranForm">
                 <input type="hidden" name="action" value="add">
-                <input type="hidden" name="ajax" value="1">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addMataPelajaranModalLabel">
-                        <i class="bi bi-plus-circle"></i> Tambah Mata Pelajaran Baru
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Nama Pelajaran <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="nama_pelajaran" required>
+                        <label for="nama_pelajaran" class="form-label">Nama Pelajaran <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="nama_pelajaran" name="nama_pelajaran" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Kode Pelajaran</label>
-                        <input type="text" class="form-control" name="kode_pelajaran" placeholder="Contoh: MAT-001">
+                        <label for="kode_pelajaran" class="form-label">Kode Pelajaran</label>
+                        <input type="text" class="form-control" id="kode_pelajaran" name="kode_pelajaran" placeholder="Contoh: MAT-001">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Guru Pengajar <span class="text-danger">*</span></label>
-                        <select class="form-select" name="guru_id" required>
+                        <label for="guru_id" class="form-label">Guru Pengajar <span class="text-danger">*</span></label>
+                        <select class="form-select" id="guru_id" name="guru_id" required>
                             <option value="">Pilih Guru</option>
                             <?php foreach ($guru_list as $guru): ?>
                                 <option value="<?php echo $guru['id']; ?>">
@@ -267,30 +200,29 @@ $conn->close();
 
 <!-- Edit Mata Pelajaran Modal -->
 <div class="modal fade" id="editMataPelajaranModal" tabindex="-1" aria-labelledby="editMataPelajaranModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <form id="editMataPelajaranForm">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editMataPelajaranModalLabel">
+                    <i class="bi bi-pencil"></i> Edit Mata Pelajaran
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" id="editMataPelajaranForm">
                 <input type="hidden" name="action" value="update">
                 <input type="hidden" name="id" id="edit_id">
-                <input type="hidden" name="ajax" value="1">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editMataPelajaranModalLabel">
-                        <i class="bi bi-pencil"></i> Edit Mata Pelajaran
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Nama Pelajaran <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="nama_pelajaran" id="edit_nama_pelajaran" required>
+                        <label for="edit_nama_pelajaran" class="form-label">Nama Pelajaran <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="edit_nama_pelajaran" name="nama_pelajaran" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Kode Pelajaran</label>
-                        <input type="text" class="form-control" name="kode_pelajaran" id="edit_kode_pelajaran" placeholder="Contoh: MAT-001">
+                        <label for="edit_kode_pelajaran" class="form-label">Kode Pelajaran</label>
+                        <input type="text" class="form-control" id="edit_kode_pelajaran" name="kode_pelajaran" placeholder="Contoh: MAT-001">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Guru Pengajar <span class="text-danger">*</span></label>
-                        <select class="form-select" name="guru_id" id="edit_guru_id" required>
+                        <label for="edit_guru_id" class="form-label">Guru Pengajar <span class="text-danger">*</span></label>
+                        <select class="form-select" id="edit_guru_id" name="guru_id" required>
                             <option value="">Pilih Guru</option>
                             <?php foreach ($guru_list as $guru): ?>
                                 <option value="<?php echo $guru['id']; ?>">
@@ -316,30 +248,7 @@ $conn->close();
 
 <script>
 $(document).ready(function() {
-    // Pastikan semua modal yang tersembunyi benar-benar tidak terlihat dan tidak bisa diklik
-    $('.modal:not(.show)').css({
-        'display': 'none',
-        'pointer-events': 'none',
-        'visibility': 'hidden'
-    });
-    
-    // Hapus backdrop yang tersisa
-    $('.modal-backdrop:not(.show)').remove();
-    
-    // Pastikan body tidak memiliki class modal-open jika tidak ada modal yang terbuka
-    if ($('.modal.show').length === 0) {
-        $('body').removeClass('modal-open');
-        $('.modal-backdrop').remove();
-    }
-    
-    // Pastikan saat modal dibuka, semua elemen di dalamnya bisa diklik
-    $(document).on('shown.bs.modal', '.modal', function() {
-        $(this).find('.modal-dialog, .modal-content, input, select, textarea, button, .btn').css({
-            'pointer-events': 'auto',
-            'z-index': '1057'
-        });
-    });
-    
+    // Initialize DataTable
     $('#mataPelajaranTable').DataTable({
         language: {
             url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
@@ -351,134 +260,13 @@ $(document).ready(function() {
         dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
     });
     
-    // Reset form when modal is closed dan pastikan backdrop dihapus
+    // Reset form when modal is closed
     $('#addMataPelajaranModal').on('hidden.bs.modal', function () {
         $(this).find('form')[0].reset();
-        $(this).css({
-            'display': 'none',
-            'pointer-events': 'none',
-            'visibility': 'hidden'
-        });
-        $('.modal-backdrop').remove();
-        $('body').removeClass('modal-open');
     });
     
     $('#editMataPelajaranModal').on('hidden.bs.modal', function () {
         $(this).find('form')[0].reset();
-        $(this).css({
-            'display': 'none',
-            'pointer-events': 'none',
-            'visibility': 'hidden'
-        });
-        $('.modal-backdrop').remove();
-        $('body').removeClass('modal-open');
-    });
-    
-    // Pastikan saat modal ditutup, semua backdrop dihapus
-    $(document).on('hidden.bs.modal', '.modal', function() {
-        $('.modal-backdrop').remove();
-        $('body').removeClass('modal-open');
-        $(this).css({
-            'display': 'none',
-            'pointer-events': 'none',
-            'visibility': 'hidden'
-        });
-    });
-    
-    // Handle add form submission with AJAX
-    $('#addMataPelajaranForm').on('submit', function(e) {
-        e.preventDefault();
-        
-        var formData = $(this).serialize();
-        var submitBtn = $(this).find('button[type="submit"]');
-        var originalText = submitBtn.html();
-        
-        // Disable submit button
-        submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...');
-        
-        $.ajax({
-            url: '',
-            type: 'POST',
-            data: formData,
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil',
-                        text: response.message,
-                        timer: 1500,
-                        showConfirmButton: false
-                    }).then(function() {
-                        $('#addMataPelajaranModal').modal('hide');
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal',
-                        text: response.message
-                    });
-                    submitBtn.prop('disabled', false).html(originalText);
-                }
-            },
-            error: function() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Terjadi kesalahan saat menyimpan data'
-                });
-                submitBtn.prop('disabled', false).html(originalText);
-            }
-        });
-    });
-    
-    // Handle edit form submission with AJAX
-    $('#editMataPelajaranForm').on('submit', function(e) {
-        e.preventDefault();
-        
-        var formData = $(this).serialize();
-        var submitBtn = $(this).find('button[type="submit"]');
-        var originalText = submitBtn.html();
-        
-        // Disable submit button
-        submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...');
-        
-        $.ajax({
-            url: '',
-            type: 'POST',
-            data: formData,
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil',
-                        text: response.message,
-                        timer: 1500,
-                        showConfirmButton: false
-                    }).then(function() {
-                        $('#editMataPelajaranModal').modal('hide');
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal',
-                        text: response.message
-                    });
-                    submitBtn.prop('disabled', false).html(originalText);
-                }
-            },
-            error: function() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Terjadi kesalahan saat menyimpan data'
-                });
-                submitBtn.prop('disabled', false).html(originalText);
-            }
-        });
     });
 });
 
@@ -493,55 +281,14 @@ function editMataPelajaran(data) {
 }
 
 function deleteMataPelajaran(id) {
-    Swal.fire({
-        title: 'Apakah Anda yakin?',
-        text: "Data mata pelajaran akan dihapus secara permanen!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Ya, hapus!',
-        cancelButtonText: 'Batal'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                url: '',
-                type: 'POST',
-                data: {
-                    action: 'delete',
-                    id: id,
-                    ajax: 1
-                },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil',
-                            text: response.message,
-                            timer: 1500,
-                            showConfirmButton: false
-                        }).then(function() {
-                            location.reload();
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Gagal',
-                            text: response.message
-                        });
-                    }
-                },
-                error: function() {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Terjadi kesalahan saat menghapus data'
-                    });
-                }
-            });
-        }
-    });
+    if (confirm('Apakah Anda yakin ingin menghapus mata pelajaran ini?')) {
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.innerHTML = '<input type="hidden" name="action" value="delete">' +
+                        '<input type="hidden" name="id" value="' + id + '">';
+        document.body.appendChild(form);
+        form.submit();
+    }
 }
 </script>
 
