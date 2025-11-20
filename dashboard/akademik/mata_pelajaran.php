@@ -260,6 +260,23 @@ $(document).ready(function() {
         dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
     });
     
+    // Pastikan modal bisa diklik saat dibuka
+    $('#addMataPelajaranModal').on('shown.bs.modal', function () {
+        // Pastikan semua elemen di dalam modal bisa diklik
+        $(this).find('.modal-dialog, .modal-content, input, select, textarea, button, .btn').css({
+            'pointer-events': 'auto',
+            'z-index': '1072'
+        });
+    });
+    
+    $('#editMataPelajaranModal').on('shown.bs.modal', function () {
+        // Pastikan semua elemen di dalam modal bisa diklik
+        $(this).find('.modal-dialog, .modal-content, input, select, textarea, button, .btn').css({
+            'pointer-events': 'auto',
+            'z-index': '1072'
+        });
+    });
+    
     // Reset form when modal is closed
     $('#addMataPelajaranModal').on('hidden.bs.modal', function () {
         $(this).find('form')[0].reset();

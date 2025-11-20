@@ -46,16 +46,33 @@ $(document).ready(function() {
         });
     }
     
+    // Pastikan saat modal dibuka, semua elemen bisa diklik
+    $(document).on('shown.bs.modal', '.modal', function() {
+        // Hapus inline style yang mungkin mengganggu
+        $(this).css({
+            'display': '',
+            'pointer-events': '',
+            'visibility': '',
+            'opacity': ''
+        });
+        // Pastikan semua elemen di dalam modal bisa diklik
+        $(this).find('.modal-dialog, .modal-content, input, select, textarea, button, .btn, label, .form-label, .form-control, .form-select').css({
+            'pointer-events': 'auto',
+            'z-index': '1072'
+        });
+    });
+    
     // Reset modal form when closed dan pastikan backdrop dihapus
     $('.modal').on('hidden.bs.modal', function () {
         $(this).find('form')[0].reset();
         $(this).find('.is-invalid').removeClass('is-invalid');
         $(this).find('.invalid-feedback').remove();
+        // Hapus inline style yang mungkin mengganggu
         $(this).css({
-            'display': 'none',
-            'pointer-events': 'none',
-            'visibility': 'hidden',
-            'opacity': '0'
+            'display': '',
+            'pointer-events': '',
+            'visibility': '',
+            'opacity': ''
         });
         $('.modal-backdrop').remove();
         $('body').removeClass('modal-open');
@@ -65,11 +82,12 @@ $(document).ready(function() {
     $(document).on('hidden.bs.modal', '.modal', function() {
         $('.modal-backdrop').remove();
         $('body').removeClass('modal-open');
+        // Hapus inline style yang mungkin mengganggu
         $(this).css({
-            'display': 'none',
-            'pointer-events': 'none',
-            'visibility': 'hidden',
-            'opacity': '0'
+            'display': '',
+            'pointer-events': '',
+            'visibility': '',
+            'opacity': ''
         });
     });
 });
