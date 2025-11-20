@@ -203,6 +203,9 @@ body::before {
     min-height: calc(100vh - var(--header-height));
     background: #ffffff;
     transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+    pointer-events: auto;
 }
 
 /* Top Header */
@@ -617,6 +620,12 @@ body::before {
     z-index: 2;
 }
 
+.dashboard-card .card-header .btn {
+    position: relative;
+    z-index: 10;
+    pointer-events: auto;
+}
+
 .dashboard-card .card-header h5 {
     font-size: 18px;
     font-weight: 700;
@@ -972,6 +981,26 @@ body::before {
 body.modal-open {
     overflow: hidden !important;
     padding-right: 0 !important;
+}
+
+/* Prevent tooltip on hidden elements */
+form[style*="display: none"],
+form.hidden,
+.d-none form {
+    pointer-events: none;
+}
+
+form[style*="display: none"] input,
+form[style*="display: none"] select,
+form[style*="display: none"] textarea,
+form.hidden input,
+form.hidden select,
+form.hidden textarea,
+.d-none form input,
+.d-none form select,
+.d-none form textarea {
+    pointer-events: none;
+    tabindex: -1;
 }
 
 .modal {
@@ -1479,6 +1508,28 @@ body.modal-open {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    position: relative;
+    z-index: 1;
+}
+
+.card-header .btn,
+.card .btn,
+.dashboard-card .btn {
+    position: relative;
+    z-index: 10;
+    pointer-events: auto !important;
+    cursor: pointer;
+}
+
+/* Ensure all interactive elements are clickable */
+.btn,
+button,
+a,
+input[type="submit"],
+input[type="button"],
+select,
+textarea {
+    pointer-events: auto !important;
 }
 
 .card-header h5 {
