@@ -11,17 +11,16 @@ $message = '';
 // Handle delete only (add and update are handled in separate pages)
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['action']) && $_POST['action'] == 'delete') {
-            $id = $_POST['id'];
-            $stmt = $conn->prepare("DELETE FROM mata_pelajaran WHERE id = ? AND sekolah_id = ?");
-            $stmt->bind_param("ii", $id, $sekolah_id);
-            
-            if ($stmt->execute()) {
-                $message = 'success:Mata pelajaran berhasil dihapus!';
-            } else {
-                $message = 'error:Gagal menghapus mata pelajaran!';
-            }
-            $stmt->close();
+        $id = $_POST['id'];
+        $stmt = $conn->prepare("DELETE FROM mata_pelajaran WHERE id = ? AND sekolah_id = ?");
+        $stmt->bind_param("ii", $id, $sekolah_id);
+        
+        if ($stmt->execute()) {
+            $message = 'success:Mata pelajaran berhasil dihapus!';
+        } else {
+            $message = 'error:Gagal menghapus mata pelajaran!';
         }
+        $stmt->close();
     }
 }
 
@@ -133,43 +132,7 @@ $(document).ready(function() {
         lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
         dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
     });
-    
-    // Pastikan modal bisa diklik saat dibuka
-    $('#addMataPelajaranModal').on('shown.bs.modal', function () {
-        // Pastikan semua elemen di dalam modal bisa diklik
-        $(this).find('.modal-dialog, .modal-content, input, select, textarea, button, .btn').css({
-            'pointer-events': 'auto',
-            'z-index': '1072'
-        });
-    });
-    
-    $('#editMataPelajaranModal').on('shown.bs.modal', function () {
-        // Pastikan semua elemen di dalam modal bisa diklik
-        $(this).find('.modal-dialog, .modal-content, input, select, textarea, button, .btn').css({
-            'pointer-events': 'auto',
-            'z-index': '1072'
-        });
-    });
-    
-    // Reset form when modal is closed
-    $('#addMataPelajaranModal').on('hidden.bs.modal', function () {
-        $(this).find('form')[0].reset();
-    });
-    
-    $('#editMataPelajaranModal').on('hidden.bs.modal', function () {
-        $(this).find('form')[0].reset();
-    });
 });
-
-function editMataPelajaran(data) {
-    document.getElementById('edit_id').value = data.id;
-    document.getElementById('edit_nama_pelajaran').value = data.nama_pelajaran;
-    document.getElementById('edit_kode_pelajaran').value = data.kode_pelajaran || '';
-    document.getElementById('edit_guru_id').value = data.guru_id;
-    
-    var modal = new bootstrap.Modal(document.getElementById('editMataPelajaranModal'));
-    modal.show();
-}
 
 function deleteMataPelajaran(id) {
     if (confirm('Apakah Anda yakin ingin menghapus mata pelajaran ini?')) {
