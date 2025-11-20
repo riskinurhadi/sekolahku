@@ -160,22 +160,21 @@ body::before {
     bottom: 64px;
     left: 0;
     width: var(--sidebar-width);
-    padding: 16px 20px;
-    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 14px 20px;
+    background: #1e3a8a;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     z-index: 1000;
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .active-users-header {
-    margin-bottom: 14px;
+    margin-bottom: 12px;
 }
 
 .active-users-title {
     color: #fbbf24;
     font-size: 9px;
     font-weight: 700;
-    letter-spacing: 2px;
+    letter-spacing: 1.8px;
     text-transform: uppercase;
     display: block;
 }
@@ -183,16 +182,16 @@ body::before {
 .active-users-list {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     flex-wrap: wrap;
 }
 
 .active-user-avatar {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     overflow: hidden;
-    border: 3px solid #ffffff;
+    border: 2px solid #ffffff;
     background: #ffffff;
     display: flex;
     align-items: center;
@@ -200,13 +199,11 @@ body::before {
     flex-shrink: 0;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .active-user-avatar:hover {
-    transform: scale(1.05);
+    transform: scale(1.08);
     border-color: #fbbf24;
-    box-shadow: 0 4px 8px rgba(251, 191, 36, 0.5);
 }
 
 .active-user-avatar img {
@@ -218,7 +215,7 @@ body::before {
 .active-user-avatar .avatar-initials {
     color: #1e3a8a;
     font-weight: 700;
-    font-size: 18px;
+    font-size: 16px;
 }
 
 .active-user-more {
@@ -229,7 +226,7 @@ body::before {
 .active-user-more .avatar-more {
     color: #ffffff;
     font-weight: 700;
-    font-size: 15px;
+    font-size: 14px;
 }
 
 /* Sidebar Footer - Logout Button */
@@ -238,21 +235,20 @@ body::before {
     bottom: 0;
     left: 0;
     width: var(--sidebar-width);
-    padding: 16px 20px;
+    padding: 14px 20px;
     border-top: 1px solid #e5e7eb;
     background: #ffffff;
     z-index: 1001;
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .sidebar-logout-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    padding: 12px 20px;
+    gap: 8px;
+    padding: 11px 20px;
     width: 100%;
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    background: #ef4444;
     color: #ffffff;
     text-decoration: none;
     border-radius: 8px;
@@ -261,14 +257,12 @@ body::before {
     transition: all 0.2s ease;
     border: none;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
 }
 
 .sidebar-logout-btn:hover {
-    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    background: #dc2626;
     color: #ffffff;
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
 }
 
 .sidebar-logout-btn i {
