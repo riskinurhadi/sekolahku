@@ -291,33 +291,39 @@ if ($table_check && $table_check->num_rows > 0) {
             </ul>
             
             <!-- Active Users Section (hanya untuk guru dan siswa) -->
-            <?php if (in_array($user_role, ['guru', 'siswa']) && $total_online > 0): ?>
+            <?php if (in_array($user_role, ['guru', 'siswa'])): ?>
                 <div class="sidebar-active-users">
                     <div class="active-users-header">
                         <span class="active-users-title">ACTIVE <?php echo strtoupper($user_role == 'guru' ? 'TEACHERS' : 'STUDENTS'); ?></span>
                     </div>
-                    <div class="active-users-list">
-                        <?php foreach ($active_users as $active_user): 
-                            $foto_profil = '';
-                            if (!empty($active_user['foto_profil']) && file_exists(__DIR__ . '/../uploads/profil/' . $active_user['foto_profil'])) {
-                                $foto_profil = getBasePath() . 'uploads/profil/' . $active_user['foto_profil'];
-                            }
-                            $initials = strtoupper(substr($active_user['nama_lengkap'], 0, 1));
-                        ?>
-                            <div class="active-user-avatar" title="<?php echo htmlspecialchars($active_user['nama_lengkap']); ?>">
-                                <?php if ($foto_profil): ?>
-                                    <img src="<?php echo htmlspecialchars($foto_profil); ?>" alt="<?php echo htmlspecialchars($active_user['nama_lengkap']); ?>">
-                                <?php else: ?>
-                                    <span class="avatar-initials"><?php echo $initials; ?></span>
-                                <?php endif; ?>
-                            </div>
-                        <?php endforeach; ?>
-                        <?php if (isset($total_online) && $total_online > 5): ?>
-                            <div class="active-user-avatar active-user-more" title="<?php echo ($total_online - 5); ?> more">
-                                <span class="avatar-more">+<?php echo $total_online - 5; ?></span>
-                            </div>
-                        <?php endif; ?>
-                    </div>
+                    <?php if ($total_online > 0 && !empty($active_users)): ?>
+                        <div class="active-users-list">
+                            <?php foreach ($active_users as $active_user): 
+                                $foto_profil = '';
+                                if (!empty($active_user['foto_profil']) && file_exists(__DIR__ . '/../uploads/profil/' . $active_user['foto_profil'])) {
+                                    $foto_profil = getBasePath() . 'uploads/profil/' . $active_user['foto_profil'];
+                                }
+                                $initials = strtoupper(substr($active_user['nama_lengkap'], 0, 1));
+                            ?>
+                                <div class="active-user-avatar" title="<?php echo htmlspecialchars($active_user['nama_lengkap']); ?>">
+                                    <?php if ($foto_profil): ?>
+                                        <img src="<?php echo htmlspecialchars($foto_profil); ?>" alt="<?php echo htmlspecialchars($active_user['nama_lengkap']); ?>">
+                                    <?php else: ?>
+                                        <span class="avatar-initials"><?php echo $initials; ?></span>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
+                            <?php if (isset($total_online) && $total_online > 5): ?>
+                                <div class="active-user-avatar active-user-more" title="<?php echo ($total_online - 5); ?> more">
+                                    <span class="avatar-more">+<?php echo $total_online - 5; ?></span>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="active-users-empty">
+                            <span class="empty-message">Tidak ada <?php echo $user_role == 'guru' ? 'guru' : 'siswa'; ?> online</span>
+                        </div>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
             
