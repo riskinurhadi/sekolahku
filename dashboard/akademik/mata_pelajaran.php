@@ -16,7 +16,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->bind_param("ii", $id, $sekolah_id);
         
         if ($stmt->execute()) {
-            $message = 'success:Mata pelajaran berhasil dihapus!';
+            $stmt->close();
+            $conn->close();
+            $_SESSION['success_message'] = 'Mata pelajaran berhasil dihapus!';
+            echo '<script>window.location.href = "mata_pelajaran.php?success=1";</script>';
+            exit;
         } else {
             $message = 'error:Gagal menghapus mata pelajaran!';
         }
@@ -34,12 +38,15 @@ $mata_pelajaran = $conn->query("SELECT mp.*, u.nama_lengkap as nama_guru, u.spes
 $conn->close();
 ?>
 
+
 <?php 
 // Check for success message from redirect
 if (isset($_GET['success']) && $_GET['success'] == 1): 
+    $success_msg = isset($_SESSION['success_message']) ? $_SESSION['success_message'] : 'Operasi berhasil dilakukan!';
+    unset($_SESSION['success_message']);
 ?>
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-        Operasi berhasil dilakukan!
+        <?php echo htmlspecialchars($success_msg); ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 <?php endif; ?>
@@ -52,11 +59,6 @@ if (isset($_GET['success']) && $_GET['success'] == 1):
         ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-    <?php if (strpos($message, 'success') === 0): ?>
-        <script>
-            setTimeout(function(){ window.location.reload(); }, 1500);
-        </script>
-    <?php endif; ?>
 <?php endif; ?>
 
 <div class="page-header">
