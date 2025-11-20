@@ -1012,7 +1012,21 @@ form.hidden textarea,
     height: 100% !important;
     overflow-x: hidden !important;
     overflow-y: auto !important;
+}
+
+/* Modal yang tersembunyi tidak boleh menerima click events */
+.modal:not(.show) {
+    display: none !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+.modal.show {
     display: block !important;
+    pointer-events: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 .modal-backdrop {
@@ -1023,6 +1037,21 @@ form.hidden textarea,
     left: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
+}
+
+/* Backdrop yang tersembunyi tidak boleh menerima click events */
+.modal-backdrop:not(.show) {
+    display: none !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+.modal-backdrop.show {
+    display: block !important;
+    pointer-events: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 .modal-dialog {

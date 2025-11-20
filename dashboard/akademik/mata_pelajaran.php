@@ -316,6 +316,22 @@ $conn->close();
 
 <script>
 $(document).ready(function() {
+    // Pastikan semua modal yang tersembunyi benar-benar tidak terlihat dan tidak bisa diklik
+    $('.modal:not(.show)').css({
+        'display': 'none',
+        'pointer-events': 'none',
+        'visibility': 'hidden'
+    });
+    
+    // Hapus backdrop yang tersisa
+    $('.modal-backdrop:not(.show)').remove();
+    
+    // Pastikan body tidak memiliki class modal-open jika tidak ada modal yang terbuka
+    if ($('.modal.show').length === 0) {
+        $('body').removeClass('modal-open');
+        $('.modal-backdrop').remove();
+    }
+    
     $('#mataPelajaranTable').DataTable({
         language: {
             url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
@@ -327,13 +343,38 @@ $(document).ready(function() {
         dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
     });
     
-    // Reset form when modal is closed
+    // Reset form when modal is closed dan pastikan backdrop dihapus
     $('#addMataPelajaranModal').on('hidden.bs.modal', function () {
         $(this).find('form')[0].reset();
+        $(this).css({
+            'display': 'none',
+            'pointer-events': 'none',
+            'visibility': 'hidden'
+        });
+        $('.modal-backdrop').remove();
+        $('body').removeClass('modal-open');
     });
     
     $('#editMataPelajaranModal').on('hidden.bs.modal', function () {
         $(this).find('form')[0].reset();
+        $(this).css({
+            'display': 'none',
+            'pointer-events': 'none',
+            'visibility': 'hidden'
+        });
+        $('.modal-backdrop').remove();
+        $('body').removeClass('modal-open');
+    });
+    
+    // Pastikan saat modal ditutup, semua backdrop dihapus
+    $(document).on('hidden.bs.modal', '.modal', function() {
+        $('.modal-backdrop').remove();
+        $('body').removeClass('modal-open');
+        $(this).css({
+            'display': 'none',
+            'pointer-events': 'none',
+            'visibility': 'hidden'
+        });
     });
     
     // Handle add form submission with AJAX

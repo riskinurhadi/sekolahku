@@ -1,6 +1,23 @@
 // Main JavaScript untuk Portal Sekolah
 
 $(document).ready(function() {
+    // Pastikan semua modal yang tersembunyi benar-benar tidak terlihat dan tidak bisa diklik
+    $('.modal:not(.show)').css({
+        'display': 'none',
+        'pointer-events': 'none',
+        'visibility': 'hidden',
+        'opacity': '0'
+    });
+    
+    // Hapus backdrop yang tersisa
+    $('.modal-backdrop:not(.show)').remove();
+    
+    // Pastikan body tidak memiliki class modal-open jika tidak ada modal yang terbuka
+    if ($('.modal.show').length === 0) {
+        $('body').removeClass('modal-open');
+        $('.modal-backdrop').remove();
+    }
+    
     // Sidebar Toggle
     $('#sidebarCollapse').on('click', function() {
         $('#sidebar').toggleClass('active');
@@ -29,11 +46,31 @@ $(document).ready(function() {
         });
     }
     
-    // Reset modal form when closed
+    // Reset modal form when closed dan pastikan backdrop dihapus
     $('.modal').on('hidden.bs.modal', function () {
         $(this).find('form')[0].reset();
         $(this).find('.is-invalid').removeClass('is-invalid');
         $(this).find('.invalid-feedback').remove();
+        $(this).css({
+            'display': 'none',
+            'pointer-events': 'none',
+            'visibility': 'hidden',
+            'opacity': '0'
+        });
+        $('.modal-backdrop').remove();
+        $('body').removeClass('modal-open');
+    });
+    
+    // Pastikan saat modal ditutup, semua backdrop dihapus
+    $(document).on('hidden.bs.modal', '.modal', function() {
+        $('.modal-backdrop').remove();
+        $('body').removeClass('modal-open');
+        $(this).css({
+            'display': 'none',
+            'pointer-events': 'none',
+            'visibility': 'hidden',
+            'opacity': '0'
+        });
     });
 });
 
