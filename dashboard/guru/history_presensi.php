@@ -163,35 +163,57 @@ $conn->close();
     <p>Lihat hasil presensi siswa secara realtime berdasarkan mata pelajaran</p>
 </div>
 
-<!-- Filter Section -->
+<!-- Filter Section dengan Tab Navigation -->
 <div class="row mb-4">
     <div class="col-12">
-        <div class="card">
-            <div class="card-body">
-                <form method="GET" class="row align-items-end">
-                    <div class="col-md-3 mb-3 mb-md-0">
-                        <label for="tanggal" class="form-label">Tanggal</label>
-                        <input type="date" class="form-control" id="tanggal" name="tanggal" value="<?php echo htmlspecialchars($filter_tanggal); ?>" onchange="this.form.submit()">
-                    </div>
-                    <div class="col-md-3 mb-3 mb-md-0">
-                        <label for="mata_pelajaran_id" class="form-label">Filter Mata Pelajaran</label>
-                        <select class="form-select" id="mata_pelajaran_id" name="mata_pelajaran_id" onchange="this.form.submit()">
-                            <option value="0">Semua Mata Pelajaran</option>
-                            <?php foreach ($mata_pelajaran_list as $mp): ?>
-                                <option value="<?php echo $mp['id']; ?>" <?php echo $filter_mata_pelajaran == $mp['id'] ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($mp['nama_pelajaran']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="col-md-6 text-md-end">
-                        <a href="index.php" class="btn btn-secondary">
-                            <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0" style="color: #1e293b; font-weight: 600;">Filter Mata Pelajaran</h5>
+            <a href="index.php" class="btn btn-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
+            </a>
+        </div>
+        <div style="background: #f8fafc; border-bottom: 2px solid #e5e7eb; padding: 0;">
+            <nav>
+                <ul class="nav" role="tablist" style="border-bottom: none; margin-bottom: 0;">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" 
+                           href="?tanggal=<?php echo urlencode($filter_tanggal); ?>&mata_pelajaran_id=0&sesi_id=<?php echo $selected_sesi_id; ?>"
+                           style="<?php echo $filter_mata_pelajaran == 0 ? 'color: #3b82f6; border-bottom: 3px solid #3b82f6; background: transparent;' : 'color: #475569; border-bottom: 3px solid transparent; background: transparent;'; ?> font-weight: 600; padding: 12px 24px; border: none; transition: all 0.2s ease;">
+                            Semua Mata Pelajaran
                         </a>
-                    </div>
+                    </li>
+                    <?php foreach ($mata_pelajaran_list as $mp): 
+                        $is_active_mp = $filter_mata_pelajaran == $mp['id'];
+                    ?>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" 
+                               href="?tanggal=<?php echo urlencode($filter_tanggal); ?>&mata_pelajaran_id=<?php echo $mp['id']; ?>&sesi_id=<?php echo $selected_sesi_id; ?>"
+                               style="<?php echo $is_active_mp ? 'color: #3b82f6; border-bottom: 3px solid #3b82f6; background: transparent;' : 'color: #475569; border-bottom: 3px solid transparent; background: transparent;'; ?> font-weight: 600; padding: 12px 24px; border: none; transition: all 0.2s ease;">
+                                <?php echo htmlspecialchars($mp['nama_pelajaran']); ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            </nav>
+        </div>
+        
+        <!-- Date Filter -->
+        <div class="mt-3 d-flex align-items-center gap-3">
+            <form method="GET" class="d-inline">
+                <div class="input-group" style="max-width: 250px;">
+                    <span class="input-group-text" style="background: #ffffff; border: 1px solid #e5e7eb; color: #64748b; font-weight: 500;">
+                        <i class="bi bi-calendar"></i>
+                    </span>
+                    <input type="date" class="form-control" id="tanggal" name="tanggal" value="<?php echo htmlspecialchars($filter_tanggal); ?>" 
+                           onchange="this.form.submit()" 
+                           style="border: 1px solid #e5e7eb; border-left: none;">
+                    <input type="hidden" name="mata_pelajaran_id" value="<?php echo $filter_mata_pelajaran; ?>">
                     <input type="hidden" name="sesi_id" value="<?php echo $selected_sesi_id; ?>">
-                </form>
-            </div>
+                </div>
+            </form>
+            <small class="text-muted">
+                <i class="bi bi-info-circle"></i> Pilih tanggal untuk melihat hasil presensi
+            </small>
         </div>
     </div>
 </div>
