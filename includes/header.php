@@ -153,6 +153,11 @@ if ($table_check && $table_check->num_rows > 0) {
                         </a>
                     </li>
                     <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/guru/history_presensi.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'history_presensi.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-clipboard-check"></i> History Presensi
+                        </a>
+                    </li>
+                    <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/guru/soal.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'soal.php' ? 'active' : ''; ?>">
                             <i class="bi bi-file-earmark-text"></i> Soal
                         </a>

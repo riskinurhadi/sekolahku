@@ -1,0 +1,357 @@
+<?php
+$page_title = 'History Presensi';
+require_once '../../config/session.php';
+requireRole(['guru']);
+require_once '../../includes/header.php';
+
+$conn = getConnection();
+$guru_id = $_SESSION['user_id'];
+$sekolah_id = $_SESSION['sekolah_id'];
+$message = '';
+
+// Get filter mata pelajaran
+$filter_mata_pelajaran = isset($_GET['mata_pelajaran_id']) ? intval($_GET['mata_pelajaran_id']) : 0;
+
+// Get all mata pelajaran untuk filter
+$stmt = $conn->prepare("SELECT id, nama_pelajaran FROM mata_pelajaran WHERE guru_id = ? ORDER BY nama_pelajaran ASC");
+$stmt->bind_param("i", $guru_id);
+$stmt->execute();
+$mata_pelajaran_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+
+// Build query untuk get sesi pelajaran yang sudah selesai
+$query = "SELECT sp.*, mp.nama_pelajaran, mp.kode_pelajaran,
+    (SELECT GROUP_CONCAT(DISTINCT k.nama_kelas SEPARATOR ', ')
+     FROM jadwal_pelajaran jp
+     JOIN kelas k ON jp.kelas_id = k.id
+     WHERE jp.mata_pelajaran_id = sp.mata_pelajaran_id 
+     AND DATE(jp.tanggal) = DATE(sp.waktu_mulai) 
+     AND TIME(jp.jam_mulai) = TIME(sp.waktu_mulai)
+     AND mp.guru_id = sp.guru_id) as nama_kelas_list,
+    (SELECT COUNT(*) FROM presensi WHERE sesi_pelajaran_id = sp.id AND status = 'hadir') as total_hadir,
+    (SELECT COUNT(*) FROM presensi WHERE sesi_pelajaran_id = sp.id AND status = 'terlambat') as total_terlambat,
+    (SELECT COUNT(*) FROM presensi WHERE sesi_pelajaran_id = sp.id AND status = 'tidak_hadir') as total_tidak_hadir
+    FROM sesi_pelajaran sp
+    JOIN mata_pelajaran mp ON sp.mata_pelajaran_id = mp.id
+    WHERE sp.guru_id = ? AND sp.status = 'selesai'";
+
+$params = [$guru_id];
+$types = "i";
+
+if ($filter_mata_pelajaran > 0) {
+    $query .= " AND sp.mata_pelajaran_id = ?";
+    $params[] = $filter_mata_pelajaran;
+    $types .= "i";
+}
+
+$query .= " ORDER BY sp.waktu_mulai DESC LIMIT 50";
+
+$stmt = $conn->prepare($query);
+if (count($params) > 1) {
+    $stmt->bind_param($types, ...$params);
+} else {
+    $stmt->bind_param($types, $params[0]);
+}
+$stmt->execute();
+$sesi_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+
+// Get detail presensi untuk setiap sesi
+$presensi_details = [];
+foreach ($sesi_list as $sesi) {
+    $sesi_id = $sesi['id'];
+    
+    // Get siswa yang hadir
+    $stmt = $conn->prepare("SELECT p.*, u.nama_lengkap, u.username, k.nama_kelas
+        FROM presensi p
+        JOIN users u ON p.siswa_id = u.id
+        LEFT JOIN kelas k ON u.kelas_id = k.id
+        WHERE p.sesi_pelajaran_id = ? AND p.status = 'hadir'
+        ORDER BY p.waktu_presensi ASC");
+    $stmt->bind_param("i", $sesi_id);
+    $stmt->execute();
+    $hadir = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+    
+    // Get siswa yang terlambat
+    $stmt = $conn->prepare("SELECT p.*, u.nama_lengkap, u.username, k.nama_kelas
+        FROM presensi p
+        JOIN users u ON p.siswa_id = u.id
+        LEFT JOIN kelas k ON u.kelas_id = k.id
+        WHERE p.sesi_pelajaran_id = ? AND p.status = 'terlambat'
+        ORDER BY p.waktu_presensi ASC");
+    $stmt->bind_param("i", $sesi_id);
+    $stmt->execute();
+    $terlambat = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+    
+    // Get siswa yang tidak hadir (harus cari dari kelas yang terkait dengan jadwal)
+    // Untuk ini, kita perlu tahu kelas mana yang terkait dengan sesi ini
+    // Kita bisa ambil dari jadwal_pelajaran yang sesuai dengan waktu_mulai sesi
+    $tidak_hadir = [];
+    $stmt = $conn->prepare("SELECT DISTINCT jp.kelas_id 
+        FROM jadwal_pelajaran jp
+        JOIN mata_pelajaran mp ON jp.mata_pelajaran_id = mp.id
+        WHERE mp.id = ? AND DATE(jp.tanggal) = DATE(?) AND TIME(jp.jam_mulai) = TIME(?)
+        AND mp.guru_id = ?");
+    $stmt->bind_param("issi", $sesi['mata_pelajaran_id'], $sesi['waktu_mulai'], $sesi['waktu_mulai'], $guru_id);
+    $stmt->execute();
+    $kelas_results = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+    
+    // Get siswa yang sudah presensi (hadir atau terlambat)
+    $siswa_yang_sudah_presensi = [];
+    foreach ($hadir as $h) {
+        $siswa_yang_sudah_presensi[] = $h['siswa_id'];
+    }
+    foreach ($terlambat as $t) {
+        $siswa_yang_sudah_presensi[] = $t['siswa_id'];
+    }
+    
+    // Get semua siswa dari semua kelas yang terkait dengan jadwal ini
+    if (!empty($kelas_results)) {
+        $kelas_ids = array_column($kelas_results, 'kelas_id');
+        $placeholders = implode(',', array_fill(0, count($kelas_ids), '?'));
+        $types = str_repeat('i', count($kelas_ids)) . 'i';
+        $params = array_merge($kelas_ids, [$sekolah_id]);
+        
+        $stmt = $conn->prepare("SELECT u.id, u.nama_lengkap, u.username, k.nama_kelas
+            FROM users u
+            LEFT JOIN kelas k ON u.kelas_id = k.id
+            WHERE u.role = 'siswa' AND u.kelas_id IN ($placeholders) AND u.sekolah_id = ?
+            ORDER BY u.nama_lengkap ASC");
+        $stmt->bind_param($types, ...$params);
+        $stmt->execute();
+        $all_siswa = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+        
+        // Siswa yang tidak hadir adalah yang tidak ada di list presensi
+        foreach ($all_siswa as $siswa) {
+            if (!in_array($siswa['id'], $siswa_yang_sudah_presensi)) {
+                $tidak_hadir[] = $siswa;
+            }
+        }
+    }
+    
+    $presensi_details[$sesi_id] = [
+        'hadir' => $hadir,
+        'terlambat' => $terlambat,
+        'tidak_hadir' => $tidak_hadir
+    ];
+}
+
+$conn->close();
+?>
+
+<div class="page-header">
+    <h2><i class="bi bi-clipboard-check"></i> History Presensi</h2>
+    <p>Lihat history presensi siswa berdasarkan mata pelajaran</p>
+</div>
+
+<!-- Filter Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" class="row align-items-end">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <label for="mata_pelajaran_id" class="form-label">Filter Mata Pelajaran</label>
+                        <select class="form-select" id="mata_pelajaran_id" name="mata_pelajaran_id" onchange="this.form.submit()">
+                            <option value="0">Semua Mata Pelajaran</option>
+                            <?php foreach ($mata_pelajaran_list as $mp): ?>
+                                <option value="<?php echo $mp['id']; ?>" <?php echo $filter_mata_pelajaran == $mp['id'] ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($mp['nama_pelajaran']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-8 text-md-end">
+                        <a href="index.php" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sesi List -->
+<?php if (empty($sesi_list)): ?>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-inbox text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
+                    <p class="text-muted mt-3 mb-0">Belum ada history presensi</p>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php else: ?>
+    <?php foreach ($sesi_list as $sesi): 
+        $presensi = $presensi_details[$sesi['id']] ?? ['hadir' => [], 'terlambat' => [], 'tidak_hadir' => []];
+        $total_siswa = count($presensi['hadir']) + count($presensi['terlambat']) + count($presensi['tidak_hadir']);
+    ?>
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0">
+                                    <i class="bi bi-book"></i> <?php echo htmlspecialchars($sesi['nama_pelajaran']); ?>
+                                    <?php if ($sesi['kode_pelajaran']): ?>
+                                        <small class="ms-2">(<?php echo htmlspecialchars($sesi['kode_pelajaran']); ?>)</small>
+                                    <?php endif; ?>
+                                </h5>
+                                <small class="d-block mt-1">
+                                    <i class="bi bi-calendar"></i> <?php echo date('d/m/Y H:i', strtotime($sesi['waktu_mulai'])); ?> - 
+                                    <?php echo date('H:i', strtotime($sesi['waktu_selesai'])); ?>
+                                    <?php if ($sesi['nama_kelas_list']): ?>
+                                        | <i class="bi bi-people"></i> Kelas: <?php echo htmlspecialchars($sesi['nama_kelas_list']); ?>
+                                    <?php endif; ?>
+                                </small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-light text-dark">Kode: <?php echo htmlspecialchars($sesi['kode_presensi']); ?></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- Summary Stats -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="text-center p-3 bg-success bg-opacity-10 rounded">
+                                    <h3 class="text-success mb-0"><?php echo count($presensi['hadir']); ?></h3>
+                                    <small class="text-muted">Hadir</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center p-3 bg-warning bg-opacity-10 rounded">
+                                    <h3 class="text-warning mb-0"><?php echo count($presensi['terlambat']); ?></h3>
+                                    <small class="text-muted">Terlambat</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center p-3 bg-danger bg-opacity-10 rounded">
+                                    <h3 class="text-danger mb-0"><?php echo count($presensi['tidak_hadir']); ?></h3>
+                                    <small class="text-muted">Tidak Hadir</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center p-3 bg-info bg-opacity-10 rounded">
+                                    <h3 class="text-info mb-0"><?php echo $total_siswa; ?></h3>
+                                    <small class="text-muted">Total Siswa</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Detail Presensi -->
+                        <div class="row">
+                            <!-- Hadir -->
+                            <div class="col-md-4 mb-3">
+                                <div class="border rounded p-3 h-100">
+                                    <h6 class="text-success mb-3">
+                                        <i class="bi bi-check-circle"></i> Hadir (<?php echo count($presensi['hadir']); ?>)
+                                    </h6>
+                                    <?php if (!empty($presensi['hadir'])): ?>
+                                        <div class="list-group list-group-flush">
+                                            <?php foreach ($presensi['hadir'] as $h): ?>
+                                                <div class="list-group-item px-0 py-2 border-0 border-bottom">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <strong><?php echo htmlspecialchars($h['nama_lengkap']); ?></strong>
+                                                            <br>
+                                                            <small class="text-muted">
+                                                                <?php echo htmlspecialchars($h['username']); ?>
+                                                                <?php if ($h['nama_kelas']): ?>
+                                                                    - <?php echo htmlspecialchars($h['nama_kelas']); ?>
+                                                                <?php endif; ?>
+                                                            </small>
+                                                        </div>
+                                                        <small class="text-muted">
+                                                            <?php echo date('H:i', strtotime($h['waktu_presensi'])); ?>
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <p class="text-muted mb-0">Tidak ada siswa yang hadir</p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            
+                            <!-- Terlambat -->
+                            <div class="col-md-4 mb-3">
+                                <div class="border rounded p-3 h-100">
+                                    <h6 class="text-warning mb-3">
+                                        <i class="bi bi-clock-history"></i> Terlambat (<?php echo count($presensi['terlambat']); ?>)
+                                    </h6>
+                                    <?php if (!empty($presensi['terlambat'])): ?>
+                                        <div class="list-group list-group-flush">
+                                            <?php foreach ($presensi['terlambat'] as $t): ?>
+                                                <div class="list-group-item px-0 py-2 border-0 border-bottom">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <strong><?php echo htmlspecialchars($t['nama_lengkap']); ?></strong>
+                                                            <br>
+                                                            <small class="text-muted">
+                                                                <?php echo htmlspecialchars($t['username']); ?>
+                                                                <?php if ($t['nama_kelas']): ?>
+                                                                    - <?php echo htmlspecialchars($t['nama_kelas']); ?>
+                                                                <?php endif; ?>
+                                                            </small>
+                                                        </div>
+                                                        <small class="text-muted">
+                                                            <?php echo date('H:i', strtotime($t['waktu_presensi'])); ?>
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <p class="text-muted mb-0">Tidak ada siswa yang terlambat</p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            
+                            <!-- Tidak Hadir -->
+                            <div class="col-md-4 mb-3">
+                                <div class="border rounded p-3 h-100">
+                                    <h6 class="text-danger mb-3">
+                                        <i class="bi bi-x-circle"></i> Tidak Hadir (<?php echo count($presensi['tidak_hadir']); ?>)
+                                    </h6>
+                                    <?php if (!empty($presensi['tidak_hadir'])): ?>
+                                        <div class="list-group list-group-flush">
+                                            <?php foreach ($presensi['tidak_hadir'] as $th): ?>
+                                                <div class="list-group-item px-0 py-2 border-0 border-bottom">
+                                                    <div>
+                                                        <strong><?php echo htmlspecialchars($th['nama_lengkap']); ?></strong>
+                                                        <br>
+                                                        <small class="text-muted">
+                                                            <?php echo htmlspecialchars($th['username']); ?>
+                                                            <?php if ($th['nama_kelas']): ?>
+                                                                - <?php echo htmlspecialchars($th['nama_kelas']); ?>
+                                                            <?php endif; ?>
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <p class="text-muted mb-0">Semua siswa hadir</p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php endforeach; ?>
+<?php endif; ?>
+
+<?php require_once '../../includes/footer.php'; ?>
+
