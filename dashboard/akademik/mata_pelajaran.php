@@ -8,47 +8,9 @@ $conn = getConnection();
 $sekolah_id = $_SESSION['sekolah_id'];
 $message = '';
 
-// Handle form submission
+// Handle delete only (add and update are handled in separate pages)
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (isset($_POST['action'])) {
-        if ($_POST['action'] == 'add') {
-            $nama_pelajaran = $_POST['nama_pelajaran'];
-            $kode_pelajaran = $_POST['kode_pelajaran'] ?? '';
-            $guru_id = $_POST['guru_id'] ?? null;
-            
-            if (empty($guru_id)) {
-                $message = 'error:Guru wajib dipilih!';
-            } else {
-                $stmt = $conn->prepare("INSERT INTO mata_pelajaran (nama_pelajaran, kode_pelajaran, sekolah_id, guru_id) VALUES (?, ?, ?, ?)");
-                $stmt->bind_param("ssii", $nama_pelajaran, $kode_pelajaran, $sekolah_id, $guru_id);
-                
-                if ($stmt->execute()) {
-                    $message = 'success:Mata pelajaran berhasil ditambahkan!';
-                } else {
-                    $message = 'error:Gagal menambahkan mata pelajaran!';
-                }
-                $stmt->close();
-            }
-        } elseif ($_POST['action'] == 'update') {
-            $id = $_POST['id'];
-            $nama_pelajaran = $_POST['nama_pelajaran'];
-            $kode_pelajaran = $_POST['kode_pelajaran'] ?? '';
-            $guru_id = $_POST['guru_id'] ?? null;
-            
-            if (empty($guru_id)) {
-                $message = 'error:Guru wajib dipilih!';
-            } else {
-                $stmt = $conn->prepare("UPDATE mata_pelajaran SET nama_pelajaran = ?, kode_pelajaran = ?, guru_id = ? WHERE id = ? AND sekolah_id = ?");
-                $stmt->bind_param("ssiii", $nama_pelajaran, $kode_pelajaran, $guru_id, $id, $sekolah_id);
-                
-                if ($stmt->execute()) {
-                    $message = 'success:Mata pelajaran berhasil diupdate!';
-                } else {
-                    $message = 'error:Gagal mengupdate mata pelajaran!';
-                }
-                $stmt->close();
-            }
-        } elseif ($_POST['action'] == 'delete') {
+    if (isset($_POST['action']) && $_POST['action'] == 'delete') {
             $id = $_POST['id'];
             $stmt = $conn->prepare("DELETE FROM mata_pelajaran WHERE id = ? AND sekolah_id = ?");
             $stmt->bind_param("ii", $id, $sekolah_id);
@@ -63,9 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-// Get all teachers
-$guru_list = $conn->query("SELECT id, nama_lengkap, spesialisasi FROM users WHERE role = 'guru' AND sekolah_id = $sekolah_id ORDER BY nama_lengkap ASC")->fetch_all(MYSQLI_ASSOC);
-
 // Get all mata pelajaran with guru info
 $mata_pelajaran = $conn->query("SELECT mp.*, u.nama_lengkap as nama_guru, u.spesialisasi
     FROM mata_pelajaran mp
@@ -75,6 +34,16 @@ $mata_pelajaran = $conn->query("SELECT mp.*, u.nama_lengkap as nama_guru, u.spes
 
 $conn->close();
 ?>
+
+<?php 
+// Check for success message from redirect
+if (isset($_GET['success']) && $_GET['success'] == 1): 
+?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        Operasi berhasil dilakukan!
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<?php endif; ?>
 
 <?php if ($message): ?>
     <div class="alert alert-<?php echo strpos($message, 'success') === 0 ? 'success' : 'danger'; ?> alert-dismissible fade show" role="alert">
@@ -102,9 +71,9 @@ $conn->close();
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="bi bi-book"></i> Daftar Mata Pelajaran</h5>
-                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addMataPelajaranModal">
+                <a href="tambah_mata_pelajaran.php" class="btn btn-primary btn-sm">
                     <i class="bi bi-plus-circle"></i> Tambah Mata Pelajaran
-                </button>
+                </a>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -134,9 +103,9 @@ $conn->close();
                                     </td>
                                     <td><?php echo date('d/m/Y', strtotime($mp['created_at'])); ?></td>
                                     <td>
-                                        <button type="button" class="btn btn-sm btn-warning me-1" onclick="editMataPelajaran(<?php echo htmlspecialchars(json_encode($mp)); ?>)">
+                                        <a href="edit_mata_pelajaran.php?id=<?php echo $mp['id']; ?>" class="btn btn-sm btn-warning me-1">
                                             <i class="bi bi-pencil"></i> Edit
-                                        </button>
+                                        </a>
                                         <button type="button" class="btn btn-sm btn-danger" onclick="deleteMataPelajaran(<?php echo $mp['id']; ?>)">
                                             <i class="bi bi-trash"></i> Hapus
                                         </button>
@@ -147,101 +116,6 @@ $conn->close();
                     </table>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
-
-<!-- Add Mata Pelajaran Modal -->
-<div class="modal fade" id="addMataPelajaranModal" tabindex="-1" aria-labelledby="addMataPelajaranModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addMataPelajaranModalLabel">
-                    <i class="bi bi-plus-circle"></i> Tambah Mata Pelajaran Baru
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="POST" id="addMataPelajaranForm">
-                <input type="hidden" name="action" value="add">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="nama_pelajaran" class="form-label">Nama Pelajaran <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="nama_pelajaran" name="nama_pelajaran" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="kode_pelajaran" class="form-label">Kode Pelajaran</label>
-                        <input type="text" class="form-control" id="kode_pelajaran" name="kode_pelajaran" placeholder="Contoh: MAT-001">
-                    </div>
-                    <div class="mb-3">
-                        <label for="guru_id" class="form-label">Guru Pengajar <span class="text-danger">*</span></label>
-                        <select class="form-select" id="guru_id" name="guru_id" required>
-                            <option value="">Pilih Guru</option>
-                            <?php foreach ($guru_list as $guru): ?>
-                                <option value="<?php echo $guru['id']; ?>">
-                                    <?php echo htmlspecialchars($guru['nama_lengkap']); ?>
-                                    <?php if ($guru['spesialisasi']): ?>
-                                        - <?php echo htmlspecialchars($guru['spesialisasi']); ?>
-                                    <?php endif; ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save"></i> Simpan
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Edit Mata Pelajaran Modal -->
-<div class="modal fade" id="editMataPelajaranModal" tabindex="-1" aria-labelledby="editMataPelajaranModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editMataPelajaranModalLabel">
-                    <i class="bi bi-pencil"></i> Edit Mata Pelajaran
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="POST" id="editMataPelajaranForm">
-                <input type="hidden" name="action" value="update">
-                <input type="hidden" name="id" id="edit_id">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="edit_nama_pelajaran" class="form-label">Nama Pelajaran <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="edit_nama_pelajaran" name="nama_pelajaran" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit_kode_pelajaran" class="form-label">Kode Pelajaran</label>
-                        <input type="text" class="form-control" id="edit_kode_pelajaran" name="kode_pelajaran" placeholder="Contoh: MAT-001">
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit_guru_id" class="form-label">Guru Pengajar <span class="text-danger">*</span></label>
-                        <select class="form-select" id="edit_guru_id" name="guru_id" required>
-                            <option value="">Pilih Guru</option>
-                            <?php foreach ($guru_list as $guru): ?>
-                                <option value="<?php echo $guru['id']; ?>">
-                                    <?php echo htmlspecialchars($guru['nama_lengkap']); ?>
-                                    <?php if ($guru['spesialisasi']): ?>
-                                        - <?php echo htmlspecialchars($guru['spesialisasi']); ?>
-                                    <?php endif; ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save"></i> Simpan Perubahan
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 </div>
