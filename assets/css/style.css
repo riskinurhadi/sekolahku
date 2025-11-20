@@ -437,6 +437,10 @@ body::before {
     outline: none;
 }
 
+.dashboard-top-header .user-profile-info::after {
+    display: none !important;
+}
+
 .dashboard-top-header .user-profile-info:hover {
     background: #e5e7eb;
 }
@@ -446,6 +450,8 @@ body::before {
     color: #64748b;
     transition: transform 0.2s ease;
     margin-left: 4px;
+    flex-shrink: 0;
+    display: block;
 }
 
 .dashboard-top-header .user-profile-info[aria-expanded="true"] .dropdown-arrow {
