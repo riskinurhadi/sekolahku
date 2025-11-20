@@ -161,7 +161,7 @@ body::before {
     left: 0;
     width: var(--sidebar-width);
     padding: 16px 20px;
-    background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
     border-top: 1px solid rgba(255, 255, 255, 0.15);
     z-index: 1000;
     box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
@@ -216,7 +216,7 @@ body::before {
 }
 
 .active-user-avatar .avatar-initials {
-    color: #0f766e;
+    color: #1e3a8a;
     font-weight: 700;
     font-size: 18px;
 }
