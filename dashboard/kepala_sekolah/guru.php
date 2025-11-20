@@ -154,9 +154,9 @@ $conn->close();
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="bi bi-person-workspace"></i> Daftar Guru</h5>
-                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addTeacherModal">
+                <a href="tambah_guru.php" class="btn btn-primary btn-sm">
                     <i class="bi bi-plus-circle"></i> Tambah Guru
-                </button>
+                </a>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -216,100 +216,8 @@ $conn->close();
     </div>
 </div>
 
-<!-- Add Teacher Modal -->
-<div class="modal fade" id="addTeacherModal" tabindex="-1" aria-labelledby="addTeacherModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <form id="addTeacherForm">
-                <input type="hidden" name="action" value="add">
-                <input type="hidden" name="ajax" value="1">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addTeacherModalLabel">
-                        <i class="bi bi-plus-circle"></i> Tambah Guru/Staf Baru
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Username <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="username" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Password <span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" name="password" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="nama_lengkap" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Role <span class="text-danger">*</span></label>
-                            <select class="form-select" name="role" id="roleSelect" required onchange="toggleSpesialisasi()">
-                                <option value="guru">Guru</option>
-                                <option value="akademik">Akademik</option>
-                            </select>
-                            <small class="text-muted">Pilih role untuk user ini</small>
-                        </div>
-                        <div class="col-md-6 mb-3" id="spesialisasiField">
-                            <label class="form-label">Spesialisasi <span class="text-danger">*</span></label>
-                            <select class="form-select" name="spesialisasi" id="spesialisasiSelect">
-                                <option value="">Pilih Spesialisasi</option>
-                                <option value="Guru Matematika">Guru Matematika</option>
-                                <option value="Guru Bahasa Indonesia">Guru Bahasa Indonesia</option>
-                                <option value="Guru Bahasa Inggris">Guru Bahasa Inggris</option>
-                                <option value="Guru Fisika">Guru Fisika</option>
-                                <option value="Guru Kimia">Guru Kimia</option>
-                                <option value="Guru Biologi">Guru Biologi</option>
-                                <option value="Guru Sejarah">Guru Sejarah</option>
-                                <option value="Guru Geografi">Guru Geografi</option>
-                                <option value="Guru Ekonomi">Guru Ekonomi</option>
-                                <option value="Guru Sosiologi">Guru Sosiologi</option>
-                                <option value="Guru Pendidikan Agama">Guru Pendidikan Agama</option>
-                                <option value="Guru Pendidikan Jasmani">Guru Pendidikan Jasmani</option>
-                                <option value="Guru Seni Budaya">Guru Seni Budaya</option>
-                                <option value="Guru Teknologi Informasi">Guru Teknologi Informasi</option>
-                                <option value="Guru Lainnya">Guru Lainnya</option>
-                            </select>
-                            <small class="text-muted">Pilih spesialisasi mata pelajaran</small>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" class="form-control" name="email">
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save"></i> Simpan
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <script>
-function toggleSpesialisasi() {
-    var role = document.getElementById('roleSelect').value;
-    var spesialisasiField = document.getElementById('spesialisasiField');
-    var spesialisasiSelect = document.getElementById('spesialisasiSelect');
-    
-    if (role === 'guru') {
-        spesialisasiField.style.display = 'block';
-        spesialisasiSelect.required = true;
-    } else {
-        spesialisasiField.style.display = 'none';
-        spesialisasiSelect.required = false;
-        spesialisasiSelect.value = '';
-    }
-}
-
 $(document).ready(function() {
-    // Initialize toggle on page load
-    toggleSpesialisasi();
-    
     $('#teachersTable').DataTable({
         language: {
             url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
@@ -319,60 +227,6 @@ $(document).ready(function() {
         pageLength: 10,
         lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
         dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
-    });
-    
-    // Reset form when modal is closed
-    $('#addTeacherModal').on('hidden.bs.modal', function () {
-        $(this).find('form')[0].reset();
-        toggleSpesialisasi();
-    });
-    
-    // Handle form submission with AJAX
-    $('#addTeacherForm').on('submit', function(e) {
-        e.preventDefault();
-        
-        var formData = $(this).serialize();
-        var submitBtn = $(this).find('button[type="submit"]');
-        var originalText = submitBtn.html();
-        
-        // Disable submit button
-        submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...');
-        
-        $.ajax({
-            url: '',
-            type: 'POST',
-            data: formData,
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil',
-                        text: response.message,
-                        timer: 1500,
-                        showConfirmButton: false
-                    }).then(function() {
-                        $('#addTeacherModal').modal('hide');
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal',
-                        text: response.message
-                    });
-                    submitBtn.prop('disabled', false).html(originalText);
-                }
-            },
-            error: function() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Terjadi kesalahan saat menyimpan data'
-                });
-                submitBtn.prop('disabled', false).html(originalText);
-            }
-        });
     });
 });
 

@@ -179,9 +179,9 @@ $conn->close();
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="bi bi-building"></i> Daftar Kelas</h5>
-                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addKelasModal">
+                <a href="tambah_kelas.php" class="btn btn-primary btn-sm">
                     <i class="bi bi-plus-circle"></i> Tambah Kelas
-                </button>
+                </a>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -207,9 +207,9 @@ $conn->close();
                                     </td>
                                     <td><?php echo date('d/m/Y', strtotime($k['created_at'])); ?></td>
                                     <td>
-                                        <button type="button" class="btn btn-sm btn-info" onclick="editKelas(<?php echo htmlspecialchars(json_encode($k)); ?>)">
+                                        <a href="edit_kelas.php?id=<?php echo $k['id']; ?>" class="btn btn-sm btn-info">
                                             <i class="bi bi-pencil"></i> Edit
-                                        </button>
+                                        </a>
                                         <button type="button" class="btn btn-sm btn-danger" onclick="deleteKelas(<?php echo $k['id']; ?>)">
                                             <i class="bi bi-trash"></i> Hapus
                                         </button>
@@ -224,58 +224,7 @@ $conn->close();
     </div>
 </div>
 
-<!-- Add/Edit Kelas Modal -->
-<div class="modal fade" id="addKelasModal" tabindex="-1" aria-labelledby="addKelasModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form id="kelasForm">
-                <input type="hidden" name="action" id="formAction" value="add">
-                <input type="hidden" name="id" id="formId">
-                <input type="hidden" name="ajax" value="1">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Tambah Kelas</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Tingkat <span class="text-danger">*</span></label>
-                        <select class="form-select" name="tingkat" id="tingkat" required>
-                            <option value="">Pilih Tingkat</option>
-                            <option value="10">Kelas 10</option>
-                            <option value="11">Kelas 11</option>
-                            <option value="12">Kelas 12</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Nama Kelas <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="nama_kelas" id="namaKelas" placeholder="Contoh: 10 D, 11 A, 12 B" required>
-                        <small class="text-muted">Masukkan nama kelas lengkap (contoh: 10 D, 11 A, 12 B)</small>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save"></i> Simpan
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <script>
-function editKelas(kelas) {
-    document.getElementById('modalTitle').textContent = 'Edit Kelas';
-    document.getElementById('formAction').value = 'edit';
-    document.getElementById('formId').value = kelas.id;
-    document.getElementById('tingkat').value = kelas.tingkat;
-    document.getElementById('namaKelas').value = kelas.nama_kelas;
-    
-    var modal = new bootstrap.Modal(document.getElementById('addKelasModal'));
-    modal.show();
-}
-
 function deleteKelas(id) {
     Swal.fire({
         title: 'Apakah Anda yakin?',
@@ -338,63 +287,6 @@ $(document).ready(function() {
         pageLength: 10,
         lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
         dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
-    });
-    
-    // Reset form when modal is closed
-    $('#addKelasModal').on('hidden.bs.modal', function () {
-        $(this).find('form')[0].reset();
-        document.getElementById('modalTitle').textContent = 'Tambah Kelas';
-        document.getElementById('formAction').value = 'add';
-        document.getElementById('formId').value = '';
-    });
-    
-    // Handle form submission with AJAX
-    $('#kelasForm').on('submit', function(e) {
-        e.preventDefault();
-        
-        var formData = $(this).serialize();
-        var submitBtn = $(this).find('button[type="submit"]');
-        var originalText = submitBtn.html();
-        var action = $('#formAction').val();
-        
-        // Disable submit button
-        submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...');
-        
-        $.ajax({
-            url: '',
-            type: 'POST',
-            data: formData,
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil',
-                        text: response.message,
-                        timer: 1500,
-                        showConfirmButton: false
-                    }).then(function() {
-                        $('#addKelasModal').modal('hide');
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal',
-                        text: response.message
-                    });
-                    submitBtn.prop('disabled', false).html(originalText);
-                }
-            },
-            error: function() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Terjadi kesalahan saat menyimpan data'
-                });
-                submitBtn.prop('disabled', false).html(originalText);
-            }
-        });
     });
 });
 </script>

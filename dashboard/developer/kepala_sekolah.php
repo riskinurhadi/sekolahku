@@ -191,9 +191,9 @@ $conn->close();
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="bi bi-person-badge"></i> Daftar Kepala Sekolah</h5>
-                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addKepalaSekolahModal">
+                <a href="tambah_kepala_sekolah.php" class="btn btn-primary btn-sm">
                     <i class="bi bi-plus-circle"></i> Tambah Kepala Sekolah
-                </button>
+                </a>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -231,62 +231,6 @@ $conn->close();
     </div>
 </div>
 
-<!-- Add Kepala Sekolah Modal -->
-<div class="modal fade" id="addKepalaSekolahModal" tabindex="-1" aria-labelledby="addKepalaSekolahModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <form id="addKepalaSekolahForm">
-                <input type="hidden" name="action" value="add">
-                <input type="hidden" name="ajax" value="1">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addKepalaSekolahModalLabel">
-                        <i class="bi bi-plus-circle"></i> Tambah Kepala Sekolah Baru
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Username <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="username" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Password <span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" name="password" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="nama_lengkap" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" class="form-control" name="email">
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label">Sekolah <span class="text-danger">*</span></label>
-                            <select class="form-select" name="sekolah_id" required>
-                                <option value="">Pilih Sekolah</option>
-                                <?php foreach ($schools as $school): ?>
-                                    <option value="<?php echo $school['id']; ?>"><?php echo htmlspecialchars($school['nama_sekolah']); ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                            <?php if (empty($schools)): ?>
-                                <small class="text-muted">Tidak ada sekolah yang tersedia (semua sekolah sudah memiliki kepala sekolah)</small>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save"></i> Simpan
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <script>
 $(document).ready(function() {
     $('#kepalaSekolahTable').DataTable({
@@ -298,59 +242,6 @@ $(document).ready(function() {
         pageLength: 10,
         lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
         dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
-    });
-    
-    // Reset form when modal is closed
-    $('#addKepalaSekolahModal').on('hidden.bs.modal', function () {
-        $(this).find('form')[0].reset();
-    });
-    
-    // Handle form submission with AJAX
-    $('#addKepalaSekolahForm').on('submit', function(e) {
-        e.preventDefault();
-        
-        var formData = $(this).serialize();
-        var submitBtn = $(this).find('button[type="submit"]');
-        var originalText = submitBtn.html();
-        
-        // Disable submit button
-        submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...');
-        
-        $.ajax({
-            url: '',
-            type: 'POST',
-            data: formData,
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil',
-                        text: response.message,
-                        timer: 1500,
-                        showConfirmButton: false
-                    }).then(function() {
-                        $('#addKepalaSekolahModal').modal('hide');
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal',
-                        text: response.message
-                    });
-                    submitBtn.prop('disabled', false).html(originalText);
-                }
-            },
-            error: function() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Terjadi kesalahan saat menyimpan data'
-                });
-                submitBtn.prop('disabled', false).html(originalText);
-            }
-        });
     });
 });
 

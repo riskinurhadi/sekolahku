@@ -134,9 +134,9 @@ $conn->close();
                 <input type="date" id="filterDate" class="form-control" value="<?php echo $filter_date; ?>" onchange="window.location.href='?tanggal=' + this.value">
             </div>
             <div class="col-md-8 text-end">
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addJadwalModal">
+                <a href="tambah_jadwal.php" class="btn btn-primary">
                     <i class="bi bi-plus-circle"></i> Tambah Jadwal
-                </button>
+                </a>
             </div>
         </div>
     </div>
@@ -220,11 +220,9 @@ for ($i = 0; $i < 7; $i++):
                                     </td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-sm btn-outline-primary" 
-                                                    onclick="editJadwal(<?php echo htmlspecialchars(json_encode($j)); ?>)" 
-                                                    title="Edit">
+                                            <a href="edit_jadwal.php?id=<?php echo $j['id']; ?>" class="btn btn-sm btn-outline-primary" title="Edit">
                                                 <i class="bi bi-pencil"></i>
-                                            </button>
+                                            </a>
                                             <form method="POST" style="display: inline;" onsubmit="event.preventDefault(); confirmDelete('jadwal ini').then(result => { if(result) this.submit(); }); return false;">
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="id" value="<?php echo $j['id']; ?>">
@@ -244,131 +242,6 @@ for ($i = 0; $i < 7; $i++):
     </div>
 <?php endfor; ?>
 
-<!-- Modal Tambah/Edit Jadwal -->
-<div class="modal fade" id="addJadwalModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">Tambah Jadwal Pelajaran</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="POST" id="jadwalForm">
-                <div class="modal-body">
-                    <input type="hidden" name="action" id="formAction" value="add">
-                    <input type="hidden" name="id" id="formId">
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Kelas <span class="text-danger">*</span></label>
-                        <select class="form-select" name="kelas_id" id="kelasId" required>
-                            <option value="">Pilih Kelas</option>
-                            <?php foreach ($kelas as $k): ?>
-                                <option value="<?php echo $k['id']; ?>"><?php echo htmlspecialchars($k['nama_kelas']); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Mata Pelajaran <span class="text-danger">*</span></label>
-                        <select class="form-select" name="mata_pelajaran_id" id="mataPelajaranId" required>
-                            <option value="">Pilih Mata Pelajaran</option>
-                            <?php if (empty($mata_pelajaran)): ?>
-                                <option value="" disabled>Tidak ada mata pelajaran tersedia. Silakan tambahkan mata pelajaran terlebih dahulu.</option>
-                            <?php else: ?>
-                                <?php foreach ($mata_pelajaran as $mp): ?>
-                                    <option value="<?php echo $mp['id']; ?>" data-guru="<?php echo htmlspecialchars($mp['nama_guru']); ?>">
-                                        <?php echo htmlspecialchars($mp['nama_pelajaran']); ?> 
-                                        <?php if ($mp['kode_pelajaran']): ?>
-                                            (<?php echo htmlspecialchars($mp['kode_pelajaran']); ?>)
-                                        <?php endif; ?>
-                                        - <?php echo htmlspecialchars($mp['nama_guru']); ?>
-                                        <?php if ($mp['spesialisasi']): ?>
-                                            [<?php echo htmlspecialchars($mp['spesialisasi']); ?>]
-                                        <?php endif; ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </select>
-                        <?php if (empty($mata_pelajaran)): ?>
-                            <small class="text-danger">
-                                <i class="bi bi-exclamation-triangle"></i> Tidak ada mata pelajaran yang tersedia. 
-                                Pastikan guru sudah membuat mata pelajaran di menu "Mata Pelajaran".
-                            </small>
-                        <?php else: ?>
-                            <small class="text-muted">Pilih mata pelajaran yang akan dijadwalkan</small>
-                        <?php endif; ?>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Tanggal <span class="text-danger">*</span></label>
-                        <input type="date" class="form-control" name="tanggal" id="tanggal" required>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Jam Mulai <span class="text-danger">*</span></label>
-                            <input type="time" class="form-control" name="jam_mulai" id="jamMulai" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Jam Selesai <span class="text-danger">*</span></label>
-                            <input type="time" class="form-control" name="jam_selesai" id="jamSelesai" required>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Ruangan</label>
-                        <input type="text" class="form-control" name="ruangan" id="ruangan" placeholder="Contoh: A-101">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Status</label>
-                        <select class="form-select" name="status" id="status">
-                            <option value="terjadwal">Terjadwal</option>
-                            <option value="berlangsung">Berlangsung</option>
-                            <option value="selesai">Selesai</option>
-                            <option value="dibatalkan">Dibatalkan</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Keterangan</label>
-                        <textarea class="form-control" name="keterangan" id="keterangan" rows="2"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<script>
-function editJadwal(jadwal) {
-    document.getElementById('modalTitle').textContent = 'Edit Jadwal Pelajaran';
-    document.getElementById('formAction').value = 'edit';
-    document.getElementById('formId').value = jadwal.id;
-    document.getElementById('kelasId').value = jadwal.kelas_id;
-    document.getElementById('mataPelajaranId').value = jadwal.mata_pelajaran_id;
-    document.getElementById('tanggal').value = jadwal.tanggal;
-    document.getElementById('jamMulai').value = jadwal.jam_mulai;
-    document.getElementById('jamSelesai').value = jadwal.jam_selesai;
-    document.getElementById('ruangan').value = jadwal.ruangan || '';
-    document.getElementById('status').value = jadwal.status;
-    document.getElementById('keterangan').value = jadwal.keterangan || '';
-    
-    var modal = new bootstrap.Modal(document.getElementById('addJadwalModal'));
-    modal.show();
-}
-
-// Reset form when modal is closed
-document.getElementById('addJadwalModal').addEventListener('hidden.bs.modal', function () {
-    document.getElementById('jadwalForm').reset();
-    document.getElementById('modalTitle').textContent = 'Tambah Jadwal Pelajaran';
-    document.getElementById('formAction').value = 'add';
-    document.getElementById('formId').value = '';
-});
-</script>
 
 <?php require_once '../../includes/footer.php'; ?>
 
