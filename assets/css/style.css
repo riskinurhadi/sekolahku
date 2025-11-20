@@ -1004,7 +1004,7 @@ form.hidden textarea,
 }
 
 .modal {
-    z-index: 1055 !important;
+    z-index: 1060 !important; /* Lebih tinggi dari watermark */
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
@@ -1027,19 +1027,22 @@ form.hidden textarea,
     pointer-events: none !important; /* Modal container tidak menerima klik, hanya backdrop */
     visibility: visible !important;
     opacity: 1 !important;
+    z-index: 1060 !important; /* Lebih tinggi dari watermark */
 }
 
 /* Modal dialog dan content harus bisa menerima klik */
 .modal.show .modal-dialog {
     pointer-events: auto !important;
+    z-index: 1061 !important;
 }
 
 .modal.show .modal-content {
     pointer-events: auto !important;
+    z-index: 1062 !important;
 }
 
 .modal-backdrop {
-    z-index: 1050 !important;
+    z-index: 1055 !important; /* Di bawah modal tapi di atas watermark */
     background-color: rgba(0, 0, 0, 0.5) !important;
     position: fixed !important;
     top: 0 !important;
@@ -1061,26 +1064,11 @@ form.hidden textarea,
     pointer-events: auto !important;
     visibility: visible !important;
     opacity: 1 !important;
-    z-index: 1050 !important;
-}
-
-/* Pastikan backdrop tidak menutupi modal content */
-.modal.show {
-    z-index: 1055 !important;
-}
-
-.modal.show .modal-dialog {
-    z-index: 1056 !important;
-    position: relative;
-}
-
-.modal.show .modal-content {
-    z-index: 1057 !important;
-    position: relative;
+    z-index: 1055 !important; /* Di bawah modal tapi di atas watermark */
 }
 
 .modal-dialog {
-    z-index: 1056 !important;
+    z-index: 1061 !important; /* Lebih tinggi dari backdrop dan watermark */
     margin: 1.75rem auto !important;
     position: relative !important;
     pointer-events: auto !important;
@@ -1103,7 +1091,7 @@ form.hidden textarea,
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     background: #ffffff;
     position: relative;
-    z-index: 1056 !important;
+    z-index: 1062 !important; /* Paling tinggi, di atas semua */
     pointer-events: auto !important;
 }
 
@@ -1119,7 +1107,7 @@ form.hidden textarea,
 .modal-content a,
 .modal-content .btn {
     pointer-events: auto !important;
-    z-index: 1057 !important;
+    z-index: 1063 !important; /* Paling tinggi untuk elemen interaktif */
     position: relative;
 }
 
@@ -1173,7 +1161,7 @@ form.hidden textarea,
     position: fixed;
     bottom: 20px;
     right: 20px;
-    z-index: 9999;
+    z-index: 1000; /* Lebih rendah dari modal */
     font-size: 13px;
     color: #94a3b8;
     font-weight: 500;
@@ -1186,6 +1174,12 @@ form.hidden textarea,
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     border: 1px solid rgba(226, 232, 240, 0.8);
     transition: all 0.3s ease;
+}
+
+/* Watermark tidak boleh menutupi modal */
+body.modal-open .watermark {
+    z-index: 1040; /* Lebih rendah dari modal (1055) */
+    pointer-events: none; /* Tidak bisa diklik saat modal terbuka */
 }
 
 .watermark:hover {
