@@ -399,7 +399,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <!-- Right Panel: Login Form -->
             <div class="login-right-panel">
                 <div class="login-form-wrapper">
-                    <h2 class="login-form-title">Login Admin</h2>
+                    <h2 class="login-form-title">Login</h2>
                     <p class="login-form-subtitle">Selamat datang, silakan masuk.</p>
                     
                     <?php if ($error): ?>
