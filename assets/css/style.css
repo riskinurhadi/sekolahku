@@ -177,20 +177,17 @@ body::before {
     padding: 0;
     margin-bottom: 0;
     margin-right: 0;
-    display: none;
-    transition: none !important;
-    -webkit-transition: none !important;
-    -moz-transition: none !important;
-    -o-transition: none !important;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease, margin-top 0.3s ease;
+    opacity: 0;
     text-align: left;
 }
 
 .sidebar .components .sidebar-submenu.show {
-    display: block !important;
-    transition: none !important;
-    -webkit-transition: none !important;
-    -moz-transition: none !important;
-    -o-transition: none !important;
+    max-height: 500px;
+    opacity: 1;
+    transition: max-height 0.3s ease, opacity 0.3s ease, margin-top 0.3s ease;
 }
 
 .sidebar .components .sidebar-submenu li {
@@ -216,6 +213,8 @@ body::before {
     transition: color 0.2s ease, background-color 0.2s ease;
     text-align: left;
     width: auto;
+    transform: none !important;
+    scale: 1 !important;
 }
 
 .sidebar .components .sidebar-submenu a:hover {
