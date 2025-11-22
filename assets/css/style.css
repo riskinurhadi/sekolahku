@@ -182,10 +182,28 @@ body::before {
     list-style: none;
     padding: 0;
     margin: 0;
+    transition: height 0.35s ease !important;
+    transform: none !important;
+    transform-origin: top !important;
+    will-change: height;
+}
+
+.sidebar .components .collapse:not(.show) {
+    display: none;
+}
+
+.sidebar .components .collapse.show {
+    display: block;
 }
 
 .sidebar .components .collapse li {
     margin: 2px 0;
+    transform: none !important;
+}
+
+.sidebar .components .collapse a {
+    transform: none !important;
+    transition: all 0.2s ease !important;
 }
 
 .sidebar .components .collapse a {
