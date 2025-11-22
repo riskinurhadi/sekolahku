@@ -32,36 +32,6 @@ $(document).ready(function() {
         });
     }
     
-    // Fix dropdown collapse size issue - prevent shrinking (lightweight version)
-    function lockDropdownSize() {
-        const links = $('#hasilSubmenu').find('a');
-        if (links.length > 0) {
-            links.css({
-                'font-size': '13px',
-                'padding': '10px 20px',
-                'padding-left': '48px',
-                'transform': 'none',
-                'scale': '1',
-                'zoom': '1',
-                'line-height': '1.5'
-            });
-            
-            links.find('i').css({
-                'font-size': '16px',
-                'width': '18px'
-            });
-        }
-    }
-    
-    // Lock size on collapse events only
-    $('#hasilSubmenu').on('shown.bs.collapse', function() {
-        setTimeout(lockDropdownSize, 100);
-    });
-    
-    // Initial lock for already shown dropdowns
-    if ($('#hasilSubmenu').hasClass('show')) {
-        setTimeout(lockDropdownSize, 100);
-    }
     
     // Initialize all DataTables with default settings
     if ($.fn.DataTable) {
