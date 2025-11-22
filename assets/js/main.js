@@ -54,11 +54,15 @@ $(document).ready(function() {
         }
         
         // Toggle submenu
-        if ($submenu.hasClass('show')) {
+        const isShowing = $submenu.hasClass('show');
+        
+        if (isShowing) {
             $submenu.removeClass('show');
+            $submenu.css('display', 'none');
             $toggle.removeClass('active');
         } else {
             $submenu.addClass('show');
+            $submenu.css('display', 'block');
             $toggle.addClass('active');
         }
         
