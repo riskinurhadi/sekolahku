@@ -32,6 +32,94 @@ $(document).ready(function() {
         });
     }
     
+    // Fix dropdown collapse size issue - prevent shrinking
+    $('#hasilSubmenu').on('show.bs.collapse', function() {
+        // Lock font size and padding before collapse starts
+        $(this).find('a').each(function() {
+            $(this).css({
+                'font-size': '13px',
+                'padding': '10px 20px',
+                'padding-left': '48px'
+            });
+        });
+    });
+    
+    $('#hasilSubmenu').on('shown.bs.collapse', function() {
+        // Ensure size stays consistent after collapse completes
+        $(this).find('a').each(function() {
+            $(this).css({
+                'font-size': '13px',
+                'padding': '10px 20px',
+                'padding-left': '48px',
+                'transform': 'none',
+                'scale': '1'
+            });
+        });
+    });
+    
+    $('#hasilSubmenu').on('hide.bs.collapse', function() {
+        // Lock size during collapse
+        $(this).find('a').each(function() {
+            $(this).css({
+                'font-size': '13px',
+                'padding': '10px 20px',
+                'padding-left': '48px'
+            });
+        });
+    });
+    
+    // Also fix for any collapse elements in sidebar
+    $('.sidebar .collapse').on('shown.bs.collapse', function() {
+        $(this).find('a').each(function() {
+            $(this).css({
+                'font-size': '13px !important',
+                'padding': '10px 20px !important',
+                'padding-left': '48px !important',
+                'transform': 'none !important',
+                'scale': '1 !important'
+            });
+        });
+    });
+    
+    // Use MutationObserver to prevent size changes
+    const collapseElement = document.getElementById('hasilSubmenu');
+    if (collapseElement) {
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                    const links = collapseElement.querySelectorAll('a');
+                    links.forEach(function(link) {
+                        if (link.style.fontSize !== '13px') {
+                            link.style.fontSize = '13px';
+                        }
+                        if (link.style.padding !== '10px 20px' && link.style.paddingLeft !== '48px') {
+                            link.style.padding = '10px 20px';
+                            link.style.paddingLeft = '48px';
+                        }
+                        if (link.style.transform && link.style.transform !== 'none') {
+                            link.style.transform = 'none';
+                        }
+                    });
+                }
+            });
+        });
+        
+        observer.observe(collapseElement, {
+            attributes: true,
+            attributeFilter: ['style'],
+            subtree: true
+        });
+        
+        // Also observe child elements
+        const links = collapseElement.querySelectorAll('a');
+        links.forEach(function(link) {
+            observer.observe(link, {
+                attributes: true,
+                attributeFilter: ['style']
+            });
+        });
+    }
+    
     // Initialize all DataTables with default settings
     if ($.fn.DataTable) {
         $('.dataTable').DataTable({
