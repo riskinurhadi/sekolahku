@@ -24,20 +24,34 @@ $(document).ready(function() {
         $('#content').toggleClass('active');
     });
     
-    // Auto-hide sidebar on mobile after click
+    // Auto-hide sidebar on mobile after click (exclude dropdown toggles)
     if ($(window).width() <= 768) {
-        $('.sidebar a').on('click', function() {
-            $('#sidebar').removeClass('active');
-            $('#content').removeClass('active');
+        $('.sidebar a').on('click', function(e) {
+            // Don't hide sidebar if clicking dropdown toggle
+            if (!$(this).hasClass('dropdown-toggle')) {
+                $('#sidebar').removeClass('active');
+                $('#content').removeClass('active');
+            }
         });
     }
     
     // Custom dropdown toggle without animation
-    $('.sidebar .dropdown-toggle').on('click', function(e) {
+    $(document).on('click', '.sidebar .dropdown-toggle', function(e) {
         e.preventDefault();
-        const targetId = $(this).data('target');
-        const $submenu = $('#' + targetId);
+        e.stopPropagation();
+        
         const $toggle = $(this);
+        const targetId = $toggle.data('target');
+        
+        if (!targetId) {
+            return false;
+        }
+        
+        const $submenu = $('#' + targetId);
+        
+        if (!$submenu.length) {
+            return false;
+        }
         
         // Toggle submenu
         if ($submenu.hasClass('show')) {
@@ -47,6 +61,8 @@ $(document).ready(function() {
             $submenu.addClass('show');
             $toggle.addClass('active');
         }
+        
+        return false;
     });
     
     

@@ -157,6 +157,9 @@ body::before {
 /* Sidebar Dropdown - No Animation, No Bootstrap Collapse */
 .sidebar .components a.dropdown-toggle {
     cursor: pointer;
+    pointer-events: auto;
+    position: relative;
+    z-index: 1;
 }
 
 .sidebar .components a.dropdown-toggle .bi-chevron-down {
