@@ -196,22 +196,43 @@ body::before {
     display: block;
 }
 
+.sidebar .components .collapse.collapsing {
+    transform: none !important;
+    transition: height 0.35s ease !important;
+    overflow: hidden;
+}
+
+.sidebar .components .collapse.collapsing *,
+.sidebar .components .collapse.collapsing a,
+.sidebar .components .collapse.collapsing li {
+    transform: none !important;
+    font-size: 13px !important;
+    padding: 10px 20px !important;
+    padding-left: 48px !important;
+}
+
+.sidebar .components .collapse.show *,
+.sidebar .components .collapse.show a,
+.sidebar .components .collapse.show li {
+    transform: none !important;
+    font-size: 13px !important;
+    padding: 10px 20px !important;
+    padding-left: 48px !important;
+}
+
 .sidebar .components .collapse li {
     margin: 2px 0;
     transform: none !important;
 }
 
 .sidebar .components .collapse a {
-    transform: none !important;
-    transition: all 0.2s ease !important;
-}
-
-.sidebar .components .collapse a {
     padding: 10px 20px;
-    font-size: 13px;
-    font-weight: 600;
     padding-left: 48px;
+    font-size: 13px !important;
+    font-weight: 600;
     color: #64748b;
+    transform: none !important;
+    transition: color 0.2s ease, background 0.2s ease !important;
 }
 
 .sidebar .components .collapse a:hover {
@@ -227,8 +248,16 @@ body::before {
 
 .sidebar .components .collapse a i {
     margin-right: 10px;
-    width: 18px;
-    font-size: 16px;
+    width: 18px !important;
+    font-size: 16px !important;
+    transform: none !important;
+}
+
+.sidebar .components .collapse.collapsing a i,
+.sidebar .components .collapse.show a i {
+    width: 18px !important;
+    font-size: 16px !important;
+    transform: none !important;
 }
 
 /* Active Users Section */
