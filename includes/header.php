@@ -273,6 +273,24 @@ if ($table_check && $table_check->num_rows > 0) {
                         </a>
                     </li>
                     <li>
+                        <a href="#hasilSubmenu" data-bs-toggle="collapse" aria-expanded="<?php echo (basename($_SERVER['PHP_SELF']) == 'hasil_latihan.php' || basename($_SERVER['PHP_SELF']) == 'presensi.php') ? 'true' : 'false'; ?>" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'hasil_latihan.php' || basename($_SERVER['PHP_SELF']) == 'presensi.php') ? 'active' : ''; ?>">
+                            <i class="bi bi-check-circle"></i> Hasil
+                            <i class="bi bi-chevron-down ms-auto"></i>
+                        </a>
+                        <ul class="collapse list-unstyled <?php echo (basename($_SERVER['PHP_SELF']) == 'hasil_latihan.php' || basename($_SERVER['PHP_SELF']) == 'presensi.php') ? 'show' : ''; ?>" id="hasilSubmenu">
+                            <li>
+                                <a href="<?php echo getBasePath(); ?>dashboard/siswa/presensi.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'presensi.php' ? 'active' : ''; ?>">
+                                    <i class="bi bi-clipboard-check"></i> Rekap Kehadiran
+                                </a>
+                            </li>
+                            <li>
+                                <a href="<?php echo getBasePath(); ?>dashboard/siswa/hasil_latihan.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'hasil_latihan.php' ? 'active' : ''; ?>">
+                                    <i class="bi bi-file-earmark-check"></i> Hasil Latihan
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/siswa/profil.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'profil.php' ? 'active' : ''; ?>">
                             <i class="bi bi-person-circle"></i> Profil
                         </a>
