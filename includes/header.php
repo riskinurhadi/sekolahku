@@ -263,6 +263,11 @@ if ($table_check && $table_check->num_rows > 0) {
                         </a>
                     </li>
                     <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/siswa/informasi_akademik.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'informasi_akademik.php' || basename($_SERVER['PHP_SELF']) == 'detail_informasi.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-megaphone"></i> Informasi Akademik
+                        </a>
+                    </li>
+                    <li>
                         <a href="javascript:void(0);" class="dropdown-toggle <?php echo (basename($_SERVER['PHP_SELF']) == 'soal_saya.php' || basename($_SERVER['PHP_SELF']) == 'uts.php' || basename($_SERVER['PHP_SELF']) == 'uas.php') ? 'active' : ''; ?>" data-target="ujianSubmenu">
                             <i class="bi bi-file-earmark-text"></i> Ujian
                             <i class="bi bi-chevron-down ms-auto"></i>
@@ -284,11 +289,6 @@ if ($table_check && $table_check->num_rows > 0) {
                                 </a>
                             </li>
                         </ul>
-                    </li>
-                    <li>
-                        <a href="<?php echo getBasePath(); ?>dashboard/siswa/informasi_akademik.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'informasi_akademik.php' || basename($_SERVER['PHP_SELF']) == 'detail_informasi.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-megaphone"></i> Informasi Akademik
-                        </a>
                     </li>
                     <li>
                         <a href="javascript:void(0);" class="dropdown-toggle <?php echo (basename($_SERVER['PHP_SELF']) == 'hasil_latihan.php' || basename($_SERVER['PHP_SELF']) == 'presensi.php') ? 'active' : ''; ?>" data-target="hasilSubmenu">
