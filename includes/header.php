@@ -263,24 +263,32 @@ if ($table_check && $table_check->num_rows > 0) {
                         </a>
                     </li>
                     <li>
-                        <a href="<?php echo getBasePath(); ?>dashboard/siswa/presensi.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'presensi.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-clipboard-check"></i> Presensi
-                        </a>
-                    </li>
-                    <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/siswa/soal_saya.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'soal_saya.php' ? 'active' : ''; ?>">
                             <i class="bi bi-file-earmark-text"></i> Soal
-                        </a>
-                    </li>
-                    <li>
-                        <a href="<?php echo getBasePath(); ?>dashboard/siswa/hasil.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'hasil.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-check-circle"></i> Hasil
                         </a>
                     </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/siswa/informasi_akademik.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'informasi_akademik.php' || basename($_SERVER['PHP_SELF']) == 'detail_informasi.php' ? 'active' : ''; ?>">
                             <i class="bi bi-megaphone"></i> Informasi Akademik
                         </a>
+                    </li>
+                    <li>
+                        <a href="#hasilSubmenu" data-bs-toggle="collapse" aria-expanded="<?php echo (basename($_SERVER['PHP_SELF']) == 'hasil_latihan.php' || basename($_SERVER['PHP_SELF']) == 'presensi.php') ? 'true' : 'false'; ?>" class="dropdown-toggle <?php echo (basename($_SERVER['PHP_SELF']) == 'hasil_latihan.php' || basename($_SERVER['PHP_SELF']) == 'presensi.php') ? 'active' : ''; ?>">
+                            <i class="bi bi-check-circle"></i> Hasil
+                            <i class="bi bi-chevron-down ms-auto"></i>
+                        </a>
+                        <ul class="collapse list-unstyled <?php echo (basename($_SERVER['PHP_SELF']) == 'hasil_latihan.php' || basename($_SERVER['PHP_SELF']) == 'presensi.php') ? 'show' : ''; ?>" id="hasilSubmenu">
+                            <li>
+                                <a href="<?php echo getBasePath(); ?>dashboard/siswa/hasil_latihan.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'hasil_latihan.php' ? 'active' : ''; ?>">
+                                    <i class="bi bi-file-earmark-check"></i> Hasil Latihan
+                                </a>
+                            </li>
+                            <li>
+                                <a href="<?php echo getBasePath(); ?>dashboard/siswa/presensi.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'presensi.php' ? 'active' : ''; ?>">
+                                    <i class="bi bi-clipboard-check"></i> Rekap Presensi
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/siswa/profil.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'profil.php' ? 'active' : ''; ?>">

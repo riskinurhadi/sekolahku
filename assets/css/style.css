@@ -154,6 +154,60 @@ body::before {
     color: inherit;
 }
 
+/* Sidebar Dropdown */
+.sidebar .components a.dropdown-toggle {
+    position: relative;
+}
+
+.sidebar .components a.dropdown-toggle .bi-chevron-down {
+    margin-right: 0;
+    margin-left: auto;
+    width: auto;
+    font-size: 14px;
+    transition: transform 0.3s ease;
+}
+
+.sidebar .components a.dropdown-toggle[aria-expanded="true"] .bi-chevron-down {
+    transform: rotate(180deg);
+}
+
+.sidebar .components .collapse {
+    margin-left: 20px;
+    margin-top: 4px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar .components .collapse li {
+    margin: 2px 0;
+}
+
+.sidebar .components .collapse a {
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    padding-left: 48px;
+    color: #64748b;
+}
+
+.sidebar .components .collapse a:hover {
+    color: #1e3a8a;
+    background: #f1f5f9;
+}
+
+.sidebar .components .collapse a.active {
+    color: #1e3a8a;
+    background: #e0e7ff;
+    font-weight: 700;
+}
+
+.sidebar .components .collapse a i {
+    margin-right: 10px;
+    width: 18px;
+    font-size: 16px;
+}
+
 /* Active Users Section */
 .sidebar-active-users {
     position: fixed;
