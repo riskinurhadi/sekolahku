@@ -159,12 +159,17 @@ body::before {
     position: relative;
 }
 
+.sidebar .components a.dropdown-toggle::after {
+    display: none !important;
+}
+
 .sidebar .components a.dropdown-toggle .bi-chevron-down {
     margin-right: 0;
     margin-left: auto;
     width: auto;
     font-size: 14px;
     transition: transform 0.3s ease;
+    flex-shrink: 0;
 }
 
 .sidebar .components a.dropdown-toggle[aria-expanded="true"] .bi-chevron-down {
