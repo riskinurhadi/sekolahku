@@ -32,21 +32,21 @@ $(document).ready(function() {
         });
     }
     
-    // Disable collapse animation for sidebar dropdowns
-    $('.sidebar .collapse').on('show.bs.collapse', function() {
-        $(this).css('transition', 'none');
-    });
-    
-    $('.sidebar .collapse').on('shown.bs.collapse', function() {
-        $(this).css('transition', 'none');
-    });
-    
-    $('.sidebar .collapse').on('hide.bs.collapse', function() {
-        $(this).css('transition', 'none');
-    });
-    
-    $('.sidebar .collapse').on('hidden.bs.collapse', function() {
-        $(this).css('transition', 'none');
+    // Custom dropdown toggle without Bootstrap collapse (no animation)
+    $('.sidebar .dropdown-toggle').on('click', function(e) {
+        e.preventDefault();
+        const targetId = $(this).data('target');
+        const $submenu = $('#' + targetId);
+        const $toggle = $(this);
+        
+        // Toggle submenu
+        if ($submenu.hasClass('show')) {
+            $submenu.removeClass('show');
+            $toggle.removeClass('active');
+        } else {
+            $submenu.addClass('show');
+            $toggle.addClass('active');
+        }
     });
     
     

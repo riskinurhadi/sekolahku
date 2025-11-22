@@ -263,11 +263,11 @@ if ($table_check && $table_check->num_rows > 0) {
                         </a>
                     </li>
                     <li>
-                        <a href="#ujianSubmenu" data-bs-toggle="collapse" aria-expanded="<?php echo (basename($_SERVER['PHP_SELF']) == 'soal_saya.php' || basename($_SERVER['PHP_SELF']) == 'uts.php' || basename($_SERVER['PHP_SELF']) == 'uas.php') ? 'true' : 'false'; ?>" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'soal_saya.php' || basename($_SERVER['PHP_SELF']) == 'uts.php' || basename($_SERVER['PHP_SELF']) == 'uas.php') ? 'active' : ''; ?>">
+                        <a href="javascript:void(0);" class="dropdown-toggle <?php echo (basename($_SERVER['PHP_SELF']) == 'soal_saya.php' || basename($_SERVER['PHP_SELF']) == 'uts.php' || basename($_SERVER['PHP_SELF']) == 'uas.php') ? 'active' : ''; ?>" data-target="ujianSubmenu">
                             <i class="bi bi-file-earmark-text"></i> Ujian
                             <i class="bi bi-chevron-down ms-auto"></i>
                         </a>
-                        <ul class="collapse list-unstyled <?php echo (basename($_SERVER['PHP_SELF']) == 'soal_saya.php' || basename($_SERVER['PHP_SELF']) == 'uts.php' || basename($_SERVER['PHP_SELF']) == 'uas.php') ? 'show' : ''; ?>" id="ujianSubmenu">
+                        <ul class="sidebar-submenu list-unstyled <?php echo (basename($_SERVER['PHP_SELF']) == 'soal_saya.php' || basename($_SERVER['PHP_SELF']) == 'uts.php' || basename($_SERVER['PHP_SELF']) == 'uas.php') ? 'show' : ''; ?>" id="ujianSubmenu">
                             <li>
                                 <a href="<?php echo getBasePath(); ?>dashboard/siswa/soal_saya.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'soal_saya.php' ? 'active' : ''; ?>">
                                     <i class="bi bi-pencil-square"></i> Latihan
@@ -291,11 +291,11 @@ if ($table_check && $table_check->num_rows > 0) {
                         </a>
                     </li>
                     <li>
-                        <a href="#hasilSubmenu" data-bs-toggle="collapse" aria-expanded="<?php echo (basename($_SERVER['PHP_SELF']) == 'hasil_latihan.php' || basename($_SERVER['PHP_SELF']) == 'presensi.php') ? 'true' : 'false'; ?>" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'hasil_latihan.php' || basename($_SERVER['PHP_SELF']) == 'presensi.php') ? 'active' : ''; ?>">
+                        <a href="javascript:void(0);" class="dropdown-toggle <?php echo (basename($_SERVER['PHP_SELF']) == 'hasil_latihan.php' || basename($_SERVER['PHP_SELF']) == 'presensi.php') ? 'active' : ''; ?>" data-target="hasilSubmenu">
                             <i class="bi bi-check-circle"></i> Hasil
                             <i class="bi bi-chevron-down ms-auto"></i>
                         </a>
-                        <ul class="collapse list-unstyled <?php echo (basename($_SERVER['PHP_SELF']) == 'hasil_latihan.php' || basename($_SERVER['PHP_SELF']) == 'presensi.php') ? 'show' : ''; ?>" id="hasilSubmenu">
+                        <ul class="sidebar-submenu list-unstyled <?php echo (basename($_SERVER['PHP_SELF']) == 'hasil_latihan.php' || basename($_SERVER['PHP_SELF']) == 'presensi.php') ? 'show' : ''; ?>" id="hasilSubmenu">
                             <li>
                                 <a href="<?php echo getBasePath(); ?>dashboard/siswa/presensi.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'presensi.php' ? 'active' : ''; ?>">
                                     <i class="bi bi-clipboard-check"></i> Rekap Kehadiran
