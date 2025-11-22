@@ -102,23 +102,10 @@ $conn->close();
 <div class="row">
     <div class="col-12">
         <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-list-check"></i> Riwayat Presensi Saya</h5>
-            </div>
             <div class="card-body">
                 <?php if (count($my_presensi) > 0): ?>
                     <div class="table-responsive">
                         <table class="table table-hover" id="presensiTable">
-                            <thead>
-                                <tr>
-                                    <th>Tanggal</th>
-                                    <th>Mata Pelajaran</th>
-                                    <th>Guru</th>
-                                    <th>Kode</th>
-                                    <th>Waktu Presensi</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
                             <tbody>
                                 <?php foreach ($my_presensi as $p): ?>
                                     <tr>

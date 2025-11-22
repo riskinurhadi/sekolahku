@@ -29,24 +29,10 @@ $conn->close();
 <div class="row">
     <div class="col-12">
         <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-file-earmark-check"></i> Daftar Hasil Latihan</h5>
-            </div>
             <div class="card-body">
                 <?php if (count($hasil_list) > 0): ?>
                     <div class="table-responsive">
                         <table id="hasilLatihanTable" class="table table-hover" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>Judul Soal</th>
-                                    <th>Mata Pelajaran</th>
-                                    <th>Jenis</th>
-                                    <th>Nilai</th>
-                                    <th>Poin</th>
-                                    <th>Waktu Selesai</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
                             <tbody>
                                 <?php foreach ($hasil_list as $hasil): ?>
                                     <tr>
