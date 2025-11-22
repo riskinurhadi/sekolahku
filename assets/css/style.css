@@ -212,32 +212,36 @@ body::before {
 }
 
 .sidebar .components .collapse a {
-    padding: 10px 20px;
-    padding-left: 48px;
+    padding: 10px 20px !important;
+    padding-left: 48px !important;
     font-size: 13px !important;
-    font-weight: 600;
+    font-weight: 600 !important;
     color: #64748b;
     transform: none !important;
     transition: color 0.2s ease, background 0.2s ease !important;
     display: flex !important;
     align-items: center !important;
     white-space: nowrap !important;
-    width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    line-height: 1.5 !important;
 }
 
 .sidebar .components .collapse.collapsing a,
-.sidebar .components .collapse.show a {
+.sidebar .components .collapse.show a,
+.sidebar .components .collapse a {
     padding: 10px 20px !important;
     padding-left: 48px !important;
     font-size: 13px !important;
+    font-weight: 600 !important;
     display: flex !important;
     align-items: center !important;
     white-space: nowrap !important;
     width: 100% !important;
     min-width: 0 !important;
     box-sizing: border-box !important;
+    line-height: 1.5 !important;
 }
 
 .sidebar .components .collapse a:hover {
