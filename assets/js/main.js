@@ -32,20 +32,59 @@ $(document).ready(function() {
         });
     }
     
-    // Custom dropdown toggle without Bootstrap collapse (no animation)
+    // Custom dropdown toggle with smooth animation
     $('.sidebar .dropdown-toggle').on('click', function(e) {
         e.preventDefault();
         const targetId = $(this).data('target');
         const $submenu = $('#' + targetId);
         const $toggle = $(this);
         
-        // Toggle submenu
         if ($submenu.hasClass('show')) {
-            $submenu.removeClass('show');
-            $toggle.removeClass('active');
+            // Close with animation
+            $submenu.css({
+                'max-height': $submenu[0].scrollHeight + 'px',
+                'opacity': '1'
+            });
+            
+            setTimeout(function() {
+                $submenu.css({
+                    'max-height': '0',
+                    'opacity': '0'
+                });
+            }, 10);
+            
+            setTimeout(function() {
+                $submenu.removeClass('show');
+                $toggle.removeClass('active');
+                $submenu.css('max-height', '');
+            }, 300);
         } else {
+            // Open with animation
             $submenu.addClass('show');
             $toggle.addClass('active');
+            
+            // Set initial state
+            $submenu.css({
+                'max-height': '0',
+                'opacity': '0',
+                'display': 'block'
+            });
+            
+            // Get actual height
+            const height = $submenu[0].scrollHeight;
+            
+            // Animate to full height
+            setTimeout(function() {
+                $submenu.css({
+                    'max-height': height + 'px',
+                    'opacity': '1'
+                });
+            }, 10);
+            
+            // Clean up after animation
+            setTimeout(function() {
+                $submenu.css('max-height', '');
+            }, 300);
         }
     });
     
