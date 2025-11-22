@@ -159,13 +159,15 @@ body::before {
     position: relative;
 }
 
-.sidebar .components a.dropdown-toggle::after {
+.sidebar .components a.dropdown-toggle::after,
+.sidebar .components a.dropdown-toggle::before {
     display: none !important;
+    content: none !important;
 }
 
 .sidebar .components a.dropdown-toggle .bi-chevron-down {
-    margin-right: 0;
     margin-left: auto;
+    margin-right: 0;
     width: auto;
     font-size: 14px;
     transition: transform 0.3s ease;
@@ -174,6 +176,11 @@ body::before {
 
 .sidebar .components a.dropdown-toggle[aria-expanded="true"] .bi-chevron-down {
     transform: rotate(180deg);
+}
+
+/* Pastikan hanya ada 1 chevron */
+.sidebar .components a.dropdown-toggle i.bi-chevron-down ~ i.bi-chevron-down {
+    display: none !important;
 }
 
 /* Dropdown Menu Container */
