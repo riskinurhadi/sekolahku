@@ -263,9 +263,27 @@ if ($table_check && $table_check->num_rows > 0) {
                         </a>
                     </li>
                     <li>
-                        <a href="<?php echo getBasePath(); ?>dashboard/siswa/soal_saya.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'soal_saya.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-file-earmark-text"></i> Soal
+                        <a href="#ujianSubmenu" data-bs-toggle="collapse" aria-expanded="<?php echo (basename($_SERVER['PHP_SELF']) == 'soal_saya.php' || basename($_SERVER['PHP_SELF']) == 'uts.php' || basename($_SERVER['PHP_SELF']) == 'uas.php') ? 'true' : 'false'; ?>" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'soal_saya.php' || basename($_SERVER['PHP_SELF']) == 'uts.php' || basename($_SERVER['PHP_SELF']) == 'uas.php') ? 'active' : ''; ?>">
+                            <i class="bi bi-file-earmark-text"></i> Ujian
+                            <i class="bi bi-chevron-down ms-auto"></i>
                         </a>
+                        <ul class="collapse list-unstyled <?php echo (basename($_SERVER['PHP_SELF']) == 'soal_saya.php' || basename($_SERVER['PHP_SELF']) == 'uts.php' || basename($_SERVER['PHP_SELF']) == 'uas.php') ? 'show' : ''; ?>" id="ujianSubmenu">
+                            <li>
+                                <a href="<?php echo getBasePath(); ?>dashboard/siswa/soal_saya.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'soal_saya.php' ? 'active' : ''; ?>">
+                                    <i class="bi bi-pencil-square"></i> Latihan
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="<?php echo basename($_SERVER['PHP_SELF']) == 'uts.php' ? 'active' : ''; ?>">
+                                    <i class="bi bi-file-earmark-medical"></i> UTS
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="<?php echo basename($_SERVER['PHP_SELF']) == 'uas.php' ? 'active' : ''; ?>">
+                                    <i class="bi bi-file-earmark-medical-fill"></i> UAS
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/siswa/informasi_akademik.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'informasi_akademik.php' || basename($_SERVER['PHP_SELF']) == 'detail_informasi.php' ? 'active' : ''; ?>">
