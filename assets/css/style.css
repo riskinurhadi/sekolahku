@@ -154,16 +154,13 @@ body::before {
     color: inherit;
 }
 
-/* Sidebar Dropdown - Fresh Start */
+/* Sidebar Dropdown */
 .sidebar .components li.has-dropdown {
     margin: 2px 0;
 }
 
 .sidebar .components li.has-dropdown > a.dropdown-toggle {
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
 }
 
 .sidebar .components li.has-dropdown > a.dropdown-toggle::after,
@@ -172,25 +169,21 @@ body::before {
     content: none !important;
 }
 
-.sidebar .components li.has-dropdown > a.dropdown-toggle span {
-    flex: 1;
-}
-
 .sidebar .components li.has-dropdown > a.dropdown-toggle .dropdown-arrow {
     margin-left: auto;
     margin-right: 0;
     font-size: 14px;
     transition: transform 0.3s ease;
     flex-shrink: 0;
-    width: 14px;
-    height: 14px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .sidebar .components li.has-dropdown > a.dropdown-toggle[aria-expanded="true"] .dropdown-arrow {
     transform: rotate(180deg);
+}
+
+/* Pastikan hanya ada 1 chevron */
+.sidebar .components li.has-dropdown > a.dropdown-toggle .dropdown-arrow ~ .dropdown-arrow {
+    display: none !important;
 }
 
 /* Dropdown Submenu */
