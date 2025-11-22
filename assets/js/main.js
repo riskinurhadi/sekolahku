@@ -33,55 +33,64 @@ $(document).ready(function() {
     }
     
     // Fix dropdown collapse size issue - prevent shrinking
-    $('#hasilSubmenu').on('show.bs.collapse', function() {
-        // Lock font size and padding before collapse starts
-        $(this).find('a').each(function() {
-            $(this).css({
-                'font-size': '13px',
-                'padding': '10px 20px',
-                'padding-left': '48px'
-            });
-        });
-    });
-    
-    $('#hasilSubmenu').on('shown.bs.collapse', function() {
-        // Ensure size stays consistent after collapse completes
-        $(this).find('a').each(function() {
-            $(this).css({
+    function lockDropdownSize() {
+        $('#hasilSubmenu').find('a').each(function() {
+            const $link = $(this);
+            $link.css({
                 'font-size': '13px',
                 'padding': '10px 20px',
                 'padding-left': '48px',
                 'transform': 'none',
-                'scale': '1'
+                'scale': '1',
+                'zoom': '1',
+                'line-height': '1.5'
+            });
+            
+            // Also lock icon size
+            $link.find('i').css({
+                'font-size': '16px',
+                'width': '18px'
             });
         });
+    }
+    
+    // Lock size on all collapse events
+    $('#hasilSubmenu').on('show.bs.collapse shown.bs.collapse hide.bs.collapse hidden.bs.collapse', function() {
+        lockDropdownSize();
     });
     
-    $('#hasilSubmenu').on('hide.bs.collapse', function() {
-        // Lock size during collapse
-        $(this).find('a').each(function() {
-            $(this).css({
-                'font-size': '13px',
-                'padding': '10px 20px',
-                'padding-left': '48px'
-            });
-        });
+    // Also monitor during collapsing state
+    $('#hasilSubmenu').on('show.bs.collapse', function() {
+        const checkInterval = setInterval(function() {
+            if ($('#hasilSubmenu').hasClass('collapsing')) {
+                lockDropdownSize();
+            } else {
+                clearInterval(checkInterval);
+                lockDropdownSize();
+            }
+        }, 10);
     });
     
     // Also fix for any collapse elements in sidebar
     $('.sidebar .collapse').on('shown.bs.collapse', function() {
         $(this).find('a').each(function() {
             $(this).css({
-                'font-size': '13px !important',
-                'padding': '10px 20px !important',
-                'padding-left': '48px !important',
-                'transform': 'none !important',
-                'scale': '1 !important'
+                'font-size': '13px',
+                'padding': '10px 20px',
+                'padding-left': '48px',
+                'transform': 'none',
+                'scale': '1',
+                'zoom': '1'
             });
         });
     });
     
-    // Use MutationObserver to prevent size changes
+    // Initial lock for already shown dropdowns
+    if ($('#hasilSubmenu').hasClass('show')) {
+        lockDropdownSize();
+    }
+    
+    // Use MutationObserver to prevent size changes - more aggressive
     const collapseElement = document.getElementById('hasilSubmenu');
     if (collapseElement) {
         const observer = new MutationObserver(function(mutations) {
@@ -89,16 +98,21 @@ $(document).ready(function() {
                 if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
                     const links = collapseElement.querySelectorAll('a');
                     links.forEach(function(link) {
-                        if (link.style.fontSize !== '13px') {
-                            link.style.fontSize = '13px';
-                        }
-                        if (link.style.padding !== '10px 20px' && link.style.paddingLeft !== '48px') {
-                            link.style.padding = '10px 20px';
-                            link.style.paddingLeft = '48px';
-                        }
-                        if (link.style.transform && link.style.transform !== 'none') {
-                            link.style.transform = 'none';
-                        }
+                        // Force reset all size-related properties
+                        link.style.setProperty('font-size', '13px', 'important');
+                        link.style.setProperty('padding', '10px 20px', 'important');
+                        link.style.setProperty('padding-left', '48px', 'important');
+                        link.style.setProperty('transform', 'none', 'important');
+                        link.style.setProperty('scale', '1', 'important');
+                        link.style.setProperty('zoom', '1', 'important');
+                        link.style.setProperty('line-height', '1.5', 'important');
+                        
+                        // Also lock icon sizes
+                        const icons = link.querySelectorAll('i');
+                        icons.forEach(function(icon) {
+                            icon.style.setProperty('font-size', '16px', 'important');
+                            icon.style.setProperty('width', '18px', 'important');
+                        });
                     });
                 }
             });
@@ -106,18 +120,35 @@ $(document).ready(function() {
         
         observer.observe(collapseElement, {
             attributes: true,
-            attributeFilter: ['style'],
-            subtree: true
+            attributeFilter: ['style', 'class'],
+            subtree: true,
+            childList: true
         });
         
-        // Also observe child elements
+        // Also observe child elements more aggressively
         const links = collapseElement.querySelectorAll('a');
         links.forEach(function(link) {
             observer.observe(link, {
                 attributes: true,
-                attributeFilter: ['style']
+                attributeFilter: ['style', 'class']
+            });
+            
+            // Also observe icons
+            const icons = link.querySelectorAll('i');
+            icons.forEach(function(icon) {
+                observer.observe(icon, {
+                    attributes: true,
+                    attributeFilter: ['style']
+                });
             });
         });
+        
+        // Additional interval check as backup
+        setInterval(function() {
+            if (collapseElement.classList.contains('show') || collapseElement.classList.contains('collapsing')) {
+                lockDropdownSize();
+            }
+        }, 50);
     }
     
     // Initialize all DataTables with default settings

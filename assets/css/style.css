@@ -184,9 +184,9 @@ body::before {
 }
 
 .sidebar .components .collapse a {
-    padding: 10px 20px;
-    padding-left: 48px;
-    font-size: 13px;
+    padding: 10px 20px !important;
+    padding-left: 48px !important;
+    font-size: 13px !important;
     font-weight: 600;
     color: #64748b;
     text-decoration: none;
@@ -195,7 +195,22 @@ body::before {
     white-space: nowrap;
     border-radius: 8px;
     margin: 0 12px;
-    transition: color 0.2s ease, background-color 0.2s ease;
+    transition: color 0.2s ease, background-color 0.2s ease !important;
+    transform: none !important;
+    scale: 1 !important;
+    zoom: 1 !important;
+    line-height: 1.5 !important;
+}
+
+.sidebar .components .collapse.collapsing a,
+.sidebar .components .collapse.show a {
+    padding: 10px 20px !important;
+    padding-left: 48px !important;
+    font-size: 13px !important;
+    transform: none !important;
+    scale: 1 !important;
+    zoom: 1 !important;
+    line-height: 1.5 !important;
 }
 
 .sidebar .components .collapse a:hover {
