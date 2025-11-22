@@ -154,7 +154,7 @@ body::before {
     color: inherit;
 }
 
-/* Sidebar Dropdown */
+/* Sidebar Dropdown - Clean Reset */
 .sidebar .components a.dropdown-toggle {
     position: relative;
 }
@@ -176,18 +176,14 @@ body::before {
     transform: rotate(180deg);
 }
 
+/* Dropdown Menu Container */
 .sidebar .components .collapse {
     margin-left: 20px;
     margin-top: 4px;
     list-style: none;
     padding: 0;
     margin: 0;
-    transition: height 0.35s ease !important;
-    transform: none !important;
-    transform-origin: top !important;
-    will-change: height;
     width: calc(100% - 40px);
-    max-width: calc(100% - 40px);
 }
 
 .sidebar .components .collapse:not(.show) {
@@ -199,95 +195,59 @@ body::before {
 }
 
 .sidebar .components .collapse.collapsing {
-    transform: none !important;
-    transition: height 0.35s ease !important;
+    position: relative;
+    height: 0;
     overflow: hidden;
+    transition: height 0.35s ease;
 }
 
-.sidebar .components .collapse.collapsing *,
-.sidebar .components .collapse.collapsing a,
-.sidebar .components .collapse.collapsing li,
-.sidebar .components .collapse.collapsing i {
-    font-size: inherit !important;
-    padding: inherit !important;
-    margin: inherit !important;
+.sidebar .components .collapse.collapsing * {
+    font-size: 13px !important;
+    padding: 10px 20px !important;
+    padding-left: 48px !important;
     transform: none !important;
-    transition: none !important;
+    scale: 1 !important;
+    zoom: 1 !important;
 }
 
+/* Dropdown Menu Items */
 .sidebar .components .collapse li {
     margin: 2px 0;
-    transform: none !important;
-    width: 100%;
-    min-width: 0;
+    list-style: none;
 }
 
 .sidebar .components .collapse a {
-    padding: 10px 20px !important;
-    padding-left: 48px !important;
-    font-size: 13px !important;
-    font-weight: 600 !important;
+    padding: 10px 20px;
+    padding-left: 48px;
+    font-size: 13px;
+    font-weight: 600;
     color: #64748b;
-    transform: none !important;
-    transition: color 0.2s ease, background 0.2s ease !important;
-    transition-property: color, background !important;
-    transition-duration: 0.2s !important;
-    transition-timing-function: ease !important;
-    display: flex !important;
-    align-items: center !important;
-    white-space: nowrap !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    box-sizing: border-box !important;
-    line-height: 1.5 !important;
-    text-overflow: ellipsis;
-    overflow: hidden;
-}
-
-.sidebar .components .collapse.collapsing a,
-.sidebar .components .collapse.show a {
-    padding: 10px 20px !important;
-    padding-left: 48px !important;
-    font-size: 13px !important;
-    font-weight: 600 !important;
-    display: flex !important;
-    align-items: center !important;
-    white-space: nowrap !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    box-sizing: border-box !important;
-    line-height: 1.5 !important;
-    text-overflow: ellipsis;
-    overflow: hidden;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    border-radius: 8px;
+    margin: 0 12px;
+    transition: color 0.2s ease, background-color 0.2s ease;
 }
 
 .sidebar .components .collapse a:hover {
     color: #1e3a8a;
-    background: #f1f5f9;
+    background-color: #f1f5f9;
 }
 
 .sidebar .components .collapse a.active {
     color: #1e3a8a;
-    background: #e0e7ff;
+    background-color: #e0e7ff;
     font-weight: 700;
 }
 
 .sidebar .components .collapse a i {
     margin-right: 10px;
-    width: 18px !important;
-    font-size: 16px !important;
-    transform: none !important;
+    width: 18px;
+    font-size: 16px;
     flex-shrink: 0;
-    display: inline-block;
-}
-
-.sidebar .components .collapse.collapsing a i,
-.sidebar .components .collapse.show a i {
-    width: 18px !important;
-    font-size: 16px !important;
-    transform: none !important;
-    flex-shrink: 0;
-    display: inline-block;
+    text-align: center;
 }
 
 
