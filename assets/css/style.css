@@ -1202,7 +1202,6 @@ form.hidden textarea,
 .d-none form select,
 .d-none form textarea {
     pointer-events: none;
-    tabindex: -1;
 }
 
 .modal {
