@@ -32,6 +32,23 @@ $(document).ready(function() {
         });
     }
     
+    // Disable collapse animation for sidebar dropdowns
+    $('.sidebar .collapse').on('show.bs.collapse', function() {
+        $(this).css('transition', 'none');
+    });
+    
+    $('.sidebar .collapse').on('shown.bs.collapse', function() {
+        $(this).css('transition', 'none');
+    });
+    
+    $('.sidebar .collapse').on('hide.bs.collapse', function() {
+        $(this).css('transition', 'none');
+    });
+    
+    $('.sidebar .collapse').on('hidden.bs.collapse', function() {
+        $(this).css('transition', 'none');
+    });
+    
     
     // Initialize all DataTables with default settings
     if ($.fn.DataTable) {

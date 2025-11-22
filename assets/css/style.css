@@ -154,10 +154,30 @@ body::before {
     color: inherit;
 }
 
-/* Sidebar Dropdown */
+/* Sidebar Dropdown - No Animation */
 .sidebar .components .collapse {
     margin-left: 20px;
     margin-top: 4px;
+    transition: none !important;
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -o-transition: none !important;
+    display: none;
+}
+
+.sidebar .components .collapse.show {
+    display: block !important;
+    height: auto !important;
+}
+
+.sidebar .components .collapse.collapsing {
+    transition: none !important;
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -o-transition: none !important;
+    height: auto !important;
+    display: block !important;
+    overflow: visible !important;
 }
 
 .sidebar .components .collapse li {
