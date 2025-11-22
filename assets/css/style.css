@@ -186,6 +186,8 @@ body::before {
     transform: none !important;
     transform-origin: top !important;
     will-change: height;
+    width: calc(100% - 40px);
+    max-width: calc(100% - 40px);
 }
 
 .sidebar .components .collapse:not(.show) {
@@ -202,27 +204,11 @@ body::before {
     overflow: hidden;
 }
 
-.sidebar .components .collapse.collapsing *,
-.sidebar .components .collapse.collapsing a,
-.sidebar .components .collapse.collapsing li {
-    transform: none !important;
-    font-size: 13px !important;
-    padding: 10px 20px !important;
-    padding-left: 48px !important;
-}
-
-.sidebar .components .collapse.show *,
-.sidebar .components .collapse.show a,
-.sidebar .components .collapse.show li {
-    transform: none !important;
-    font-size: 13px !important;
-    padding: 10px 20px !important;
-    padding-left: 48px !important;
-}
-
 .sidebar .components .collapse li {
     margin: 2px 0;
     transform: none !important;
+    width: 100%;
+    min-width: 0;
 }
 
 .sidebar .components .collapse a {
@@ -233,6 +219,25 @@ body::before {
     color: #64748b;
     transform: none !important;
     transition: color 0.2s ease, background 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.sidebar .components .collapse.collapsing a,
+.sidebar .components .collapse.show a {
+    padding: 10px 20px !important;
+    padding-left: 48px !important;
+    font-size: 13px !important;
+    display: flex !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
 }
 
 .sidebar .components .collapse a:hover {
@@ -251,6 +256,8 @@ body::before {
     width: 18px !important;
     font-size: 16px !important;
     transform: none !important;
+    flex-shrink: 0;
+    display: inline-block;
 }
 
 .sidebar .components .collapse.collapsing a i,
@@ -258,6 +265,13 @@ body::before {
     width: 18px !important;
     font-size: 16px !important;
     transform: none !important;
+    flex-shrink: 0;
+    display: inline-block;
+}
+
+.sidebar .components .collapse a {
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 /* Active Users Section */

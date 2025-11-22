@@ -393,6 +393,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <p class="login-system-description">
                         Portal pembelajaran online untuk mengelola kegiatan belajar mengajar dengan mudah dan efisien.
                     </p>
+                    
                 </div>
             </div>
             
