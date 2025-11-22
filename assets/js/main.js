@@ -24,83 +24,28 @@ $(document).ready(function() {
         $('#content').toggleClass('active');
     });
     
-    // Auto-hide sidebar on mobile after click (exclude dropdown toggles)
+    // Auto-hide sidebar on mobile after click
     if ($(window).width() <= 768) {
-        $('.sidebar a').on('click', function(e) {
-            // Don't hide sidebar if clicking dropdown toggle
-            if (!$(this).hasClass('dropdown-toggle')) {
-                $('#sidebar').removeClass('active');
-                $('#content').removeClass('active');
-            }
+        $('.sidebar a').on('click', function() {
+            $('#sidebar').removeClass('active');
+            $('#content').removeClass('active');
         });
     }
     
-    // Custom dropdown toggle with smooth animation
+    // Custom dropdown toggle without animation
     $('.sidebar .dropdown-toggle').on('click', function(e) {
         e.preventDefault();
-        e.stopPropagation();
-        
         const targetId = $(this).data('target');
         const $submenu = $('#' + targetId);
         const $toggle = $(this);
         
-        // Check if currently showing
-        const isShowing = $submenu.hasClass('show');
-        
-        if (isShowing) {
-            // Close with animation
-            $submenu.css({
-                'max-height': $submenu[0].scrollHeight + 'px',
-                'opacity': '1'
-            });
-            
-            setTimeout(function() {
-                $submenu.css({
-                    'max-height': '0',
-                    'opacity': '0'
-                });
-            }, 10);
-            
-            setTimeout(function() {
-                $submenu.removeClass('show');
-                $toggle.removeClass('active');
-                $submenu.css({
-                    'max-height': '',
-                    'display': 'none'
-                });
-            }, 300);
+        // Toggle submenu
+        if ($submenu.hasClass('show')) {
+            $submenu.removeClass('show');
+            $toggle.removeClass('active');
         } else {
-            // Open with animation
             $submenu.addClass('show');
             $toggle.addClass('active');
-            
-            // Set initial state
-            $submenu.css({
-                'max-height': '0',
-                'opacity': '0',
-                'display': 'block'
-            });
-            
-            // Get actual height
-            const height = $submenu[0].scrollHeight;
-            
-            // Animate to full height
-            setTimeout(function() {
-                $submenu.css({
-                    'max-height': height + 'px',
-                    'opacity': '1'
-                });
-            }, 10);
-            
-            // After animation, set to auto to allow dynamic content
-            setTimeout(function() {
-                if ($submenu.hasClass('show')) {
-                    $submenu.css({
-                        'max-height': 'none',
-                        'opacity': '1'
-                    });
-                }
-            }, 300);
         }
     });
     
