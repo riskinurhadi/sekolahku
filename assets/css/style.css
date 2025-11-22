@@ -204,6 +204,17 @@ body::before {
     overflow: hidden;
 }
 
+.sidebar .components .collapse.collapsing *,
+.sidebar .components .collapse.collapsing a,
+.sidebar .components .collapse.collapsing li,
+.sidebar .components .collapse.collapsing i {
+    font-size: inherit !important;
+    padding: inherit !important;
+    margin: inherit !important;
+    transform: none !important;
+    transition: none !important;
+}
+
 .sidebar .components .collapse li {
     margin: 2px 0;
     transform: none !important;
@@ -219,6 +230,9 @@ body::before {
     color: #64748b;
     transform: none !important;
     transition: color 0.2s ease, background 0.2s ease !important;
+    transition-property: color, background !important;
+    transition-duration: 0.2s !important;
+    transition-timing-function: ease !important;
     display: flex !important;
     align-items: center !important;
     white-space: nowrap !important;
@@ -226,11 +240,12 @@ body::before {
     min-width: 0 !important;
     box-sizing: border-box !important;
     line-height: 1.5 !important;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .sidebar .components .collapse.collapsing a,
-.sidebar .components .collapse.show a,
-.sidebar .components .collapse a {
+.sidebar .components .collapse.show a {
     padding: 10px 20px !important;
     padding-left: 48px !important;
     font-size: 13px !important;
@@ -242,6 +257,8 @@ body::before {
     min-width: 0 !important;
     box-sizing: border-box !important;
     line-height: 1.5 !important;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .sidebar .components .collapse a:hover {
@@ -273,10 +290,6 @@ body::before {
     display: inline-block;
 }
 
-.sidebar .components .collapse a {
-    text-overflow: ellipsis;
-    overflow: hidden;
-}
 
 /* Active Users Section */
 .sidebar-active-users {
