@@ -154,76 +154,75 @@ body::before {
     color: inherit;
 }
 
-/* Sidebar Dropdown - Clean Reset */
-.sidebar .components a.dropdown-toggle {
-    position: relative;
+/* Sidebar Dropdown - Fresh Start */
+.sidebar .components li.has-dropdown {
+    margin: 2px 0;
 }
 
-.sidebar .components a.dropdown-toggle::after,
-.sidebar .components a.dropdown-toggle::before {
+.sidebar .components li.has-dropdown > a.dropdown-toggle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sidebar .components li.has-dropdown > a.dropdown-toggle::after,
+.sidebar .components li.has-dropdown > a.dropdown-toggle::before {
     display: none !important;
     content: none !important;
 }
 
-.sidebar .components a.dropdown-toggle .bi-chevron-down {
+.sidebar .components li.has-dropdown > a.dropdown-toggle span {
+    flex: 1;
+}
+
+.sidebar .components li.has-dropdown > a.dropdown-toggle .dropdown-arrow {
     margin-left: auto;
     margin-right: 0;
-    width: auto;
     font-size: 14px;
     transition: transform 0.3s ease;
     flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.sidebar .components a.dropdown-toggle[aria-expanded="true"] .bi-chevron-down {
+.sidebar .components li.has-dropdown > a.dropdown-toggle[aria-expanded="true"] .dropdown-arrow {
     transform: rotate(180deg);
 }
 
-/* Pastikan hanya ada 1 chevron */
-.sidebar .components a.dropdown-toggle i.bi-chevron-down ~ i.bi-chevron-down {
-    display: none !important;
-}
-
-/* Dropdown Menu Container */
-.sidebar .components .collapse {
+/* Dropdown Submenu */
+.sidebar .components li.has-dropdown .collapse {
     margin-left: 20px;
     margin-top: 4px;
     list-style: none;
     padding: 0;
-    margin: 0;
-    width: calc(100% - 40px);
+    margin-bottom: 0;
 }
 
-.sidebar .components .collapse:not(.show) {
+.sidebar .components li.has-dropdown .collapse:not(.show) {
     display: none;
 }
 
-.sidebar .components .collapse.show {
+.sidebar .components li.has-dropdown .collapse.show {
     display: block;
 }
 
-.sidebar .components .collapse.collapsing {
-    position: relative;
+.sidebar .components li.has-dropdown .collapse.collapsing {
     height: 0;
     overflow: hidden;
     transition: height 0.35s ease;
 }
 
-.sidebar .components .collapse.collapsing * {
-    font-size: 13px !important;
-    padding: 10px 20px !important;
-    padding-left: 48px !important;
-    transform: none !important;
-    scale: 1 !important;
-    zoom: 1 !important;
-}
-
-/* Dropdown Menu Items */
-.sidebar .components .collapse li {
+/* Dropdown Submenu Items */
+.sidebar .components li.has-dropdown .collapse li {
     margin: 2px 0;
     list-style: none;
 }
 
-.sidebar .components .collapse a {
+.sidebar .components li.has-dropdown .collapse a {
     padding: 10px 20px;
     padding-left: 48px;
     font-size: 13px;
@@ -238,18 +237,18 @@ body::before {
     transition: color 0.2s ease, background-color 0.2s ease;
 }
 
-.sidebar .components .collapse a:hover {
+.sidebar .components li.has-dropdown .collapse a:hover {
     color: #1e3a8a;
     background-color: #f1f5f9;
 }
 
-.sidebar .components .collapse a.active {
+.sidebar .components li.has-dropdown .collapse a.active {
     color: #1e3a8a;
     background-color: #e0e7ff;
     font-weight: 700;
 }
 
-.sidebar .components .collapse a i {
+.sidebar .components li.has-dropdown .collapse a i {
     margin-right: 10px;
     width: 18px;
     font-size: 16px;

@@ -272,10 +272,11 @@ if ($table_check && $table_check->num_rows > 0) {
                             <i class="bi bi-megaphone"></i> Informasi Akademik
                         </a>
                     </li>
-                    <li>
+                    <li class="has-dropdown">
                         <a href="#hasilSubmenu" data-bs-toggle="collapse" aria-expanded="<?php echo (basename($_SERVER['PHP_SELF']) == 'hasil_latihan.php' || basename($_SERVER['PHP_SELF']) == 'presensi.php') ? 'true' : 'false'; ?>" class="dropdown-toggle <?php echo (basename($_SERVER['PHP_SELF']) == 'hasil_latihan.php' || basename($_SERVER['PHP_SELF']) == 'presensi.php') ? 'active' : ''; ?>">
-                            <i class="bi bi-check-circle"></i> Hasil
-                            <i class="bi bi-chevron-down ms-auto"></i>
+                            <i class="bi bi-check-circle"></i>
+                            <span>Hasil</span>
+                            <i class="bi bi-chevron-down dropdown-arrow"></i>
                         </a>
                         <ul class="collapse list-unstyled <?php echo (basename($_SERVER['PHP_SELF']) == 'hasil_latihan.php' || basename($_SERVER['PHP_SELF']) == 'presensi.php') ? 'show' : ''; ?>" id="hasilSubmenu">
                             <li>
