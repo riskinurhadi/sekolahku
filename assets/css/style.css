@@ -253,6 +253,12 @@ body::before {
     margin-bottom: 8px;
 }
 
+/* Menghilangkan elemen after pada icon tersebut */
+.bi-chevron-down::after {
+    display: none !important;
+    content: none !important;
+}
+
 .active-users-title {
     color: #1e3a8a;
     font-size: 8px;
