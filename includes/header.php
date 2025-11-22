@@ -254,7 +254,7 @@ if ($table_check && $table_check->num_rows > 0) {
                             <i class="bi bi-images"></i> Slider Dashboard
                         </a>
                     </li>
-                <?php endif; ?>
+                <?php endif; ?>  
                 
                 <?php if ($_SESSION['user_role'] == 'siswa'): ?>
                     <li>
