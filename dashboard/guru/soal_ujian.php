@@ -65,10 +65,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $delete_hasil->close();
                 
                 // Delete jadwal_ujian (if exists)
-                $delete_jadwal = $conn->prepare("DELETE FROM jadwal_ujian WHERE soal_id = ?");
-                $delete_jadwal->bind_param("i", $id);
-                $delete_jadwal->execute();
-                $delete_jadwal->close();
+                $check_table = $conn->query("SHOW TABLES LIKE 'jadwal_ujian'");
+                if ($check_table && $check_table->num_rows > 0) {
+                    $delete_jadwal = $conn->prepare("DELETE FROM jadwal_ujian WHERE soal_id = ?");
+                    $delete_jadwal->bind_param("i", $id);
+                    $delete_jadwal->execute();
+                    $delete_jadwal->close();
+                }
                 
                 // Delete item_soal
                 $delete_item = $conn->prepare("DELETE FROM item_soal WHERE soal_id = ?");
@@ -114,26 +117,48 @@ if (isset($_GET['error']) && $_GET['error'] == 1) {
     $message = 'error:' . $msg;
 }
 
+// Check if jadwal_ujian table exists
+$check_table = $conn->query("SHOW TABLES LIKE 'jadwal_ujian'");
+$jadwal_table_exists = ($check_table && $check_table->num_rows > 0);
+
 // Check if tipe_ujian column exists
 $check_column = $conn->query("SHOW COLUMNS FROM soal LIKE 'tipe_ujian'");
 if ($check_column && $check_column->num_rows > 0) {
     // Get all soal with tipe_ujian filter
-    $stmt = $conn->prepare("SELECT s.*, mp.nama_pelajaran,
-        (SELECT COUNT(*) FROM jadwal_ujian ju WHERE ju.soal_id = s.id) as jadwal_count
-        FROM soal s 
-        JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id 
-        WHERE s.guru_id = ? AND s.tipe_ujian = ?
-        ORDER BY s.created_at DESC");
-    $stmt->bind_param("is", $guru_id, $tipe_ujian);
+    if ($jadwal_table_exists) {
+        $stmt = $conn->prepare("SELECT s.*, mp.nama_pelajaran,
+            (SELECT COUNT(*) FROM jadwal_ujian ju WHERE ju.soal_id = s.id) as jadwal_count
+            FROM soal s 
+            JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id 
+            WHERE s.guru_id = ? AND s.tipe_ujian = ?
+            ORDER BY s.created_at DESC");
+        $stmt->bind_param("is", $guru_id, $tipe_ujian);
+    } else {
+        $stmt = $conn->prepare("SELECT s.*, mp.nama_pelajaran, 0 as jadwal_count
+            FROM soal s 
+            JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id 
+            WHERE s.guru_id = ? AND s.tipe_ujian = ?
+            ORDER BY s.created_at DESC");
+        $stmt->bind_param("is", $guru_id, $tipe_ujian);
+    }
 } else {
     // Fallback: get all soal (tipe_ujian column doesn't exist yet)
-    $stmt = $conn->prepare("SELECT s.*, mp.nama_pelajaran,
-        (SELECT COUNT(*) FROM jadwal_ujian ju WHERE ju.soal_id = s.id) as jadwal_count
-        FROM soal s 
-        JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id 
-        WHERE s.guru_id = ?
-        ORDER BY s.created_at DESC");
-    $stmt->bind_param("i", $guru_id);
+    if ($jadwal_table_exists) {
+        $stmt = $conn->prepare("SELECT s.*, mp.nama_pelajaran,
+            (SELECT COUNT(*) FROM jadwal_ujian ju WHERE ju.soal_id = s.id) as jadwal_count
+            FROM soal s 
+            JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id 
+            WHERE s.guru_id = ?
+            ORDER BY s.created_at DESC");
+        $stmt->bind_param("i", $guru_id);
+    } else {
+        $stmt = $conn->prepare("SELECT s.*, mp.nama_pelajaran, 0 as jadwal_count
+            FROM soal s 
+            JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id 
+            WHERE s.guru_id = ?
+            ORDER BY s.created_at DESC");
+        $stmt->bind_param("i", $guru_id);
+    }
 }
 $stmt->execute();
 $soal_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);

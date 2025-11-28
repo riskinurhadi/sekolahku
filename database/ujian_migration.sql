@@ -1,8 +1,21 @@
 -- Migration untuk fitur UTS/UAS
+-- Jalankan file ini di database Anda untuk menambahkan fitur UTS/UAS
 
--- Tambah kolom tipe_ujian di tabel soal
-ALTER TABLE soal ADD COLUMN tipe_ujian ENUM('latihan', 'uts', 'uas') DEFAULT 'latihan' AFTER jenis;
-ALTER TABLE soal ADD INDEX idx_tipe_ujian (tipe_ujian);
+-- Tambah kolom tipe_ujian di tabel soal (jika belum ada)
+SET @col_exists = 0;
+SELECT COUNT(*) INTO @col_exists 
+FROM information_schema.COLUMNS 
+WHERE TABLE_SCHEMA = DATABASE() 
+AND TABLE_NAME = 'soal' 
+AND COLUMN_NAME = 'tipe_ujian';
+
+SET @query = IF(@col_exists = 0,
+    'ALTER TABLE soal ADD COLUMN tipe_ujian ENUM(\'latihan\', \'uts\', \'uas\') DEFAULT \'latihan\' AFTER jenis, ADD INDEX idx_tipe_ujian (tipe_ujian)',
+    'SELECT "Kolom tipe_ujian sudah ada" AS message'
+);
+PREPARE stmt FROM @query;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- Tabel Jadwal Ujian (untuk akademik mengatur jadwal UTS/UAS)
 CREATE TABLE IF NOT EXISTS jadwal_ujian (
@@ -27,4 +40,3 @@ CREATE TABLE IF NOT EXISTS jadwal_ujian (
     INDEX idx_tanggal (tanggal_ujian),
     INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
