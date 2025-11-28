@@ -224,6 +224,24 @@ if ($table_check && $table_check->num_rows > 0) {
                         </a>
                     </li>
                     <li>
+                        <a href="javascript:void(0);" class="dropdown-toggle <?php echo (basename($_SERVER['PHP_SELF']) == 'soal_ujian.php' || basename($_SERVER['PHP_SELF']) == 'tambah_soal_ujian.php') ? 'active' : ''; ?>" data-target="ujianGuruSubmenu">
+                            <i class="bi bi-file-earmark-medical"></i> Ujian
+                            <i class="bi bi-chevron-down ms-auto"></i>
+                        </a>
+                        <ul class="sidebar-submenu list-unstyled <?php echo (basename($_SERVER['PHP_SELF']) == 'soal_ujian.php' || basename($_SERVER['PHP_SELF']) == 'tambah_soal_ujian.php') ? 'show' : ''; ?>" id="ujianGuruSubmenu">
+                            <li>
+                                <a href="<?php echo getBasePath(); ?>dashboard/guru/soal_ujian.php?tipe=uts" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'soal_ujian.php' && isset($_GET['tipe']) && $_GET['tipe'] == 'uts') || (basename($_SERVER['PHP_SELF']) == 'tambah_soal_ujian.php' && isset($_GET['tipe']) && $_GET['tipe'] == 'uts') ? 'active' : ''; ?>">
+                                    <i class="bi bi-file-earmark-medical"></i> UTS
+                                </a>
+                            </li>
+                            <li>
+                                <a href="<?php echo getBasePath(); ?>dashboard/guru/soal_ujian.php?tipe=uas" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'soal_ujian.php' && isset($_GET['tipe']) && $_GET['tipe'] == 'uas') || (basename($_SERVER['PHP_SELF']) == 'tambah_soal_ujian.php' && isset($_GET['tipe']) && $_GET['tipe'] == 'uas') ? 'active' : ''; ?>">
+                                    <i class="bi bi-file-earmark-medical-fill"></i> UAS
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/guru/informasi_akademik.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'informasi_akademik.php' || basename($_SERVER['PHP_SELF']) == 'detail_informasi.php' ? 'active' : ''; ?>">
                             <i class="bi bi-megaphone"></i> Informasi Akademik
                         </a>
@@ -239,6 +257,11 @@ if ($table_check && $table_check->num_rows > 0) {
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/akademik/jadwal.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'jadwal.php' ? 'active' : ''; ?>">
                             <i class="bi bi-calendar-week"></i> Jadwal Pelajaran
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/akademik/jadwal_ujian.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'jadwal_ujian.php' || basename($_SERVER['PHP_SELF']) == 'soal_ujian.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-calendar-event"></i> Jadwal Ujian
                         </a>
                     </li>
                     <li>
@@ -279,12 +302,12 @@ if ($table_check && $table_check->num_rows > 0) {
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="<?php echo basename($_SERVER['PHP_SELF']) == 'uts.php' ? 'active' : ''; ?>">
+                                <a href="<?php echo getBasePath(); ?>dashboard/siswa/uts.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'uts.php' ? 'active' : ''; ?>">
                                     <i class="bi bi-file-earmark-medical"></i> UTS
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="<?php echo basename($_SERVER['PHP_SELF']) == 'uas.php' ? 'active' : ''; ?>">
+                                <a href="<?php echo getBasePath(); ?>dashboard/siswa/uas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'uas.php' ? 'active' : ''; ?>">
                                     <i class="bi bi-file-earmark-medical-fill"></i> UAS
                                 </a>
                             </li>
