@@ -363,7 +363,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <img src="assets/img/sekolahku-login.png" alt="Sekolahku" style="max-width: 250px; height: auto; margin-bottom: 30px;">
                     
                     <p class="login-system-description">
-                        Portal pembelajaran online untuk mengelola kegiatan belajar mengajar dengan mudah dan efisien. <br> support by 
+                        Portal pembelajaran online untuk mengelola kegiatan belajar mengajar dengan mudah dan efisien. 
                     </p>
                 </div>
             </div>
@@ -405,7 +405,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </form>
                     
                     <div class="login-footer">
-                        <small>© 2025 Sekolahku - Portal Pembelajaran Online</small>
+                        <small>© 2025 Sekolahku - Portal Pembelajaran Online <br> support by <a href="https://instagram.com/ellfauzan_" target="_blank">@ellfauzan_</a></small>
                     </div>
                 </div>
             </div>
