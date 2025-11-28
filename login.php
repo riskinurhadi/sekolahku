@@ -68,11 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         
         html {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%) !important;
-            background-attachment: fixed !important;
-            background-size: cover !important;
-            background-position: center center !important;
-            background-repeat: no-repeat !important;
+            background: #ffffff !important;
             min-height: 100vh !important;
             width: 100% !important;
         }
@@ -81,31 +77,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             margin: 0 !important;
             padding: 0 !important;
             overflow-x: hidden;
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%) !important;
-            background-attachment: fixed !important;
-            background-size: cover !important;
-            background-position: center center !important;
-            background-repeat: no-repeat !important;
+            background: #ffffff !important;
             min-height: 100vh !important;
             width: 100% !important;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             position: relative;
-        }
-        
-        body.login-page::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%);
-            background-attachment: fixed;
-            background-size: cover;
-            background-position: center center;
-            background-repeat: no-repeat;
-            z-index: -1;
-            pointer-events: none;
         }
         
         body.login-page .login-container {
@@ -129,11 +105,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         0 4px 20px rgba(0, 0, 0, 0.08) !important;
             border: 1px solid #e5e7eb !important;
             width: 100% !important;
-            max-width: 1100px !important;
+            max-width: 900px !important;
             display: flex !important;
             flex-direction: row !important;
             overflow: hidden !important;
-            min-height: 650px !important;
+            min-height: 550px !important;
             margin: 0 auto !important;
             position: relative !important;
         }
@@ -183,18 +159,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             max-width: 400px;
         }
         
-        /* Logo Kemenag - Soft purple to match dashboard */
+        /* Logo Kemenag - Solid background without glassmorphism */
         .logo-kemenag-shape {
             width: 100px !important;
             height: 100px !important;
-            background: rgba(255, 255, 255, 0.2) !important;
-            backdrop-filter: blur(10px) !important;
-            -webkit-backdrop-filter: blur(10px) !important;
+            background: rgba(255, 255, 255, 0.25) !important;
             clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%) !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
             border: 1px solid rgba(255, 255, 255, 0.3) !important;
         }
         
@@ -215,18 +189,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-size: 16px !important;
         }
         
-        /* Logo Sekolahku - Soft purple with glass effect */
+        /* Logo Sekolahku - Solid background without glassmorphism */
         .logo-waykanan-shape {
             width: 100px !important;
             height: 100px !important;
-            background: rgba(255, 255, 255, 0.2) !important;
-            backdrop-filter: blur(10px) !important;
-            -webkit-backdrop-filter: blur(10px) !important;
+            background: rgba(255, 255, 255, 0.25) !important;
             border-radius: 50% !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
             border: 1px solid rgba(255, 255, 255, 0.3) !important;
         }
         
@@ -391,7 +363,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <img src="assets/img/sekolahku-login.png" alt="Sekolahku" style="max-width: 250px; height: auto; margin-bottom: 30px;">
                     
                     <p class="login-system-description">
-                        Portal pembelajaran online untuk mengelola kegiatan belajar mengajar dengan mudah dan efisien.
+                        Portal pembelajaran online untuk mengelola kegiatan belajar mengajar dengan mudah dan efisien. <br> support by 
                     </p>
                 </div>
             </div>
