@@ -34,24 +34,7 @@ if ($check_column && $check_column->num_rows > 0) {
 $conn->close();
 
 // Show success message if redirected from submit
-if (isset($_GET['success']) && $_GET['success'] == 1) {
-    echo "<script>
-        $(document).ready(function() {
-            Swal.fire({
-                icon: 'success',
-                title: 'Selamat!',
-                text: 'Selamat, anda telah menyelesaikan soal',
-                confirmButtonText: 'Oke',
-                allowOutsideClick: false,
-                allowEscapeKey: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = 'index.php';
-                }
-            });
-        });
-    </script>";
-}
+$show_success_alert = isset($_GET['success']) && $_GET['success'] == 1;
 ?>
 
 <div class="page-header">
@@ -157,5 +140,33 @@ $(document).ready(function() {
     });
 });
 </script>
+
+<?php if ($show_success_alert): ?>
+<script>
+// Pastikan script dijalankan setelah semua library ter-load
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Selamat!',
+                text: 'Selamat, anda telah menyelesaikan soal',
+                confirmButtonText: 'Oke',
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = 'index.php';
+                }
+            });
+        } else {
+            // Fallback jika SweetAlert2 belum ter-load
+            alert('Selamat, anda telah menyelesaikan soal');
+            window.location.href = 'index.php';
+        }
+    }, 300);
+});
+</script>
+<?php endif; ?>
 
 <?php require_once '../../includes/footer.php'; ?>
