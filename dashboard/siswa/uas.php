@@ -86,24 +86,30 @@ $conn->close();
                             <tbody>
                                 <?php foreach ($jadwal_list as $jadwal): ?>
                                     <?php
-                                    $now = strtotime(date('Y-m-d H:i:s'));
+                                    $now = time();
                                     
                                     // Format waktu mulai: tanggal + jam_mulai
-                                    $tanggal_waktu_str = $jadwal['tanggal_ujian'] . ' ' . $jadwal['jam_mulai'];
+                                    // Pastikan format tanggal dan waktu konsisten
+                                    $tanggal_ujian = date('Y-m-d', strtotime($jadwal['tanggal_ujian']));
+                                    $jam_mulai = date('H:i:s', strtotime($jadwal['jam_mulai']));
+                                    $tanggal_waktu_str = $tanggal_ujian . ' ' . $jam_mulai;
                                     $tanggal_waktu = strtotime($tanggal_waktu_str);
                                     
-                                    // Hitung waktu selesai: waktu mulai + waktu pengerjaan (dalam menit)
-                                    $waktu_pengerjaan_menit = intval($jadwal['waktu_pengerjaan'] ?? 60);
-                                    $tanggal_selesai = $tanggal_waktu + ($waktu_pengerjaan_menit * 60);
-                                    
-                                    // Jika jam_selesai dari jadwal ada, gunakan yang lebih awal
-                                    if (!empty($jadwal['jam_selesai']) && $jadwal['jam_selesai'] != '00:00:00') {
-                                        $tanggal_selesai_jadwal_str = $jadwal['tanggal_ujian'] . ' ' . $jadwal['jam_selesai'];
-                                        $tanggal_selesai_jadwal = strtotime($tanggal_selesai_jadwal_str);
-                                        // Gunakan yang lebih awal antara waktu pengerjaan atau jam_selesai jadwal
-                                        if ($tanggal_selesai_jadwal < $tanggal_selesai) {
-                                            $tanggal_selesai = $tanggal_selesai_jadwal;
+                                    // Untuk UTS/UAS, waktu selesai mengikuti jam_selesai dari jadwal yang diatur akademik
+                                    if (!empty($jadwal['jam_selesai']) && $jadwal['jam_selesai'] != '00:00:00' && $jadwal['jam_selesai'] != '00:00') {
+                                        $jam_selesai = date('H:i:s', strtotime($jadwal['jam_selesai']));
+                                        $tanggal_selesai_str = $tanggal_ujian . ' ' . $jam_selesai;
+                                        $tanggal_selesai = strtotime($tanggal_selesai_str);
+                                        
+                                        // Pastikan waktu selesai tidak lebih kecil dari waktu mulai
+                                        if ($tanggal_selesai <= $tanggal_waktu) {
+                                            // Jika jam_selesai <= jam_mulai, berarti mungkin melewati hari, tambahkan 1 hari
+                                            $tanggal_selesai = strtotime($tanggal_selesai_str . ' +1 day');
                                         }
+                                    } else {
+                                        // Fallback: jika jam_selesai tidak ada, gunakan waktu mulai + waktu pengerjaan
+                                        $waktu_pengerjaan_menit = intval($jadwal['waktu_pengerjaan'] ?? 60);
+                                        $tanggal_selesai = $tanggal_waktu + ($waktu_pengerjaan_menit * 60);
                                     }
                                     
                                     $is_belum_mulai = $tanggal_waktu > $now;
