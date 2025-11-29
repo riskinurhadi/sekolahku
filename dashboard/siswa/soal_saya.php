@@ -35,15 +35,19 @@ $conn->close();
 
 // Show success message if redirected from submit
 if (isset($_GET['success']) && $_GET['success'] == 1) {
-    $msg = isset($_GET['msg']) ? $_GET['msg'] : 'Selamat telah mengerjakan soal, hasil silahkan menunggu penilaian yang akan tampil di halaman hasil';
     echo "<script>
         $(document).ready(function() {
             Swal.fire({
                 icon: 'success',
                 title: 'Selamat!',
-                text: '" . addslashes($msg) . "',
-                confirmButtonText: 'OK',
-                timer: 5000
+                text: 'Selamat, anda telah menyelesaikan soal',
+                confirmButtonText: 'Oke',
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = 'index.php';
+                }
             });
         });
     </script>";
