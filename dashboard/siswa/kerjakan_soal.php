@@ -133,8 +133,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Close connection before redirect
     $conn->close();
     
-    // Redirect dengan parameter success
-    header('Location: hasil.php?soal_id=' . $soal_id . '&success=1');
+    // Redirect ke soal_saya.php dengan parameter success (hanya alert sederhana)
+    header('Location: soal_saya.php?success=1&msg=' . urlencode('Selamat telah mengerjakan soal, hasil silahkan menunggu penilaian yang akan tampil di halaman hasil'));
     exit();
 }
 

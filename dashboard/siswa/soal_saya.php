@@ -8,16 +8,46 @@ $conn = getConnection();
 $siswa_id = $_SESSION['user_id'];
 $sekolah_id = $_SESSION['sekolah_id'];
 
-// Get all soal
-$soal_list = $conn->query("SELECT s.*, mp.nama_pelajaran, 
-    (SELECT COUNT(*) FROM hasil_ujian hu WHERE hu.soal_id = s.id AND hu.siswa_id = $siswa_id) as sudah_dikerjakan,
-    (SELECT nilai FROM hasil_ujian hu WHERE hu.soal_id = s.id AND hu.siswa_id = $siswa_id LIMIT 1) as nilai
-    FROM soal s 
-    JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id 
-    WHERE mp.sekolah_id = $sekolah_id 
-    ORDER BY s.created_at DESC")->fetch_all(MYSQLI_ASSOC);
+// Check if tipe_ujian column exists
+$check_column = $conn->query("SHOW COLUMNS FROM soal LIKE 'tipe_ujian'");
+if ($check_column && $check_column->num_rows > 0) {
+    // Get only soal latihan (not UTS/UAS)
+    $soal_list = $conn->query("SELECT s.*, mp.nama_pelajaran, 
+        (SELECT COUNT(*) FROM hasil_ujian hu WHERE hu.soal_id = s.id AND hu.siswa_id = $siswa_id) as sudah_dikerjakan,
+        (SELECT nilai FROM hasil_ujian hu WHERE hu.soal_id = s.id AND hu.siswa_id = $siswa_id LIMIT 1) as nilai
+        FROM soal s 
+        JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id 
+        WHERE mp.sekolah_id = $sekolah_id 
+        AND (s.tipe_ujian = 'latihan' OR s.tipe_ujian IS NULL)
+        ORDER BY s.created_at DESC")->fetch_all(MYSQLI_ASSOC);
+} else {
+    // Fallback: get all soal (tipe_ujian column doesn't exist yet)
+    $soal_list = $conn->query("SELECT s.*, mp.nama_pelajaran, 
+        (SELECT COUNT(*) FROM hasil_ujian hu WHERE hu.soal_id = s.id AND hu.siswa_id = $siswa_id) as sudah_dikerjakan,
+        (SELECT nilai FROM hasil_ujian hu WHERE hu.soal_id = s.id AND hu.siswa_id = $siswa_id LIMIT 1) as nilai
+        FROM soal s 
+        JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id 
+        WHERE mp.sekolah_id = $sekolah_id 
+        ORDER BY s.created_at DESC")->fetch_all(MYSQLI_ASSOC);
+}
 
 $conn->close();
+
+// Show success message if redirected from submit
+if (isset($_GET['success']) && $_GET['success'] == 1) {
+    $msg = isset($_GET['msg']) ? $_GET['msg'] : 'Selamat telah mengerjakan soal, hasil silahkan menunggu penilaian yang akan tampil di halaman hasil';
+    echo "<script>
+        $(document).ready(function() {
+            Swal.fire({
+                icon: 'success',
+                title: 'Selamat!',
+                text: '" . addslashes($msg) . "',
+                confirmButtonText: 'OK',
+                timer: 5000
+            });
+        });
+    </script>";
+}
 ?>
 
 <div class="page-header">

@@ -68,10 +68,36 @@ foreach ($item_soal as $key => $item) {
 }
 
 $conn->close();
+?>
 
-// Show success message if redirected from submit
+<?php 
+// Jika diakses dari menu "Lihat Hasil", tampilkan detail lengkap
+// Jika diakses setelah submit, hanya tampilkan alert sederhana
 if (isset($_GET['success']) && $_GET['success'] == 1) {
-    echo "<script>showSuccess('Soal berhasil dikerjakan!');</script>";
+    // Hanya tampilkan alert sederhana setelah submit
+    ?>
+    <div class="page-header">
+        <h2>Hasil Ujian</h2>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <div class="alert alert-success" role="alert">
+                        <h4 class="alert-heading"><i class="bi bi-check-circle-fill"></i> Selamat!</h4>
+                        <p class="mb-0">Selamat telah mengerjakan soal, hasil silahkan menunggu penilaian yang akan tampil di halaman hasil.</p>
+                    </div>
+                    <a href="soal_saya.php" class="btn btn-primary btn-lg mt-3">
+                        <i class="bi bi-arrow-left"></i> Kembali ke Daftar Soal
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php
+    require_once '../../includes/footer.php';
+    exit();
 }
 ?>
 
