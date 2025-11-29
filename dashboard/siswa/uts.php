@@ -86,12 +86,29 @@ $conn->close();
                             <tbody>
                                 <?php foreach ($jadwal_list as $jadwal): ?>
                                     <?php
-                                    $now = date('Y-m-d H:i:s');
-                                    $tanggal_waktu = $jadwal['tanggal_ujian'] . ' ' . $jadwal['jam_mulai'];
-                                    $tanggal_selesai = $jadwal['tanggal_ujian'] . ' ' . $jadwal['jam_selesai'];
-                                    $is_belum_mulai = strtotime($tanggal_waktu) > strtotime($now);
-                                    $is_berlangsung = strtotime($tanggal_waktu) <= strtotime($now) && strtotime($tanggal_selesai) >= strtotime($now);
-                                    $is_selesai = strtotime($tanggal_selesai) < strtotime($now);
+                                    $now = strtotime(date('Y-m-d H:i:s'));
+                                    
+                                    // Format waktu mulai: tanggal + jam_mulai
+                                    $tanggal_waktu_str = $jadwal['tanggal_ujian'] . ' ' . $jadwal['jam_mulai'];
+                                    $tanggal_waktu = strtotime($tanggal_waktu_str);
+                                    
+                                    // Hitung waktu selesai: waktu mulai + waktu pengerjaan (dalam menit)
+                                    $waktu_pengerjaan_menit = intval($jadwal['waktu_pengerjaan'] ?? 60);
+                                    $tanggal_selesai = $tanggal_waktu + ($waktu_pengerjaan_menit * 60);
+                                    
+                                    // Jika jam_selesai dari jadwal ada, gunakan yang lebih awal
+                                    if (!empty($jadwal['jam_selesai']) && $jadwal['jam_selesai'] != '00:00:00') {
+                                        $tanggal_selesai_jadwal_str = $jadwal['tanggal_ujian'] . ' ' . $jadwal['jam_selesai'];
+                                        $tanggal_selesai_jadwal = strtotime($tanggal_selesai_jadwal_str);
+                                        // Gunakan yang lebih awal antara waktu pengerjaan atau jam_selesai jadwal
+                                        if ($tanggal_selesai_jadwal < $tanggal_selesai) {
+                                            $tanggal_selesai = $tanggal_selesai_jadwal;
+                                        }
+                                    }
+                                    
+                                    $is_belum_mulai = $tanggal_waktu > $now;
+                                    $is_berlangsung = $tanggal_waktu <= $now && $tanggal_selesai >= $now;
+                                    $is_selesai = $tanggal_selesai < $now;
                                     ?>
                                     <tr>
                                         <td><strong><?php echo htmlspecialchars($jadwal['nama_pelajaran']); ?></strong></td>
