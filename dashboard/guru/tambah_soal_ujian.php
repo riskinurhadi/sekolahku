@@ -37,9 +37,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Validasi pertanyaan minimal 1
     $pertanyaan_count = 0;
     if (isset($_POST['pertanyaan']) && is_array($_POST['pertanyaan'])) {
-        foreach ($_POST['pertanyaan'] as $pertanyaan) {
+        foreach ($_POST['pertanyaan'] as $index => $pertanyaan) {
             if (!empty(trim($pertanyaan))) {
                 $pertanyaan_count++;
+                
+                // Validasi untuk pilihan ganda: harus ada minimal 2 pilihan dan jawaban benar harus dipilih
+                $jenis_jawaban = $_POST['jenis_jawaban'][$index] ?? 'pilihan_ganda';
+                if ($jenis_jawaban == 'pilihan_ganda') {
+                    $pilihan_count = 0;
+                    $has_benar = false;
+                    
+                    if (isset($_POST['pilihan'][$index]) && is_array($_POST['pilihan'][$index])) {
+                        foreach ($_POST['pilihan'][$index] as $pilihan_index => $pilihan_text) {
+                            if (!empty(trim($pilihan_text))) {
+                                $pilihan_count++;
+                                // Check if this pilihan is marked as correct
+                                if (isset($_POST['is_benar'][$index][$pilihan_index])) {
+                                    $has_benar = true;
+                                }
+                            }
+                        }
+                    }
+                    
+                    if ($pilihan_count < 2) {
+                        $errors[] = 'Pertanyaan ' . ($pertanyaan_count) . ': Minimal harus ada 2 pilihan jawaban yang diisi';
+                    }
+                    
+                    if (!$has_benar) {
+                        $errors[] = 'Pertanyaan ' . ($pertanyaan_count) . ': Harus dipilih jawaban yang benar (centang salah satu pilihan)';
+                    }
+                }
             }
         }
     }
@@ -333,27 +360,54 @@ function validateForm() {
                 if (pilihanContainer) {
                     const pilihanInputs = pilihanContainer.querySelectorAll('input[type="text"][name*="pilihan"]');
                     let hasPilihan = false;
+                    let pilihanCount = 0;
                     
                     pilihanInputs.forEach(input => {
                         if (input.value.trim()) {
                             hasPilihan = true;
+                            pilihanCount++;
                         }
                     });
                     
-                    if (!hasPilihan) {
-                        errors.push('Pertanyaan ' + (index + 1) + ': Pilihan jawaban harus diisi untuk pilihan ganda');
+                    if (!hasPilihan || pilihanCount < 2) {
+                        errors.push('Pertanyaan ' + (index + 1) + ': Minimal harus ada 2 pilihan jawaban yang diisi');
+                        item.classList.add('border-danger');
+                    } else {
+                        item.classList.remove('border-danger');
                     }
                     
+                    // Check if jawaban benar sudah dipilih
                     const benarRadios = pilihanContainer.querySelectorAll('input[type="radio"]');
                     let hasBenar = false;
-                    benarRadios.forEach(radio => {
+                    let checkedRadioIndex = -1;
+                    
+                    benarRadios.forEach((radio, radioIndex) => {
                         if (radio.checked) {
                             hasBenar = true;
+                            checkedRadioIndex = radioIndex;
+                            // Verify that the checked radio has a filled pilihan
+                            const correspondingInput = pilihanInputs[radioIndex];
+                            if (!correspondingInput || !correspondingInput.value.trim()) {
+                                hasBenar = false; // Radio checked but pilihan is empty
+                            }
                         }
                     });
                     
                     if (!hasBenar) {
-                        errors.push('Pertanyaan ' + (index + 1) + ': Harus dipilih jawaban yang benar');
+                        errors.push('Pertanyaan ' + (index + 1) + ': Harus dipilih jawaban yang benar (centang salah satu pilihan)');
+                        item.classList.add('border-danger');
+                        // Highlight the radio buttons area
+                        const radioGroup = pilihanContainer.querySelectorAll('.input-group-text');
+                        radioGroup.forEach(group => {
+                            group.style.border = '2px solid #dc3545';
+                        });
+                    } else {
+                        item.classList.remove('border-danger');
+                        // Remove highlight
+                        const radioGroup = pilihanContainer.querySelectorAll('.input-group-text');
+                        radioGroup.forEach(group => {
+                            group.style.border = '';
+                        });
                     }
                 }
             }

@@ -118,13 +118,25 @@ if (isset($_GET['error']) && $_GET['error'] == 1) {
     $message = 'error:' . $msg;
 }
 
-// Get all soal
-$stmt = $conn->prepare("SELECT s.*, mp.nama_pelajaran 
-    FROM soal s 
-    JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id 
-    WHERE s.guru_id = ? 
-    ORDER BY s.created_at DESC");
-$stmt->bind_param("i", $guru_id);
+// Check if tipe_ujian column exists
+$check_column = $conn->query("SHOW COLUMNS FROM soal LIKE 'tipe_ujian'");
+if ($check_column && $check_column->num_rows > 0) {
+    // Get only soal latihan (not UTS/UAS)
+    $stmt = $conn->prepare("SELECT s.*, mp.nama_pelajaran 
+        FROM soal s 
+        JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id 
+        WHERE s.guru_id = ? AND (s.tipe_ujian = 'latihan' OR s.tipe_ujian IS NULL)
+        ORDER BY s.created_at DESC");
+    $stmt->bind_param("i", $guru_id);
+} else {
+    // Fallback: get all soal (tipe_ujian column doesn't exist yet)
+    $stmt = $conn->prepare("SELECT s.*, mp.nama_pelajaran 
+        FROM soal s 
+        JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id 
+        WHERE s.guru_id = ? 
+        ORDER BY s.created_at DESC");
+    $stmt->bind_param("i", $guru_id);
+}
 $stmt->execute();
 $soal_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
