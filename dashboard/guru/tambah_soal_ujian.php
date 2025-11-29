@@ -51,11 +51,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         foreach ($_POST['pilihan'][$index] as $pilihan_index => $pilihan_text) {
                             if (!empty(trim($pilihan_text))) {
                                 $pilihan_count++;
-                                // Check if this pilihan is marked as correct
-                                if (isset($_POST['is_benar'][$index][$pilihan_index])) {
-                                    $has_benar = true;
-                                }
                             }
+                        }
+                        // Check if jawaban benar sudah dipilih
+                        if (isset($_POST['is_benar'][$index]) && $_POST['is_benar'][$index] !== '') {
+                            $has_benar = true;
                         }
                     }
                     
@@ -126,10 +126,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 
                 // Handle pilihan jawaban untuk pilihan ganda
                 if ($jenis_jawaban == 'pilihan_ganda' && isset($_POST['pilihan'][$index]) && is_array($_POST['pilihan'][$index])) {
+                    $jawaban_benar_index = isset($_POST['is_benar'][$index]) ? intval($_POST['is_benar'][$index]) : -1;
                     $urutan_pilihan_counter = 1;
                     foreach ($_POST['pilihan'][$index] as $pilihan_index => $pilihan_text) {
                         if (!empty(trim($pilihan_text))) {
-                            $is_benar = isset($_POST['is_benar'][$index][$pilihan_index]) ? 1 : 0;
+                            // Cek apakah pilihan ini adalah jawaban yang benar
+                            $is_benar = ($pilihan_index == $jawaban_benar_index) ? 1 : 0;
                             
                             $stmt = $conn->prepare("INSERT INTO pilihan_jawaban (item_soal_id, pilihan, is_benar, urutan) VALUES (?, ?, ?, ?)");
                             $stmt->bind_param("isii", $item_soal_id, $pilihan_text, $is_benar, $urutan_pilihan_counter);
@@ -261,7 +263,7 @@ require_once '../../includes/header.php';
                                 <div class="pilihan-item mb-2">
                                     <div class="input-group">
                                         <div class="input-group-text">
-                                            <input type="radio" name="is_benar[0][0]" value="1">
+                                            <input type="radio" name="is_benar[0]" value="0">
                                         </div>
                                         <input type="text" class="form-control" name="pilihan[0][]" placeholder="Pilihan A">
                                     </div>
@@ -269,7 +271,7 @@ require_once '../../includes/header.php';
                                 <div class="pilihan-item mb-2">
                                     <div class="input-group">
                                         <div class="input-group-text">
-                                            <input type="radio" name="is_benar[0][1]" value="1">
+                                            <input type="radio" name="is_benar[0]" value="1">
                                         </div>
                                         <input type="text" class="form-control" name="pilihan[0][]" placeholder="Pilihan B">
                                     </div>
@@ -277,7 +279,7 @@ require_once '../../includes/header.php';
                                 <div class="pilihan-item mb-2">
                                     <div class="input-group">
                                         <div class="input-group-text">
-                                            <input type="radio" name="is_benar[0][2]" value="1">
+                                            <input type="radio" name="is_benar[0]" value="2">
                                         </div>
                                         <input type="text" class="form-control" name="pilihan[0][]" placeholder="Pilihan C">
                                     </div>
@@ -285,7 +287,7 @@ require_once '../../includes/header.php';
                                 <div class="pilihan-item mb-2">
                                     <div class="input-group">
                                         <div class="input-group-text">
-                                            <input type="radio" name="is_benar[0][3]" value="1">
+                                            <input type="radio" name="is_benar[0]" value="3">
                                         </div>
                                         <input type="text" class="form-control" name="pilihan[0][]" placeholder="Pilihan D">
                                     </div>
@@ -453,7 +455,7 @@ function tambahPertanyaan() {
             <div class="pilihan-item mb-2">
                 <div class="input-group">
                     <div class="input-group-text">
-                        <input type="radio" name="is_benar[${nextIndex}][0]" value="1">
+                        <input type="radio" name="is_benar[${nextIndex}]" value="0">
                     </div>
                     <input type="text" class="form-control" name="pilihan[${nextIndex}][]" placeholder="Pilihan A">
                 </div>
@@ -461,7 +463,7 @@ function tambahPertanyaan() {
             <div class="pilihan-item mb-2">
                 <div class="input-group">
                     <div class="input-group-text">
-                        <input type="radio" name="is_benar[${nextIndex}][1]" value="1">
+                        <input type="radio" name="is_benar[${nextIndex}]" value="1">
                     </div>
                     <input type="text" class="form-control" name="pilihan[${nextIndex}][]" placeholder="Pilihan B">
                 </div>
@@ -469,7 +471,7 @@ function tambahPertanyaan() {
             <div class="pilihan-item mb-2">
                 <div class="input-group">
                     <div class="input-group-text">
-                        <input type="radio" name="is_benar[${nextIndex}][2]" value="1">
+                        <input type="radio" name="is_benar[${nextIndex}]" value="2">
                     </div>
                     <input type="text" class="form-control" name="pilihan[${nextIndex}][]" placeholder="Pilihan C">
                 </div>
@@ -477,7 +479,7 @@ function tambahPertanyaan() {
             <div class="pilihan-item mb-2">
                 <div class="input-group">
                     <div class="input-group-text">
-                        <input type="radio" name="is_benar[${nextIndex}][3]" value="1">
+                        <input type="radio" name="is_benar[${nextIndex}]" value="3">
                     </div>
                     <input type="text" class="form-control" name="pilihan[${nextIndex}][]" placeholder="Pilihan D">
                 </div>
