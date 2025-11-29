@@ -1,6 +1,6 @@
 <?php
-require_once 'config/database.php';
-require_once 'config/session.php';
+require_once '../config/database.php';
+require_once '../config/session.php';
 
 // Jika sudah login, redirect ke dashboard sesuai role
 if (isLoggedIn()) {
