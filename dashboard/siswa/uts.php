@@ -86,6 +86,11 @@ $conn->close();
                             <tbody>
                                 <?php foreach ($jadwal_list as $jadwal): ?>
                                     <?php
+                                    // Pastikan timezone sudah di-set ke Asia/Jakarta (GMT+7)
+                                    if (date_default_timezone_get() != 'Asia/Jakarta') {
+                                        date_default_timezone_set('Asia/Jakarta');
+                                    }
+                                    
                                     $now = time();
                                     
                                     // Format waktu mulai: tanggal + jam_mulai

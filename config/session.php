@@ -1,4 +1,7 @@
 <?php
+// Set timezone ke Indonesia (WIB - GMT+7)
+date_default_timezone_set('Asia/Jakarta');
+
 // Konfigurasi Session
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
