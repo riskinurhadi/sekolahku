@@ -357,14 +357,22 @@ $conn->close();
     border: none;
     border-radius: 20px;
     padding: 2rem;
-    box-shadow: 0 10px 30px var(--shadow-color);
+    box-shadow: 0 20px 50px var(--shadow-color);
     transition: all 0.3s ease-in-out;
     height: 100%;
 }
 
 .metric-card:hover, .chart-section:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 40px var(--shadow-color-hover);
+    transform: translateY(-15px);
+    box-shadow: 0 30px 60px var(--shadow-color-hover);
+}
+
+.metric-card .bi {
+    font-size: 3rem;
+    background: -webkit-linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 5px 15px var(--shadow-color);
 }
 
 .metric-card-header .metric-title {

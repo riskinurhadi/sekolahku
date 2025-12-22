@@ -641,4 +641,4 @@ if ($table_check && $table_check->num_rows > 0) {
             </div>
             
             <!-- Main Content -->
-            <div class="container-fluid">
+            <div class="container">
