@@ -695,7 +695,6 @@ $conn->close();
         </div>
         </div>
         
-        <div class="responsive-row">
         <!-- Charts Row 2 -->
         <div class="row">
             <!-- Trend Nilai -->
@@ -724,9 +723,7 @@ $conn->close();
                 </div>
             </div>
         </div>
-        </div>
         
-        <div class="responsive-row">
         <!-- Charts Row 3 -->
         <div class="row">
             <!-- Soal per Mata Pelajaran (Stacked Bar) -->
@@ -744,7 +741,6 @@ $conn->close();
                     </div>
                 </div>
             </div>
-        </div>
         </div>
     </div>
     
