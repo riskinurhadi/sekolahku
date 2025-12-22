@@ -3,23 +3,41 @@ require_once '../../config/session.php';
 require_once '../../config/database.php';
 
 // Pastikan hanya siswa yang bisa akses
-if ($_SESSION['role'] !== 'siswa') {
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'siswa') {
     header('Location: ../login.php');
     exit();
 }
 
 $user_id = $_SESSION['user_id'];
-$nama_siswa = $_SESSION['nama'];
+$nama_siswa = $_SESSION['nama'] ?? 'Siswa';
 
-// Ambil data statistik sederhana (Contoh: Jumlah presensi, Jadwal hari ini)
-// Anda bisa menyesuaikan query ini dengan struktur database asli Anda
-$stmt_presensi = $db->prepare("SELECT COUNT(*) as total FROM presensi WHERE user_id = ? AND status = 'Hadir'");
-$stmt_presensi->execute([$user_id]);
-$total_hadir = $stmt_presensi->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+// Inisialisasi variabel statistik dengan nilai default (0)
+// Gunakan try-catch agar jika tabel belum ada di database, halaman tidak error/blank
+$total_hadir = 0;
+$total_jadwal = 0;
+$info_terbaru = [];
 
-$stmt_jadwal = $db->prepare("SELECT COUNT(*) as total FROM jadwal j JOIN kelas k ON j.kelas_id = k.id JOIN siswa s ON s.kelas_id = k.id WHERE s.user_id = ?");
-$stmt_jadwal->execute([$user_id]);
-$total_jadwal = $stmt_jadwal->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+try {
+    // 1. Ambil total kehadiran
+    $stmt_presensi = $db->prepare("SELECT COUNT(*) as total FROM presensi WHERE user_id = ? AND status = 'Hadir'");
+    $stmt_presensi->execute([$user_id]);
+    $total_hadir = $stmt_presensi->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+
+    // 2. Ambil total jadwal (sesuaikan dengan relasi tabel siswa -> kelas -> jadwal)
+    $stmt_jadwal = $db->prepare("SELECT COUNT(*) as total FROM jadwal j 
+                                 JOIN kelas k ON j.kelas_id = k.id 
+                                 JOIN siswa s ON s.kelas_id = k.id 
+                                 WHERE s.user_id = ?");
+    $stmt_jadwal->execute([$user_id]);
+    $total_jadwal = $stmt_jadwal->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+
+    // 3. Ambil 5 informasi terbaru
+    $stmt_info = $db->query("SELECT * FROM informasi_akademik ORDER BY created_at DESC LIMIT 5");
+    $info_terbaru = $stmt_info->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    // Jika ada error database, biarkan nilai tetap 0 atau tampilkan pesan error log secara internal
+    // Error ini biasanya terjadi jika tabel belum dibuat melalui file .sql yang Anda miliki
+}
 ?>
 
 <!DOCTYPE html>
@@ -194,7 +212,6 @@ $total_jadwal = $stmt_jadwal->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
             margin-bottom: 1rem;
         }
 
-        /* Colors for Icons */
         .bg-purple { background: #f5f3ff; color: #7c3aed; }
         .bg-blue { background: #eff6ff; color: #2563eb; }
         .bg-orange { background: #fff7ed; color: #ea580c; }
@@ -228,18 +245,10 @@ $total_jadwal = $stmt_jadwal->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
 
         /* Mobile Responsive */
         @media (max-width: 992px) {
-            #sidebar {
-                left: -var(--sidebar-width);
-            }
-            #content {
-                margin-left: 0;
-            }
-            #sidebar.active {
-                left: 0;
-            }
-            .search-bar {
-                width: 200px;
-            }
+            #sidebar { left: -var(--sidebar-width); }
+            #content { margin-left: 0; }
+            #sidebar.active { left: 0; }
+            .search-bar { width: 200px; }
         }
     </style>
 </head>
@@ -272,7 +281,7 @@ $total_jadwal = $stmt_jadwal->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
                 <i class="fa-solid fa-chart-line"></i> Nilai Saya
             </a>
             <a href="profil.php" class="nav-link">
-                <i class="fa-solid fa-user-gear"></i> Pengaturan Profil
+                <i class="fa-solid fa-user-gear"></i> Profil
             </a>
             
             <div class="mt-auto p-3">
@@ -317,13 +326,12 @@ $total_jadwal = $stmt_jadwal->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
         <!-- Welcome Banner -->
         <div class="welcome-card">
             <div class="z-1 position-relative">
-                <h1>Halo, <?php echo explode(' ', $nama_siswa)[0]; ?>! 👋</h1>
+                <h1>Halo, <?php echo htmlspecialchars(explode(' ', $nama_siswa)[0]); ?>! 👋</h1>
                 <p>Selamat datang kembali di dashboard Sekolahku. Cek jadwal pelajaranmu hari ini dan pastikan semua tugas sudah dikerjakan tepat waktu.</p>
                 <a href="jadwal.php" class="btn btn-light text-primary fw-bold px-4 py-2 mt-2 rounded-pill shadow-sm">
                     Lihat Jadwal Hari Ini
                 </a>
             </div>
-            <!-- Gunakan emoji atau SVG sebagai pengganti gambar ilustrasi jika tidak ada -->
             <div class="welcome-img d-none d-md-block">
                 <i class="fa-solid fa-user-graduate" style="font-size: 150px; color: rgba(255,255,255,0.2);"></i>
             </div>
@@ -331,7 +339,7 @@ $total_jadwal = $stmt_jadwal->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
 
         <!-- Statistics Row -->
         <div class="row g-4 mb-4">
-            <div class="col-md-3">
+            <div class="col-md-3 col-sm-6">
                 <div class="stat-card">
                     <div class="icon-box bg-purple">
                         <i class="fa-solid fa-clock-rotate-left"></i>
@@ -340,7 +348,7 @@ $total_jadwal = $stmt_jadwal->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
                     <div class="fs-4 fw-bold"><?php echo $total_hadir; ?> Hari</div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 col-sm-6">
                 <div class="stat-card">
                     <div class="icon-box bg-blue">
                         <i class="fa-solid fa-book"></i>
@@ -349,7 +357,7 @@ $total_jadwal = $stmt_jadwal->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
                     <div class="fs-4 fw-bold"><?php echo $total_jadwal; ?> Mapel</div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 col-sm-6">
                 <div class="stat-card">
                     <div class="icon-box bg-orange">
                         <i class="fa-solid fa-clipboard-list"></i>
@@ -358,7 +366,7 @@ $total_jadwal = $stmt_jadwal->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
                     <div class="fs-4 fw-bold">3 Tugas</div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 col-sm-6">
                 <div class="stat-card">
                     <div class="icon-box bg-green">
                         <i class="fa-solid fa-star"></i>
@@ -389,68 +397,60 @@ $total_jadwal = $stmt_jadwal->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php
-                                // Ambil 5 informasi terbaru
-                                $stmt_info = $db->query("SELECT * FROM informasi_akademik ORDER BY created_at DESC LIMIT 5");
-                                while ($info = $stmt_info->fetch(PDO::FETCH_ASSOC)) :
-                                ?>
-                                <tr>
-                                    <td>
-                                        <div class="fw-bold text-truncate" style="max-width: 250px;">
-                                            <?php echo htmlspecialchars($info['judul']); ?>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-light text-primary px-3 py-2 rounded-pill">
-                                            <?php echo htmlspecialchars($info['kategori'] ?? 'Akademik'); ?>
-                                        </span>
-                                    </td>
-                                    <td class="text-muted small">
-                                        <?php echo date('d M Y', strtotime($info['created_at'])); ?>
-                                    </td>
-                                    <td>
-                                        <a href="detail_informasi.php?id=<?php echo $info['id']; ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3">Detail</a>
-                                    </td>
-                                </tr>
-                                <?php endwhile; ?>
+                                <?php if (empty($info_terbaru)): ?>
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">Belum ada informasi terbaru.</td>
+                                    </tr>
+                                <?php else: ?>
+                                    <?php foreach ($info_terbaru as $info): ?>
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold text-truncate" style="max-width: 250px;">
+                                                <?php echo htmlspecialchars($info['judul']); ?>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-primary px-3 py-2 rounded-pill">
+                                                <?php echo htmlspecialchars($info['kategori'] ?? 'Akademik'); ?>
+                                            </span>
+                                        </td>
+                                        <td class="text-muted small">
+                                            <?php echo date('d M Y', strtotime($info['created_at'])); ?>
+                                        </td>
+                                        <td>
+                                            <a href="detail_informasi.php?id=<?php echo $info['id']; ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3">Detail</a>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Column: Quick Calendar / Upcoming -->
+            <!-- Right Column -->
             <div class="col-lg-4">
                 <div class="card-table mb-4" style="background: var(--primary-color); color: white;">
                     <h5 class="fw-bold mb-3">Presensi Cepat</h5>
-                    <p class="small opacity-75">Gunakan kode dari gurumu untuk melakukan presensi kehadiran hari ini.</p>
-                    <a href="presensi.php" class="btn btn-light w-100 fw-bold py-2 rounded-pill">Masuk ke Menu Presensi</a>
+                    <p class="small opacity-75">Sudah hadir di kelas? Masukkan kode presensi untuk hari ini.</p>
+                    <a href="presensi.php" class="btn btn-light w-100 fw-bold py-2 rounded-pill shadow-sm">Menu Presensi</a>
                 </div>
 
                 <div class="card-table">
                     <h5 class="fw-bold mb-4">Agenda Hari Ini</h5>
                     <div class="d-flex mb-3">
                         <div class="bg-light text-center rounded p-2 me-3" style="min-width: 60px;">
-                            <div class="small text-muted">SEN</div>
-                            <div class="fw-bold">22</div>
+                            <div class="small text-muted"><?php echo strtoupper(date('D')); ?></div>
+                            <div class="fw-bold"><?php echo date('d'); ?></div>
                         </div>
                         <div>
-                            <div class="fw-bold">Matematika</div>
-                            <div class="small text-muted">08:00 - 09:30 • Ruang 10</div>
-                        </div>
-                    </div>
-                    <div class="d-flex mb-3">
-                        <div class="bg-light text-center rounded p-2 me-3" style="min-width: 60px;">
-                            <div class="small text-muted">SEN</div>
-                            <div class="fw-bold">22</div>
-                        </div>
-                        <div>
-                            <div class="fw-bold">Bahasa Inggris</div>
-                            <div class="small text-muted">10:00 - 11:30 • Ruang Lab</div>
+                            <div class="fw-bold">Jadwal Sekolah</div>
+                            <div class="small text-muted">Cek jadwal pelajaran lengkap Anda di menu Jadwal.</div>
                         </div>
                     </div>
                     <hr>
-                    <button class="btn btn-outline-secondary btn-sm w-100 rounded-pill">Lihat Kalender Akademik</button>
+                    <a href="jadwal.php" class="btn btn-outline-secondary btn-sm w-100 rounded-pill">Lihat Kalender Akademik</a>
                 </div>
             </div>
         </div>
@@ -460,9 +460,12 @@ $total_jadwal = $stmt_jadwal->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Toggle Sidebar for Mobile
-        document.getElementById('sidebarToggle').addEventListener('click', function() {
-            document.getElementById('sidebar').classList.toggle('active');
-        });
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('active');
+            });
+        }
     </script>
 </body>
 </html>
