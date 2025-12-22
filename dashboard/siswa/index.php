@@ -320,7 +320,7 @@ $conn->close();
 }
 
 .dashboard-greeting h1 {
-    font-size: 1.8rem;
+    font-size: 2rem;
     font-weight: 700;
     background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
     -webkit-background-clip: text;
@@ -329,59 +329,105 @@ $conn->close();
 }
 
 .dashboard-greeting p {
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: var(--text-color-light);
 }
 
 .dashboard-tabs .nav-link {
     color: var(--text-color-light);
     font-weight: 600;
-    padding: 0.4rem 0.8rem;
+    padding: 0.5rem 1rem;
     border: none;
     border-bottom: 2px solid transparent;
     transition: all 0.3s ease;
+}
+
+.dashboard-tabs .nav-link:hover {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.dashboard-tabs .nav-link.active {
+    color: var(--secondary-color);
+    border-bottom-color: var(--secondary-color);
 }
 
 .metric-card, .chart-section {
     background: var(--card-bg-color);
     border: none;
     border-radius: 15px;
-    padding: 1.2rem;
+    padding: 1.5rem;
     box-shadow: 0 15px 40px var(--shadow-color);
     transition: all 0.3s ease-in-out;
     height: 100%;
 }
 
+.metric-card:hover, .chart-section:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 25px 50px var(--shadow-color-hover);
+}
+
+.metric-card .bi {
+    font-size: 2.5rem;
+    background: -webkit-linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 5px 15px var(--shadow-color);
+}
+
+.metric-card-header .metric-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-color-light);
+}
+
 .metric-card-header .metric-value {
-    font-size: 1.8rem;
+    font-size: 2rem;
     font-weight: 700;
     color: var(--text-color);
     line-height: 1;
 }
 
+.metric-change {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.metric-change.positive {
+    color: #00F260;
+}
+
+.metric-change.negative {
+    color: #ff4d4d;
+}
+
 .metric-chart {
-    height: 40px;
+    height: 50px;
     margin-top: 1rem;
 }
 
 .chart-section-header .chart-section-title {
-    font-size: 1.1rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: var(--text-color);
 }
 
 .chart-section-header .chart-section-desc {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: var(--text-color-light);
 }
 
 .chart-container {
-    height: 220px;
+    height: 240px;
+}
+
+.top-list-item-name {
+    font-weight: 600;
 }
 
 .top-list-item-value {
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: var(--primary-color);
 }
 </style>
