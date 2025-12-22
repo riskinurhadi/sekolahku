@@ -1,290 +1,453 @@
 <?php
-// Pastikan sesi sudah dimulai
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+require_once __DIR__ . '/../config/session.php';
+require_once __DIR__ . '/../config/database.php';
+
+// Get user info
+$conn = getConnection();
+$user_id = $_SESSION['user_id'];
+$user_role = $_SESSION['user_role'];
+$sekolah_id = $_SESSION['sekolah_id'] ?? null;
+
+$stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$user = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+// Get sekolah_id if not set
+if (!$sekolah_id && isset($user['sekolah_id'])) {
+    $sekolah_id = $user['sekolah_id'];
 }
 
-// Ambil info user untuk sidebar
-$user_nama = $_SESSION['nama_lengkap'] ?? 'User';
-$user_role = $_SESSION['role'] ?? '';
-$sekolah_nama = $_SESSION['sekolah_nama'] ?? 'Sekolahku';
+// Update last_activity untuk tracking user online
+// Cek apakah kolom last_activity ada
+$check_column = $conn->query("SHOW COLUMNS FROM users LIKE 'last_activity'");
+if ($check_column->num_rows == 0) {
+    // Tambahkan kolom last_activity jika belum ada
+    $conn->query("ALTER TABLE users ADD COLUMN last_activity DATETIME NULL AFTER updated_at");
+}
+
+// Update last_activity untuk user yang sedang login
+$now = date('Y-m-d H:i:s');
+$update_stmt = $conn->prepare("UPDATE users SET last_activity = ? WHERE id = ?");
+$update_stmt->bind_param("si", $now, $user_id);
+$update_stmt->execute();
+$update_stmt->close();
+
+// Get active users berdasarkan role (dalam 5 menit terakhir)
+$active_users = [];
+$total_online = 0;
+$online_threshold = date('Y-m-d H:i:s', strtotime('-5 minutes'));
+
+// Hanya tampilkan untuk role guru dan siswa
+if (in_array($user_role, ['guru', 'siswa']) && $sekolah_id) {
+    // Hitung total user online terlebih dahulu
+    $query_count = "SELECT COUNT(*) as total 
+                    FROM users 
+                    WHERE role = ? 
+                    AND sekolah_id = ? 
+                    AND id != ? 
+                    AND last_activity >= ?";
+    
+    $stmt_count = $conn->prepare($query_count);
+    if ($stmt_count) {
+        $stmt_count->bind_param("siis", $user_role, $sekolah_id, $user_id, $online_threshold);
+        $stmt_count->execute();
+        $result_count = $stmt_count->get_result();
+        $total_online = $result_count->fetch_assoc()['total'];
+        $stmt_count->close();
+    }
+    
+    // Ambil 5 user pertama untuk ditampilkan
+    if ($total_online > 0) {
+        $query_active = "SELECT id, nama_lengkap, foto_profil 
+                         FROM users 
+                         WHERE role = ? 
+                         AND sekolah_id = ? 
+                         AND id != ? 
+                         AND last_activity >= ? 
+                         ORDER BY last_activity DESC 
+                         LIMIT 5";
+        
+        $stmt_active = $conn->prepare($query_active);
+        if ($stmt_active) {
+            $stmt_active->bind_param("siis", $user_role, $sekolah_id, $user_id, $online_threshold);
+            $stmt_active->execute();
+            $result_active = $stmt_active->get_result();
+            $active_users = $result_active->fetch_all(MYSQLI_ASSOC);
+            $stmt_active->close();
+        }
+    }
+}
+
+// Get count of unread informasi akademik
+$unread_count = 0;
+$table_check = $conn->query("SHOW TABLES LIKE 'informasi_akademik'");
+if ($table_check && $table_check->num_rows > 0) {
+    $query = "SELECT COUNT(*) as count
+        FROM informasi_akademik ia
+        WHERE ia.status = 'terkirim'
+        AND ia.id NOT IN (SELECT informasi_id FROM informasi_akademik_baca WHERE user_id = ?)";
+    
+    $params = [$user_id];
+    $types = "i";
+    
+    // Filter berdasarkan sekolah jika ada
+    if ($sekolah_id) {
+        $query .= " AND (ia.sekolah_id = ? OR ia.sekolah_id IS NULL)";
+        $params[] = $sekolah_id;
+        $types .= "i";
+    }
+    
+    // Filter berdasarkan target role
+    // Jika target_user_id tidak null, berarti pesan spesifik untuk user tersebut
+    // Jika target_user_id null, filter berdasarkan target_role
+    $query .= " AND ((ia.target_user_id IS NOT NULL AND ia.target_user_id = ?)";
+    $params[] = $user_id;
+    $types .= "i";
+    
+    $query .= " OR (ia.target_user_id IS NULL AND (ia.target_role = 'semua' OR ia.target_role = ?)))";
+    $params[] = $user_role;
+    $types .= "s";
+    
+    $stmt = $conn->prepare($query);
+    if ($stmt) {
+        $stmt->bind_param($types, ...$params);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        $unread_count = $result['count'] ?? 0;
+        $stmt->close();
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title ?? 'Dashboard'; ?> - <?php echo $sekolah_nama; ?></title>
+    <title><?php echo isset($page_title) ? $page_title : 'Portal Sekolah'; ?></title>
     
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
-    <!-- Bootstrap 5 CSS -->
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="<?php echo getBasePath(); ?>assets/css/style.css">
     <style>
-        :root {
-            --sidebar-width: 260px;
-            --topbar-height: 70px;
-            --navy-dark: #0f172a;
-            --navy-light: #1e293b;
-            --accent-blue: #3b82f6;
-            --text-muted: #94a3b8;
+        /* Background blue gradient untuk semua dashboard */
+        html {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%) !important;
         }
-
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-            overflow-x: hidden;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%) !important;
         }
-
-        /* Sidebar Styling */
-        #sidebar {
-            width: var(--sidebar-width);
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            background-color: var(--navy-dark);
-            color: white;
-            transition: all 0.3s;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sidebar-header {
-            padding: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .sidebar-logo {
-            width: 35px;
-            height: 35px;
-            background: var(--accent-blue);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 1.2rem;
-        }
-
-        .nav-list {
-            padding: 1.5rem 0.8rem;
-            list-style: none;
-            flex-grow: 1;
-            overflow-y: auto;
-        }
-
-        .nav-item {
-            margin-bottom: 5px;
-        }
-
-        .nav-link-custom {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 15px;
-            color: var(--text-muted);
-            text-decoration: none;
-            border-radius: 10px;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .nav-link-custom i {
-            font-size: 1.2rem;
-        }
-
-        .nav-link-custom:hover {
-            background: rgba(255,255,255,0.05);
-            color: white;
-        }
-
-        .nav-link-custom.active {
-            background: var(--accent-blue);
-            color: white;
-        }
-
-        /* Topbar Styling */
-        #main-wrapper {
-            margin-left: var(--sidebar-width);
-            min-height: 100vh;
-            transition: all 0.3s;
-        }
-
-        #topbar {
-            height: var(--topbar-height);
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 999;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .search-box {
-            background: #f1f5f9;
-            border-radius: 10px;
-            padding: 8px 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            width: 300px;
-        }
-
-        .search-box input {
-            border: none;
-            background: transparent;
-            outline: none;
-            font-size: 0.9rem;
-            width: 100%;
-        }
-
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            padding: 5px 10px;
-            border-radius: 12px;
-            transition: background 0.2s;
-        }
-
-        .user-profile:hover {
-            background: #f8fafc;
-        }
-
-        .profile-img {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            background: #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--navy-dark);
-            font-weight: 700;
-        }
-
-        .content-area {
-            padding: 2rem;
-        }
-
-        @media (max-width: 992px) {
-            #sidebar { margin-left: calc(-1 * var(--sidebar-width)); }
-            #main-wrapper { margin-left: 0; }
-            #sidebar.active { margin-left: 0; }
+        body::before {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%) !important;
         }
     </style>
 </head>
 <body>
-
-    <!-- Sidebar -->
-    <nav id="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-logo">S</div>
-            <div class="overflow-hidden">
-                <h6 class="mb-0 fw-bold">Sekolahku</h6>
-                <small class="text-muted d-block" style="font-size: 0.7rem;">Sistem Akademik</small>
-            </div>
-        </div>
-
-        <ul class="nav-list">
-            <li class="nav-item">
-                <a href="../<?php echo $user_role; ?>/index.php" class="nav-link-custom <?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">
-                    <i class="bi bi-grid-1x2"></i> <span>Dashboard</span>
-                </a>
-            </li>
-
-            <?php if ($user_role == 'siswa'): ?>
-            <li class="nav-item">
-                <a href="soal_saya.php" class="nav-link-custom <?php echo basename($_SERVER['PHP_SELF']) == 'soal_saya.php' ? 'active' : ''; ?>">
-                    <i class="bi bi-journal-text"></i> <span>Tugas & Soal</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="jadwal.php" class="nav-link-custom <?php echo basename($_SERVER['PHP_SELF']) == 'jadwal.php' ? 'active' : ''; ?>">
-                    <i class="bi bi-calendar-week"></i> <span>Jadwal</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="presensi.php" class="nav-link-custom <?php echo basename($_SERVER['PHP_SELF']) == 'presensi.php' ? 'active' : ''; ?>">
-                    <i class="bi bi-person-check"></i> <span>Presensi</span>
-                </a>
-            </li>
-            <?php endif; ?>
-
-            <li class="nav-item mt-4">
-                <small class="text-muted px-3 text-uppercase fw-bold" style="font-size: 0.65rem;">Lainnya</small>
-            </li>
-            <li class="nav-item">
-                <a href="profil.php" class="nav-link-custom <?php echo basename($_SERVER['PHP_SELF']) == 'profil.php' ? 'active' : ''; ?>">
-                    <i class="bi bi-person-circle"></i> <span>Profil</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="../../logout.php" class="nav-link-custom text-danger">
-                    <i class="bi bi-box-arrow-left"></i> <span>Keluar</span>
-                </a>
-            </li>
-        </ul>
-
-        <div class="p-3 mt-auto">
-            <div class="bg-white bg-opacity-10 rounded-3 p-3 text-center">
-                <p class="small mb-0 text-white-50">Butuh bantuan?</p>
-                <a href="#" class="btn btn-sm btn-outline-light border-0 w-100">Hubungi Admin</a>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Content Wrapper -->
-    <main id="main-wrapper">
-        <!-- Topbar -->
-        <header id="topbar">
-            <div class="d-flex align-items-center gap-3">
-                <button class="btn d-lg-none" id="sidebarToggle">
-                    <i class="bi bi-list fs-4"></i>
-                </button>
-                <div class="search-box d-none d-md-flex">
-                    <i class="bi bi-search text-muted"></i>
-                    <input type="text" placeholder="Cari materi atau tugas...">
-                </div>
-            </div>
-
-            <div class="d-flex align-items-center gap-3">
-                <div class="position-relative me-2">
-                    <i class="bi bi-bell fs-5 text-muted"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.5rem; padding: 0.3em 0.5em;">
-                        3
-                    </span>
-                </div>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar" class="sidebar">
+            <ul class="list-unstyled components">
+                <li>
+                    <a href="<?php echo getBasePath(); ?>dashboard/<?php echo $_SESSION['user_role']; ?>/index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">
+                        <i class="bi bi-house-door"></i> Beranda
+                    </a>
+                </li>
                 
-                <div class="user-profile dropdown">
-                    <div class="text-end d-none d-sm-block">
-                        <p class="mb-0 fw-bold" style="font-size: 0.85rem;"><?php echo htmlspecialchars($user_nama); ?></p>
-                        <small class="text-muted text-capitalize" style="font-size: 0.75rem;"><?php echo $user_role; ?></small>
+                <?php if ($_SESSION['user_role'] == 'developer'): ?>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/developer/sekolah.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'sekolah.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-building"></i> Sekolah
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/developer/kepala_sekolah.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'kepala_sekolah.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-person-badge"></i> Kepala Sekolah
+                        </a>
+                    </li>
+                <?php endif; ?>
+                
+                <?php if ($_SESSION['user_role'] == 'kepala_sekolah'): ?>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/kepala_sekolah/guru.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'guru.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-person-workspace"></i> Guru & Staf
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/kepala_sekolah/siswa.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'siswa.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-people"></i> Siswa
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/kepala_sekolah/kelas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'kelas.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-building"></i> Kelas
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/kepala_sekolah/informasi_akademik.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'informasi_akademik.php' || basename($_SERVER['PHP_SELF']) == 'detail_informasi.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-megaphone"></i> Informasi Akademik
+                        </a>
+                    </li>
+                <?php endif; ?>
+                
+                <?php if ($_SESSION['user_role'] == 'guru'): ?>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/guru/siswa.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'siswa.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-people"></i> Siswa
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/guru/mulai_pelajaran.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'mulai_pelajaran.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-play-circle"></i> Jadwal Pelajaran
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/guru/history_presensi.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'history_presensi.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-clipboard-check"></i> Hasil Presensi
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/guru/soal.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'soal.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-file-earmark-text"></i> Soal
+                        </a>
+                    </li>
+                    <li>
+                        <a href="javascript:void(0);" class="dropdown-toggle <?php echo (basename($_SERVER['PHP_SELF']) == 'soal_ujian.php' || basename($_SERVER['PHP_SELF']) == 'tambah_soal_ujian.php') ? 'active' : ''; ?>" data-target="ujianGuruSubmenu">
+                            <i class="bi bi-file-earmark-medical"></i> Ujian
+                            <i class="bi bi-chevron-down ms-auto"></i>
+                        </a>
+                        <ul class="sidebar-submenu list-unstyled <?php echo (basename($_SERVER['PHP_SELF']) == 'soal_ujian.php' || basename($_SERVER['PHP_SELF']) == 'tambah_soal_ujian.php') ? 'show' : ''; ?>" id="ujianGuruSubmenu">
+                            <li>
+                                <a href="<?php echo getBasePath(); ?>dashboard/guru/soal_ujian.php?tipe=uts" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'soal_ujian.php' && isset($_GET['tipe']) && $_GET['tipe'] == 'uts') || (basename($_SERVER['PHP_SELF']) == 'tambah_soal_ujian.php' && isset($_GET['tipe']) && $_GET['tipe'] == 'uts') ? 'active' : ''; ?>">
+                                    <i class="bi bi-file-earmark-medical"></i> UTS
+                                </a>
+                            </li>
+                            <li>
+                                <a href="<?php echo getBasePath(); ?>dashboard/guru/soal_ujian.php?tipe=uas" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'soal_ujian.php' && isset($_GET['tipe']) && $_GET['tipe'] == 'uas') || (basename($_SERVER['PHP_SELF']) == 'tambah_soal_ujian.php' && isset($_GET['tipe']) && $_GET['tipe'] == 'uas') ? 'active' : ''; ?>">
+                                    <i class="bi bi-file-earmark-medical-fill"></i> UAS
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/guru/informasi_akademik.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'informasi_akademik.php' || basename($_SERVER['PHP_SELF']) == 'detail_informasi.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-megaphone"></i> Informasi Akademik
+                        </a>
+                    </li>
+                <?php endif; ?>
+                
+                <?php if ($_SESSION['user_role'] == 'akademik'): ?>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/akademik/mata_pelajaran.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'mata_pelajaran.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-book"></i> Mata Pelajaran
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/akademik/jadwal.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'jadwal.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-calendar-week"></i> Jadwal Pelajaran
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/akademik/jadwal_ujian.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'jadwal_ujian.php' || basename($_SERVER['PHP_SELF']) == 'soal_ujian.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-calendar-event"></i> Jadwal Ujian
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/akademik/slider.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'slider.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-images"></i> Slider Dashboard
+                        </a>
+                    </li>
+                <?php endif; ?>
+                
+                <?php if ($_SESSION['user_role'] == 'developer'): ?>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/akademik/slider.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'slider.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-images"></i> Slider Dashboard
+                        </a>
+                    </li>
+                <?php endif; ?>  
+                
+                <?php if ($_SESSION['user_role'] == 'siswa'): ?>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/siswa/jadwal.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'jadwal.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-calendar-week"></i> Jadwal Pelajaran
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/siswa/informasi_akademik.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'informasi_akademik.php' || basename($_SERVER['PHP_SELF']) == 'detail_informasi.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-megaphone"></i> Informasi Akademik
+                        </a>
+                    </li>
+                    <li>
+                        <a href="javascript:void(0);" class="dropdown-toggle <?php echo (basename($_SERVER['PHP_SELF']) == 'soal_saya.php' || basename($_SERVER['PHP_SELF']) == 'uts.php' || basename($_SERVER['PHP_SELF']) == 'uas.php') ? 'active' : ''; ?>" data-target="ujianSubmenu">
+                            <i class="bi bi-file-earmark-text"></i> Ujian
+                            <i class="bi bi-chevron-down ms-auto"></i>
+                        </a>
+                        <ul class="sidebar-submenu list-unstyled <?php echo (basename($_SERVER['PHP_SELF']) == 'soal_saya.php' || basename($_SERVER['PHP_SELF']) == 'uts.php' || basename($_SERVER['PHP_SELF']) == 'uas.php') ? 'show' : ''; ?>" id="ujianSubmenu">
+                            <li>
+                                <a href="<?php echo getBasePath(); ?>dashboard/siswa/soal_saya.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'soal_saya.php' ? 'active' : ''; ?>">
+                                    <i class="bi bi-pencil-square"></i> Latihan
+                                </a>
+                            </li>
+                            <li>
+                                <a href="<?php echo getBasePath(); ?>dashboard/siswa/uts.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'uts.php' ? 'active' : ''; ?>">
+                                    <i class="bi bi-file-earmark-medical"></i> UTS
+                                </a>
+                            </li>
+                            <li>
+                                <a href="<?php echo getBasePath(); ?>dashboard/siswa/uas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'uas.php' ? 'active' : ''; ?>">
+                                    <i class="bi bi-file-earmark-medical-fill"></i> UAS
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="javascript:void(0);" class="dropdown-toggle <?php echo (basename($_SERVER['PHP_SELF']) == 'hasil_latihan.php' || basename($_SERVER['PHP_SELF']) == 'presensi.php') ? 'active' : ''; ?>" data-target="hasilSubmenu">
+                            <i class="bi bi-check-circle"></i> Hasil
+                            <i class="bi bi-chevron-down ms-auto"></i>
+                        </a>
+                        <ul class="sidebar-submenu list-unstyled <?php echo (basename($_SERVER['PHP_SELF']) == 'hasil_latihan.php' || basename($_SERVER['PHP_SELF']) == 'presensi.php') ? 'show' : ''; ?>" id="hasilSubmenu">
+                            <li>
+                                <a href="<?php echo getBasePath(); ?>dashboard/siswa/presensi.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'presensi.php' ? 'active' : ''; ?>">
+                                    <i class="bi bi-clipboard-check"></i> Rekap Kehadiran
+                                </a>
+                            </li>
+                            <li>
+                                <a href="<?php echo getBasePath(); ?>dashboard/siswa/hasil_latihan.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'hasil_latihan.php' ? 'active' : ''; ?>">
+                                    <i class="bi bi-file-earmark-check"></i> Hasil Latihan
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="<?php echo getBasePath(); ?>dashboard/siswa/profil.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'profil.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-person-circle"></i> Profil
+                        </a>
+                    </li>
+                <?php endif; ?>
+            </ul>
+            
+            <!-- Active Users Section (hanya untuk guru dan siswa) -->
+            <?php if (in_array($user_role, ['guru', 'siswa'])): ?>
+                <div class="sidebar-active-users">
+                    <div class="active-users-header">
+                        <span class="active-users-title">ACTIVE <?php echo strtoupper($user_role == 'guru' ? 'TEACHERS' : 'STUDENTS'); ?></span>
                     </div>
-                    <div class="profile-img" data-bs-toggle="dropdown">
-                        <?php echo strtoupper(substr($user_nama, 0, 1)); ?>
+                    <?php if ($total_online > 0 && !empty($active_users)): ?>
+                        <div class="active-users-list">
+                            <?php foreach ($active_users as $active_user): 
+                                $foto_profil = '';
+                                if (!empty($active_user['foto_profil']) && file_exists(__DIR__ . '/../uploads/profil/' . $active_user['foto_profil'])) {
+                                    $foto_profil = getBasePath() . 'uploads/profil/' . $active_user['foto_profil'];
+                                }
+                                $initials = strtoupper(substr($active_user['nama_lengkap'], 0, 1));
+                            ?>
+                                <div class="active-user-avatar" title="<?php echo htmlspecialchars($active_user['nama_lengkap']); ?>">
+                                    <?php if ($foto_profil): ?>
+                                        <img src="<?php echo htmlspecialchars($foto_profil); ?>" alt="<?php echo htmlspecialchars($active_user['nama_lengkap']); ?>">
+                                    <?php else: ?>
+                                        <span class="avatar-initials"><?php echo $initials; ?></span>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
+                            <?php if (isset($total_online) && $total_online > 5): ?>
+                                <div class="active-user-avatar active-user-more" title="<?php echo ($total_online - 5); ?> more">
+                                    <span class="avatar-more">+<?php echo $total_online - 5; ?></span>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="active-users-empty">
+                            <span class="empty-message">Tidak ada <?php echo $user_role == 'guru' ? 'guru' : 'siswa'; ?> online</span>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+        </nav>
+        
+        <!-- Page Content -->
+        <div id="content" class="content">
+            <!-- Top Header -->
+            <div class="dashboard-top-header">
+                <div class="logo-section"> 
+                    <img src="<?php echo getBasePath(); ?>assets/img/sekolahku.png" alt="Sekolahku" class="logo-image me-5">
+                </div>
+                <div class="search-section">
+                    <div class="search-wrapper">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text" class="search-input" placeholder="Cari sesuatu...">
                     </div>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-3 p-2" style="border-radius: 12px; width: 200px;">
-                        <li><a class="dropdown-item rounded-2 py-2" href="profil.php"><i class="bi bi-person me-2"></i> Profil Saya</a></li>
-                        <li><a class="dropdown-item rounded-2 py-2" href="#"><i class="bi bi-gear me-2"></i> Pengaturan</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item rounded-2 py-2 text-danger" href="../../logout.php"><i class="bi bi-box-arrow-left me-2"></i> Keluar</a></li>
-                    </ul>
+                </div>
+                <div class="user-profile-section">
+                    <div class="header-icons">
+                        <a href="#" class="icon-btn" title="Notifikasi">
+                            <i class="bi bi-bell"></i>
+                            <span class="badge">3</span>
+                        </a>
+                        <a href="<?php echo getBasePath(); ?>dashboard/<?php echo $user_role; ?>/informasi_akademik.php" class="icon-btn" title="Informasi Akademik">
+                            <i class="bi bi-chat-dots"></i>
+                            <?php if ($unread_count > 0): ?>
+                                <span class="badge"><?php echo $unread_count > 99 ? '99+' : $unread_count; ?></span>
+                            <?php endif; ?>
+                        </a>
+                    </div>
+                    <div class="dropdown">
+                        <div class="user-profile-info dropdown-toggle" id="userProfileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="user-avatar">
+                                <?php 
+                                $foto_profil = '';
+                                if (!empty($user['foto_profil']) && file_exists(__DIR__ . '/../uploads/profil/' . $user['foto_profil'])) {
+                                    $foto_profil = getBasePath() . 'uploads/profil/' . $user['foto_profil'];
+                                }
+                                if ($foto_profil): ?>
+                                    <img src="<?php echo htmlspecialchars($foto_profil); ?>" alt="Foto Profil" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                <?php else: ?>
+                                    <?php echo strtoupper(substr($user['nama_lengkap'], 0, 1)); ?>
+                                <?php endif; ?>
+                            </div>
+                            <div class="user-details">
+                                <p class="user-name"><?php echo htmlspecialchars($user['nama_lengkap']); ?></p>
+                                <p class="user-role"><?php 
+                                    $role_labels = [
+                                        'developer' => 'Developer',
+                                        'kepala_sekolah' => 'Kepala Sekolah',
+                                        'guru' => 'Guru',
+                                        'siswa' => 'Siswa'
+                                    ];
+                                    echo $role_labels[$_SESSION['user_role']] ?? ucfirst($_SESSION['user_role']);
+                                ?></p>
+                            </div>
+                            <i class="bi bi-chevron-down dropdown-arrow"></i>
+                        </div>
+                        <ul class="dropdown-menu user-profile-dropdown dropdown-menu-end" aria-labelledby="userProfileDropdown">
+                            <li>
+                                <a class="dropdown-item" href="<?php echo getBasePath(); ?>dashboard/<?php echo $user_role; ?>/profil.php">
+                                    <i class="bi bi-person-circle"></i> Profil
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="https://sekolahku.rnara.my.id/logout.php">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
-        </header>
+            
+            <!-- Main Content -->
+            <div class="container-fluid">
 
-        <!-- Dynamic Content Start -->
-        <div class="content-area">
