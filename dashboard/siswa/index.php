@@ -309,13 +309,13 @@ $conn->close();
 <style>
 /* Dashboard Modern Style */
 .dashboard-greeting {
-    margin-bottom: 32px;
+    margin-bottom: 2rem;
 }
 
 .dashboard-greeting h1 {
-    font-size: 32px;
-    font-weight: 700;
-    color: #1e3a8a;
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #1e293b;
     margin-bottom: 8px;
 }
 
@@ -326,7 +326,7 @@ $conn->close();
 }
 
 .dashboard-tabs {
-    border-bottom: 2px solid #e5e7eb;
+    border-bottom: 1px solid #e2e8f0;
     margin-bottom: 24px;
 }
 
@@ -341,23 +341,23 @@ $conn->close();
 }
 
 .dashboard-tabs .nav-link:hover {
-    color: #3b82f6;
-    border-bottom-color: rgba(59, 130, 246, 0.3);
+    color: #4361ee;
+    border-bottom-color: rgba(67, 97, 238, 0.3);
 }
 
 .dashboard-tabs .nav-link.active {
-    color: #3b82f6;
-    border-bottom-color: #3b82f6;
+    color: #4361ee;
+    border-bottom-color: #4361ee;
     background: transparent;
 }
 
 /* Stat Cards dengan Mini Charts */
 .metric-card {
     background: #ffffff;
-    border-radius: 16px;
+    border-radius: 1rem;
     padding: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f1f5f9;
     transition: all 0.3s ease;
     height: 100%;
     position: relative;
@@ -365,9 +365,9 @@ $conn->close();
 }
 
 .metric-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    border-color: #3b82f6;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    border-color: #4361ee;
 }
 
 .metric-card-header {
@@ -385,7 +385,7 @@ $conn->close();
 }
 
 .metric-value {
-    font-size: 32px;
+    font-size: 2rem;
     font-weight: 700;
     color: #1e293b;
     line-height: 1;
@@ -417,10 +417,10 @@ $conn->close();
 /* Chart Sections */
 .chart-section {
     background: #ffffff;
-    border-radius: 16px;
+    border-radius: 1rem;
     padding: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f1f5f9;
     margin-bottom: 24px;
     height: 100%;
     display: flex;
@@ -472,7 +472,7 @@ $conn->close();
     justify-content: space-between;
     align-items: center;
     padding: 16px 0;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px dashed #e2e8f0;
 }
 
 .top-list-item:last-child {
@@ -488,7 +488,7 @@ $conn->close();
 .top-list-item-value {
     font-size: 16px;
     font-weight: 700;
-    color: #3b82f6;
+    color: #4361ee;
 }
 
 /* Date Range Selector */
@@ -511,7 +511,7 @@ $conn->close();
     <div class="row align-items-center">
         <div class="col-md-8">
             <h1>Hai, selamat datang kembali!</h1>
-            <p>Dashboard monitoring pembelajaran Anda.</p>
+            <p class="text-muted">Dashboard monitoring pembelajaran Anda.</p>
         </div>
         <div class="col-md-4 text-md-end">
             <div class="date-range-selector">
@@ -639,7 +639,7 @@ $conn->close();
                             <?php foreach ($top_pelajaran as $index => $pel): ?>
                                 <li class="top-list-item">
                                     <span class="top-list-item-name">
-                                        <span style="display: inline-block; width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; text-align: center; line-height: 24px; font-size: 12px; font-weight: 700; margin-right: 12px;">
+                                        <span style="display: inline-block; width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%); color: white; text-align: center; line-height: 24px; font-size: 12px; font-weight: 700; margin-right: 12px;">
                                             <?php echo $index + 1; ?>
                                         </span>
                                         <?php echo htmlspecialchars($pel['nama_pelajaran']); ?>
@@ -711,7 +711,7 @@ $conn->close();
                         <div style="flex: 1; overflow-y: auto; min-height: 0;">
                             <?php foreach (array_slice($jadwal_besok, 0, 5) as $j): ?>
                                 <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
-                                    <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; margin-right: 12px;">
+                                    <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; margin-right: 12px;">
                                         <i class="bi bi-book"></i>
                                     </div>
                                     <div class="flex-grow-1">
@@ -991,8 +991,8 @@ new Chart(document.getElementById('chartSoalAktif'), {
         labels: ['', '', '', '', '', '', ''],
         datasets: [{
             data: <?php echo json_encode($trend_data['soal_aktif']); ?>,
-            borderColor: '#8b5cf6',
-            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+            borderColor: '#4361ee',
+            backgroundColor: 'rgba(67, 97, 238, 0.1)',
             fill: true
         }]
     },
@@ -1006,8 +1006,8 @@ new Chart(document.getElementById('chartSoalSelesai'), {
         labels: ['', '', '', '', '', '', ''],
         datasets: [{
             data: <?php echo json_encode($trend_data['soal_selesai']); ?>,
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            borderColor: '#3f37c9',
+            backgroundColor: 'rgba(63, 55, 201, 0.1)',
             fill: true
         }]
     },
@@ -1085,8 +1085,8 @@ new Chart(document.getElementById('chartTrendNilai'), {
         datasets: [{
             label: 'Rata-rata Nilai',
             data: <?php echo json_encode($nilai_trend); ?>,
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            borderColor: '#4361ee',
+            backgroundColor: 'rgba(67, 97, 238, 0.1)',
             fill: true,
             tension: 0.4,
             pointRadius: 4,
@@ -1125,7 +1125,7 @@ new Chart(document.getElementById('chartDistribusiSoal'), {
         datasets: [{
             data: <?php echo json_encode(array_column($top_pelajaran, 'total_soal')); ?>,
             backgroundColor: [
-                '#3b82f6',
+                '#4361ee',
                 '#10b981',
                 '#f59e0b',
                 '#8b5cf6',
@@ -1152,7 +1152,7 @@ new Chart(document.getElementById('chartDistribusiSoal'), {
 
 // Soal per Mata Pelajaran Stacked Bar Chart
 <?php if (!empty($pelajaran_list)): ?>
-const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#14b8a6', '#ef4444'];
+const colors = ['#4361ee', '#3f37c9', '#4895ef', '#4cc9f0', '#f72585', '#7209b7'];
 const datasets = <?php echo json_encode($pelajaran_list); ?>.map((pelajaran, index) => ({
     label: pelajaran,
     data: <?php echo json_encode($soal_per_pelajaran); ?>[index] || [],

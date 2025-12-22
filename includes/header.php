@@ -143,15 +143,206 @@ if ($table_check && $table_check->num_rows > 0) {
     <!-- Custom CSS -->
     <link rel="stylesheet" href="<?php echo getBasePath(); ?>assets/css/style.css">
     <style>
-        /* Background blue gradient untuk semua dashboard */
-        html {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%) !important;
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --sidebar-width: 260px;
+            --header-height: 70px;
         }
+        
         body {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%) !important;
+            background-color: #f3f4f6 !important;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
         }
-        body::before {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%) !important;
+        
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            background: #ffffff;
+            box-shadow: 4px 0 24px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-header {
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .sidebar-header .logo-image {
+            max-height: 40px;
+            width: auto;
+        }
+        
+        .sidebar ul.components {
+            padding: 1rem;
+            margin: 0;
+        }
+        
+        .sidebar ul li {
+            margin-bottom: 0.25rem;
+        }
+        
+        .sidebar ul li a {
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            color: #64748b;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .sidebar ul li a:hover {
+            color: var(--primary);
+            background: rgba(67, 97, 238, 0.05);
+        }
+        
+        .sidebar ul li a.active {
+            color: #fff;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+        }
+        
+        .sidebar ul li a i {
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+        
+        /* Content */
+        .content {
+            margin-left: var(--sidebar-width);
+            padding-top: var(--header-height);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+        
+        /* Header */
+        .dashboard-top-header {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: var(--sidebar-width);
+            height: var(--header-height);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.03);
+        }
+        
+        /* Search */
+        .search-input {
+            border: 1px solid #e2e8f0;
+            border-radius: 50px;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            background: #f8fafc;
+            width: 250px;
+        }
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+        
+        /* Profile */
+        .user-profile-info {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            transition: background 0.2s;
+        }
+        .user-profile-info:hover {
+            background: #f1f5f9;
+        }
+        .user-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 10px;
+            overflow: hidden;
+        }
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1e293b;
+            margin: 0;
+        }
+        .user-role {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin: 0;
+        }
+        
+        /* Active Users */
+        .sidebar-active-users {
+            margin-top: auto;
+            padding: 1.5rem;
+            border-top: 1px solid #f1f5f9;
+        }
+        .active-users-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #94a3b8;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+        .active-users-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .active-user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .active-user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .avatar-initials {
+            width: 100%;
+            height: 100%;
+            background: #e2e8f0;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
         }
     </style>
 </head>
@@ -159,6 +350,10 @@ if ($table_check && $table_check->num_rows > 0) {
     <div class="wrapper">
         <!-- Sidebar -->
         <nav id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <img src="<?php echo getBasePath(); ?>assets/img/sekolahku.png" alt="Sekolahku" class="logo-image">
+            </div>
+            
             <ul class="list-unstyled components">
                 <li>
                     <a href="<?php echo getBasePath(); ?>dashboard/<?php echo $_SESSION['user_role']; ?>/index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">
@@ -381,9 +576,6 @@ if ($table_check && $table_check->num_rows > 0) {
         <div id="content" class="content">
             <!-- Top Header -->
             <div class="dashboard-top-header">
-                <div class="logo-section"> 
-                    <img src="<?php echo getBasePath(); ?>assets/img/sekolahku.png" alt="Sekolahku" class="logo-image me-5">
-                </div>
                 <div class="search-section">
                     <div class="search-wrapper">
                         <i class="bi bi-search search-icon"></i>
@@ -450,4 +642,3 @@ if ($table_check && $table_check->num_rows > 0) {
             
             <!-- Main Content -->
             <div class="container-fluid">
-
