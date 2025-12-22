@@ -320,23 +320,23 @@ $conn->close();
 }
 
 .dashboard-greeting h1 {
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: 700;
     background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
 }
 
 .dashboard-greeting p {
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: var(--text-color-light);
 }
 
 .dashboard-tabs .nav-link {
     color: var(--text-color-light);
     font-weight: 600;
-    padding: 0.5rem 1rem;
+    padding: 0.4rem 0.8rem;
     border: none;
     border-bottom: 2px solid transparent;
     transition: all 0.3s ease;
@@ -356,7 +356,7 @@ $conn->close();
     background: var(--card-bg-color);
     border: none;
     border-radius: 15px;
-    padding: 1.5rem;
+    padding: 1.2rem;
     box-shadow: 0 15px 40px var(--shadow-color);
     transition: all 0.3s ease-in-out;
     height: 100%;
@@ -368,7 +368,7 @@ $conn->close();
 }
 
 .metric-card .bi {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
     background: -webkit-linear-gradient(45deg, var(--primary-color), var(--secondary-color));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -376,20 +376,20 @@ $conn->close();
 }
 
 .metric-card-header .metric-title {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--text-color-light);
 }
 
 .metric-card-header .metric-value {
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: 700;
     color: var(--text-color);
     line-height: 1;
 }
 
 .metric-change {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 600;
 }
 
@@ -402,32 +402,33 @@ $conn->close();
 }
 
 .metric-chart {
-    height: 50px;
-    margin-top: 1rem;
+    height: 40px;
+    margin-top: 0.8rem;
 }
 
 .chart-section-header .chart-section-title {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: var(--text-color);
 }
 
 .chart-section-header .chart-section-desc {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: var(--text-color-light);
 }
 
 .chart-container {
-    height: 240px;
+    height: 220px;
 }
 
 .top-list-item-name {
     font-weight: 600;
+    font-size: 0.9rem;
 }
 
 .top-list-item-value {
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: var(--primary-color);
 }
 </style>
