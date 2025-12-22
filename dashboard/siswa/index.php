@@ -604,28 +604,34 @@ $conn->close();
             
             <!-- Presensi Donut Chart -->
             <div class="col-lg-4 mb-4 d-flex">
-                <div class="chart-section w-100 small-chart-section d-flex flex-column justify-content-center">
-                    <div class="chart-section-header text-center">
+                <div class="chart-section w-100 small-chart-section">
+                    <div class="chart-section-header">
                         <h5 class="chart-section-title">Presensi Minggu Ini</h5>
                         <p class="chart-section-desc">Persentase kehadiran Anda.</p>
                     </div>
+                    <div class="chart-container-small" style="position: relative; height: 150px; margin: auto;">
+                        <canvas id="chartPresensi"></canvas>
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                            <h3 class="mb-0" style="font-size: 2rem; font-weight: 700; color: var(--primary-color);"><?php echo $presensi_stats['persentase']; ?>%</h3>
+                        </div>
+                    </div>
                     <?php if ($presensi_stats['total'] > 0): ?>
-                        <div class="row text-center my-auto">
+                        <div class="row text-center mt-3 pt-3 border-top" style="flex-shrink: 0;">
                             <div class="col-4">
                                 <div class="py-2">
-                                    <h4 class="text-success mb-0" style="font-size: 2rem;"><?php echo $presensi_stats['hadir']; ?></h4>
+                                    <h4 class="text-success mb-0" style="font-size: 1.5rem;"><?php echo $presensi_stats['hadir']; ?></h4>
                                     <small class="text-muted">Hadir</small>
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="py-2">
-                                    <h4 class="text-warning mb-0" style="font-size: 2rem;"><?php echo $presensi_stats['terlambat']; ?></h4>
+                                    <h4 class="text-warning mb-0" style="font-size: 1.5rem;"><?php echo $presensi_stats['terlambat']; ?></h4>
                                     <small class="text-muted">Terlambat</small>
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="py-2">
-                                    <h4 class="text-danger mb-0" style="font-size: 2rem;"><?php echo $presensi_stats['tidak_hadir']; ?></h4>
+                                    <h4 class="text-danger mb-0" style="font-size: 1.5rem;"><?php echo $presensi_stats['tidak_hadir']; ?></h4>
                                     <small class="text-muted">Tidak Hadir</small>
                                 </div>
                             </div>
@@ -972,19 +978,31 @@ document.addEventListener('DOMContentLoaded', function() {
         options: chartOptions
     });
 
-    new Chart(document.getElementById('chartBelumDikerjakan'), {
-        type: 'line',
+    <?php if ($presensi_stats['total'] > 0): ?>
+    new Chart(document.getElementById('chartPresensi'), {
+        type: 'doughnut',
         data: {
-            labels: ['', '', '', '', '', '', ''],
             datasets: [{
-                data: <?php echo json_encode($trend_data['belum_dikerjakan']); ?>,
-                borderColor: '#FFC371',
-                backgroundColor: 'rgba(255, 195, 113, 0.1)',
-                fill: true
+                data: [
+                    <?php echo $presensi_stats['persentase']; ?>,
+                    100 - <?php echo $presensi_stats['persentase']; ?>
+                ],
+                backgroundColor: [accentColor, '#e9ecef'],
+                borderWidth: 0
             }]
         },
-        options: chartOptions
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            cutout: '80%'
+        }
     });
+    <?php endif; ?>
 
     
 
