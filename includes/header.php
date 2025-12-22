@@ -346,7 +346,7 @@ if ($table_check && $table_check->num_rows > 0) {
         }
     </style>
 </head>
-<body>
+<body class="sidebar-visible">
     <div class="wrapper">
         <!-- Sidebar -->
         <nav id="sidebar" class="sidebar">
@@ -357,19 +357,19 @@ if ($table_check && $table_check->num_rows > 0) {
             <ul class="list-unstyled components">
                 <li>
                     <a href="<?php echo getBasePath(); ?>dashboard/<?php echo $_SESSION['user_role']; ?>/index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">
-                        <i class="bi bi-house-door"></i> Beranda
+                        <i class="bi bi-house-door"></i> <span>Beranda</span>
                     </a>
                 </li>
                 
                 <?php if ($_SESSION['user_role'] == 'developer'): ?>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/developer/sekolah.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'sekolah.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-building"></i> Sekolah
+                            <i class="bi bi-building"></i> <span>Sekolah</span>
                         </a>
                     </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/developer/kepala_sekolah.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'kepala_sekolah.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-person-badge"></i> Kepala Sekolah
+                            <i class="bi bi-person-badge"></i> <span>Kepala Sekolah</span>
                         </a>
                     </li>
                 <?php endif; ?>
@@ -377,22 +377,22 @@ if ($table_check && $table_check->num_rows > 0) {
                 <?php if ($_SESSION['user_role'] == 'kepala_sekolah'): ?>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/kepala_sekolah/guru.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'guru.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-person-workspace"></i> Guru & Staf
+                            <i class="bi bi-person-workspace"></i> <span>Guru & Staf</span>
                         </a>
                     </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/kepala_sekolah/siswa.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'siswa.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-people"></i> Siswa
+                            <i class="bi bi-people"></i> <span>Siswa</span>
                         </a>
                     </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/kepala_sekolah/kelas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'kelas.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-building"></i> Kelas
+                            <i class="bi bi-building"></i> <span>Kelas</span>
                         </a>
                     </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/kepala_sekolah/informasi_akademik.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'informasi_akademik.php' || basename($_SERVER['PHP_SELF']) == 'detail_informasi.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-megaphone"></i> Informasi Akademik
+                            <i class="bi bi-megaphone"></i> <span>Informasi Akademik</span>
                         </a>
                     </li>
                 <?php endif; ?>
@@ -400,45 +400,45 @@ if ($table_check && $table_check->num_rows > 0) {
                 <?php if ($_SESSION['user_role'] == 'guru'): ?>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/guru/siswa.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'siswa.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-people"></i> Siswa
+                            <i class="bi bi-people"></i> <span>Siswa</span>
                         </a>
                     </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/guru/mulai_pelajaran.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'mulai_pelajaran.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-play-circle"></i> Jadwal Pelajaran
+                            <i class="bi bi-play-circle"></i> <span>Jadwal Pelajaran</span>
                         </a>
                     </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/guru/history_presensi.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'history_presensi.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-clipboard-check"></i> Hasil Presensi
+                            <i class="bi bi-clipboard-check"></i> <span>Hasil Presensi</span>
                         </a>
                     </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/guru/soal.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'soal.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-file-earmark-text"></i> Soal
+                            <i class="bi bi-file-earmark-text"></i> <span>Soal</span>
                         </a>
                     </li>
                     <li>
                         <a href="javascript:void(0);" class="dropdown-toggle <?php echo (basename($_SERVER['PHP_SELF']) == 'soal_ujian.php' || basename($_SERVER['PHP_SELF']) == 'tambah_soal_ujian.php') ? 'active' : ''; ?>" data-target="ujianGuruSubmenu">
-                            <i class="bi bi-file-earmark-medical"></i> Ujian
+                            <i class="bi bi-file-earmark-medical"></i> <span>Ujian</span>
                             <i class="bi bi-chevron-down ms-auto"></i>
                         </a>
                         <ul class="sidebar-submenu list-unstyled <?php echo (basename($_SERVER['PHP_SELF']) == 'soal_ujian.php' || basename($_SERVER['PHP_SELF']) == 'tambah_soal_ujian.php') ? 'show' : ''; ?>" id="ujianGuruSubmenu">
                             <li>
                                 <a href="<?php echo getBasePath(); ?>dashboard/guru/soal_ujian.php?tipe=uts" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'soal_ujian.php' && isset($_GET['tipe']) && $_GET['tipe'] == 'uts') || (basename($_SERVER['PHP_SELF']) == 'tambah_soal_ujian.php' && isset($_GET['tipe']) && $_GET['tipe'] == 'uts') ? 'active' : ''; ?>">
-                                    <i class="bi bi-file-earmark-medical"></i> UTS
+                                    <i class="bi bi-file-earmark-medical"></i> <span>UTS</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="<?php echo getBasePath(); ?>dashboard/guru/soal_ujian.php?tipe=uas" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'soal_ujian.php' && isset($_GET['tipe']) && $_GET['tipe'] == 'uas') || (basename($_SERVER['PHP_SELF']) == 'tambah_soal_ujian.php' && isset($_GET['tipe']) && $_GET['tipe'] == 'uas') ? 'active' : ''; ?>">
-                                    <i class="bi bi-file-earmark-medical-fill"></i> UAS
+                                    <i class="bi bi-file-earmark-medical-fill"></i> <span>UAS</span>
                                 </a>
                             </li>
                         </ul>
                     </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/guru/informasi_akademik.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'informasi_akademik.php' || basename($_SERVER['PHP_SELF']) == 'detail_informasi.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-megaphone"></i> Informasi Akademik
+                            <i class="bi bi-megaphone"></i> <span>Informasi Akademik</span>
                         </a>
                     </li>
                 <?php endif; ?>
@@ -446,22 +446,22 @@ if ($table_check && $table_check->num_rows > 0) {
                 <?php if ($_SESSION['user_role'] == 'akademik'): ?>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/akademik/mata_pelajaran.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'mata_pelajaran.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-book"></i> Mata Pelajaran
+                            <i class="bi bi-book"></i> <span>Mata Pelajaran</span>
                         </a>
                     </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/akademik/jadwal.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'jadwal.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-calendar-week"></i> Jadwal Pelajaran
+                            <i class="bi bi-calendar-week"></i> <span>Jadwal Pelajaran</span>
                         </a>
                     </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/akademik/jadwal_ujian.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'jadwal_ujian.php' || basename($_SERVER['PHP_SELF']) == 'soal_ujian.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-calendar-event"></i> Jadwal Ujian
+                            <i class="bi bi-calendar-event"></i> <span>Jadwal Ujian</span>
                         </a>
                     </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/akademik/slider.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'slider.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-images"></i> Slider Dashboard
+                            <i class="bi bi-images"></i> <span>Slider Dashboard</span>
                         </a>
                     </li>
                 <?php endif; ?>
@@ -469,7 +469,7 @@ if ($table_check && $table_check->num_rows > 0) {
                 <?php if ($_SESSION['user_role'] == 'developer'): ?>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/akademik/slider.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'slider.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-images"></i> Slider Dashboard
+                            <i class="bi bi-images"></i> <span>Slider Dashboard</span>
                         </a>
                     </li>
                 <?php endif; ?>  
@@ -477,58 +477,58 @@ if ($table_check && $table_check->num_rows > 0) {
                 <?php if ($_SESSION['user_role'] == 'siswa'): ?>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/siswa/jadwal.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'jadwal.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-calendar-week"></i> Jadwal Pelajaran
+                            <i class="bi bi-calendar-week"></i> <span>Jadwal Pelajaran</span>
                         </a>
                     </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/siswa/informasi_akademik.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'informasi_akademik.php' || basename($_SERVER['PHP_SELF']) == 'detail_informasi.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-megaphone"></i> Informasi Akademik
+                            <i class="bi bi-megaphone"></i> <span>Informasi Akademik</span>
                         </a>
                     </li>
                     <li>
                         <a href="javascript:void(0);" class="dropdown-toggle <?php echo (basename($_SERVER['PHP_SELF']) == 'soal_saya.php' || basename($_SERVER['PHP_SELF']) == 'uts.php' || basename($_SERVER['PHP_SELF']) == 'uas.php') ? 'active' : ''; ?>" data-target="ujianSubmenu">
-                            <i class="bi bi-file-earmark-text"></i> Ujian
+                            <i class="bi bi-file-earmark-text"></i> <span>Ujian</span>
                             <i class="bi bi-chevron-down ms-auto"></i>
                         </a>
                         <ul class="sidebar-submenu list-unstyled <?php echo (basename($_SERVER['PHP_SELF']) == 'soal_saya.php' || basename($_SERVER['PHP_SELF']) == 'uts.php' || basename($_SERVER['PHP_SELF']) == 'uas.php') ? 'show' : ''; ?>" id="ujianSubmenu">
                             <li>
                                 <a href="<?php echo getBasePath(); ?>dashboard/siswa/soal_saya.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'soal_saya.php' ? 'active' : ''; ?>">
-                                    <i class="bi bi-pencil-square"></i> Latihan
+                                    <i class="bi bi-pencil-square"></i> <span>Latihan</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="<?php echo getBasePath(); ?>dashboard/siswa/uts.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'uts.php' ? 'active' : ''; ?>">
-                                    <i class="bi bi-file-earmark-medical"></i> UTS
+                                    <i class="bi bi-file-earmark-medical"></i> <span>UTS</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="<?php echo getBasePath(); ?>dashboard/siswa/uas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'uas.php' ? 'active' : ''; ?>">
-                                    <i class="bi bi-file-earmark-medical-fill"></i> UAS
+                                    <i class="bi bi-file-earmark-medical-fill"></i> <span>UAS</span>
                                 </a>
                             </li>
                         </ul>
                     </li>
                     <li>
                         <a href="javascript:void(0);" class="dropdown-toggle <?php echo (basename($_SERVER['PHP_SELF']) == 'hasil_latihan.php' || basename($_SERVER['PHP_SELF']) == 'presensi.php') ? 'active' : ''; ?>" data-target="hasilSubmenu">
-                            <i class="bi bi-check-circle"></i> Hasil
+                            <i class="bi bi-check-circle"></i> <span>Hasil</span>
                             <i class="bi bi-chevron-down ms-auto"></i>
                         </a>
                         <ul class="sidebar-submenu list-unstyled <?php echo (basename($_SERVER['PHP_SELF']) == 'hasil_latihan.php' || basename($_SERVER['PHP_SELF']) == 'presensi.php') ? 'show' : ''; ?>" id="hasilSubmenu">
                             <li>
                                 <a href="<?php echo getBasePath(); ?>dashboard/siswa/presensi.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'presensi.php' ? 'active' : ''; ?>">
-                                    <i class="bi bi-clipboard-check"></i> Rekap Kehadiran
+                                    <i class="bi bi-clipboard-check"></i> <span>Rekap Kehadiran</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="<?php echo getBasePath(); ?>dashboard/siswa/hasil_latihan.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'hasil_latihan.php' ? 'active' : ''; ?>">
-                                    <i class="bi bi-file-earmark-check"></i> Hasil Latihan
+                                    <i class="bi bi-file-earmark-check"></i> <span>Hasil Latihan</span>
                                 </a>
                             </li>
                         </ul>
                     </li>
                     <li>
                         <a href="<?php echo getBasePath(); ?>dashboard/siswa/profil.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'profil.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-person-circle"></i> Profil
+                            <i class="bi bi-person-circle"></i> <span>Profil</span>
                         </a>
                     </li>
                 <?php endif; ?>
@@ -573,13 +573,18 @@ if ($table_check && $table_check->num_rows > 0) {
         </nav>
         
         <!-- Page Content -->
-        <div id="content" class="content">
+        <main id="content" class="content">
             <!-- Top Header -->
             <div class="dashboard-top-header">
-                <div class="search-section">
-                    <div class="search-wrapper">
-                        <i class="bi bi-search search-icon"></i>
-                        <input type="text" class="search-input" placeholder="Cari sesuatu...">
+                <div class="d-flex align-items-center">
+                    <button type="button" id="sidebar-toggle" class="btn icon-btn me-3">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <div class="search-section">
+                        <div class="search-wrapper">
+                            <i class="bi bi-search search-icon"></i>
+                            <input type="text" class="search-input" placeholder="Cari sesuatu...">
+                        </div>
                     </div>
                 </div>
                 <div class="user-profile-section">
