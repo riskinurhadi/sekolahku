@@ -307,202 +307,120 @@ $conn->close();
 ?>
 
 <style>
-/* Dashboard Modern Style */
-.dashboard-greeting {
-    margin-bottom: 32px;
+:root {
+    --primary-color: #8E2DE2;
+    --secondary-color: #4A00E0;
+    --accent-color: #00F260;
+    --bg-color: #f0f2f5;
+    --card-bg-color: #ffffff;
+    --text-color: #333;
+    --text-color-light: #777;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --shadow-color-hover: rgba(0, 0, 0, 0.2);
 }
 
 .dashboard-greeting h1 {
-    font-size: 32px;
+    font-size: 2.5rem;
     font-weight: 700;
-    color: #1e3a8a;
-    margin-bottom: 8px;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
 }
 
 .dashboard-greeting p {
-    font-size: 16px;
-    color: #64748b;
-    margin-bottom: 24px;
-}
-
-.dashboard-tabs {
-    border-bottom: 2px solid #e5e7eb;
-    margin-bottom: 24px;
+    font-size: 1.1rem;
+    color: var(--text-color-light);
 }
 
 .dashboard-tabs .nav-link {
-    color: #64748b;
+    color: var(--text-color-light);
     font-weight: 600;
-    padding: 12px 24px;
+    padding: 0.75rem 1.5rem;
     border: none;
     border-bottom: 3px solid transparent;
-    background: transparent;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
 }
 
 .dashboard-tabs .nav-link:hover {
-    color: #3b82f6;
-    border-bottom-color: rgba(59, 130, 246, 0.3);
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
 }
 
 .dashboard-tabs .nav-link.active {
-    color: #3b82f6;
-    border-bottom-color: #3b82f6;
-    background: transparent;
+    color: var(--secondary-color);
+    border-bottom-color: var(--secondary-color);
 }
 
-/* Stat Cards dengan Mini Charts */
-.metric-card {
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e5e7eb;
-    transition: all 0.3s ease;
+.metric-card, .chart-section {
+    background: var(--card-bg-color);
+    border: none;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px var(--shadow-color);
+    transition: all 0.3s ease-in-out;
     height: 100%;
-    position: relative;
-    overflow: hidden;
 }
 
-.metric-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    border-color: #3b82f6;
+.metric-card:hover, .chart-section:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px var(--shadow-color-hover);
 }
 
-.metric-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 16px;
-}
-
-.metric-title {
-    font-size: 14px;
+.metric-card-header .metric-title {
+    font-size: 1rem;
     font-weight: 600;
-    color: #64748b;
-    margin-bottom: 8px;
+    color: var(--text-color-light);
 }
 
-.metric-value {
-    font-size: 32px;
+.metric-card-header .metric-value {
+    font-size: 2.5rem;
     font-weight: 700;
-    color: #1e293b;
+    color: var(--text-color);
     line-height: 1;
-    margin-bottom: 8px;
 }
 
 .metric-change {
-    font-size: 12px;
+    font-size: 0.9rem;
     font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 4px;
 }
 
 .metric-change.positive {
-    color: #10b981;
+    color: #00F260;
 }
 
 .metric-change.negative {
-    color: #ef4444;
+    color: #ff4d4d;
 }
 
 .metric-chart {
-    height: 60px;
-    margin-top: 16px;
-    position: relative;
+    height: 70px;
+    margin-top: 1rem;
 }
 
-/* Chart Sections */
-.chart-section {
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e5e7eb;
-    margin-bottom: 24px;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    min-height: 400px;
-    max-height: 400px;
-}
-
-.chart-section-header {
-    margin-bottom: 24px;
-    flex-shrink: 0;
-}
-
-.chart-section-title {
-    font-size: 18px;
+.chart-section-header .chart-section-title {
+    font-size: 1.5rem;
     font-weight: 700;
-    color: #1e293b;
-    margin-bottom: 4px;
+    color: var(--text-color);
 }
 
-.chart-section-desc {
-    font-size: 14px;
-    color: #64748b;
+.chart-section-header .chart-section-desc {
+    font-size: 1rem;
+    color: var(--text-color-light);
 }
 
 .chart-container {
-    position: relative;
-    height: 300px;
-    flex: 1;
-    min-height: 0;
-}
-
-.chart-container-small {
-    position: relative;
-    height: 200px;
-    flex: 1;
-    min-height: 0;
-}
-
-/* Top List */
-.top-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.top-list-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 0;
-    border-bottom: 1px solid #f1f5f9;
-}
-
-.top-list-item:last-child {
-    border-bottom: none;
+    height: 280px;
 }
 
 .top-list-item-name {
-    font-size: 14px;
     font-weight: 600;
-    color: #1e293b;
 }
 
 .top-list-item-value {
-    font-size: 16px;
     font-weight: 700;
-    color: #3b82f6;
-}
-
-/* Date Range Selector */
-.date-range-selector {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 14px;
-    color: #64748b;
-}
-
-.date-range-selector .date-text {
-    font-weight: 600;
-    color: #1e293b;
+    font-size: 1.2rem;
+    color: var(--primary-color);
 }
 </style>
 
@@ -966,226 +884,206 @@ $conn->close();
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-// Mini Charts untuk Stat Cards
-const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-        legend: { display: false },
-        tooltip: { enabled: false }
-    },
-    scales: {
-        x: { display: false },
-        y: { display: false }
-    },
-    elements: {
-        point: { radius: 0 },
-        line: { borderWidth: 2, tension: 0.4 }
-    }
-};
+    const rootStyles = getComputedStyle(document.documentElement);
+    const primaryColor = rootStyles.getPropertyValue('--primary-color').trim();
+    const secondaryColor = rootStyles.getPropertyValue('--secondary-color').trim();
+    const accentColor = rootStyles.getPropertyValue('--accent-color').trim();
 
-// Chart Soal Aktif
-new Chart(document.getElementById('chartSoalAktif'), {
-    type: 'line',
-    data: {
-        labels: ['', '', '', '', '', '', ''],
-        datasets: [{
-            data: <?php echo json_encode($trend_data['soal_aktif']); ?>,
-            borderColor: '#8b5cf6',
-            backgroundColor: 'rgba(139, 92, 246, 0.1)',
-            fill: true
-        }]
-    },
-    options: chartOptions
-});
-
-// Chart Soal Selesai
-new Chart(document.getElementById('chartSoalSelesai'), {
-    type: 'line',
-    data: {
-        labels: ['', '', '', '', '', '', ''],
-        datasets: [{
-            data: <?php echo json_encode($trend_data['soal_selesai']); ?>,
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            fill: true
-        }]
-    },
-    options: chartOptions
-});
-
-// Chart Rata Nilai
-new Chart(document.getElementById('chartRataNilai'), {
-    type: 'line',
-    data: {
-        labels: ['', '', '', '', '', '', ''],
-        datasets: [{
-            data: <?php echo json_encode($trend_data['rata_nilai']); ?>,
-            borderColor: '#f59e0b',
-            backgroundColor: 'rgba(245, 158, 11, 0.1)',
-            fill: true
-        }]
-    },
-    options: chartOptions
-});
-
-// Chart Belum Dikerjakan
-new Chart(document.getElementById('chartBelumDikerjakan'), {
-    type: 'line',
-    data: {
-        labels: ['', '', '', '', '', '', ''],
-        datasets: [{
-            data: <?php echo json_encode($trend_data['belum_dikerjakan']); ?>,
-            borderColor: '#14b8a6',
-            backgroundColor: 'rgba(20, 184, 166, 0.1)',
-            fill: true
-        }]
-    },
-    options: chartOptions
-});
-
-// Presensi Donut Chart
-<?php if ($presensi_stats['total'] > 0): ?>
-new Chart(document.getElementById('chartPresensi'), {
-    type: 'doughnut',
-    data: {
-        labels: ['Hadir', 'Terlambat', 'Tidak Hadir'],
-        datasets: [{
-            data: [
-                <?php echo $presensi_stats['hadir']; ?>,
-                <?php echo $presensi_stats['terlambat']; ?>,
-                <?php echo $presensi_stats['tidak_hadir']; ?>
-            ],
-            backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
-            borderWidth: 0
-        }]
-    },
-    options: {
+    const chartOptions = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            legend: {
-                position: 'bottom',
-                labels: {
-                    padding: 15,
-                    font: { size: 12 }
-                }
-            }
-        },
-        cutout: '70%'
-    }
-});
-<?php endif; ?>
-
-// Trend Nilai Line Chart
-new Chart(document.getElementById('chartTrendNilai'), {
-    type: 'line',
-    data: {
-        labels: <?php echo json_encode($nilai_labels); ?>,
-        datasets: [{
-            label: 'Rata-rata Nilai',
-            data: <?php echo json_encode($nilai_trend); ?>,
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            fill: true,
-            tension: 0.4,
-            pointRadius: 4,
-            pointHoverRadius: 6
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: true,
-                position: 'top'
-            }
+            legend: { display: false },
+            tooltip: { enabled: false }
         },
         scales: {
-            y: {
-                beginAtZero: true,
-                max: 100,
-                ticks: {
-                    callback: function(value) {
-                        return value;
+            x: { display: false },
+            y: { display: false }
+        },
+        elements: {
+            point: { radius: 0 },
+            line: { borderWidth: 2, tension: 0.4 }
+        }
+    };
+
+    new Chart(document.getElementById('chartSoalAktif'), {
+        type: 'line',
+        data: {
+            labels: ['', '', '', '', '', '', ''],
+            datasets: [{
+                data: <?php echo json_encode($trend_data['soal_aktif']); ?>,
+                borderColor: primaryColor,
+                backgroundColor: 'rgba(142, 45, 226, 0.1)',
+                fill: true
+            }]
+        },
+        options: chartOptions
+    });
+
+    new Chart(document.getElementById('chartSoalSelesai'), {
+        type: 'line',
+        data: {
+            labels: ['', '', '', '', '', '', ''],
+            datasets: [{
+                data: <?php echo json_encode($trend_data['soal_selesai']); ?>,
+                borderColor: secondaryColor,
+                backgroundColor: 'rgba(74, 0, 224, 0.1)',
+                fill: true
+            }]
+        },
+        options: chartOptions
+    });
+
+    new Chart(document.getElementById('chartRataNilai'), {
+        type: 'line',
+        data: {
+            labels: ['', '', '', '', '', '', ''],
+            datasets: [{
+                data: <?php echo json_encode($trend_data['rata_nilai']); ?>,
+                borderColor: accentColor,
+                backgroundColor: 'rgba(0, 242, 96, 0.1)',
+                fill: true
+            }]
+        },
+        options: chartOptions
+    });
+
+    new Chart(document.getElementById('chartBelumDikerjakan'), {
+        type: 'line',
+        data: {
+            labels: ['', '', '', '', '', '', ''],
+            datasets: [{
+                data: <?php echo json_encode($trend_data['belum_dikerjakan']); ?>,
+                borderColor: '#FFC371',
+                backgroundColor: 'rgba(255, 195, 113, 0.1)',
+                fill: true
+            }]
+        },
+        options: chartOptions
+    });
+
+    <?php if ($presensi_stats['total'] > 0): ?>
+    new Chart(document.getElementById('chartPresensi'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Hadir', 'Terlambat', 'Tidak Hadir'],
+            datasets: [{
+                data: [
+                    <?php echo $presensi_stats['hadir']; ?>,
+                    <?php echo $presensi_stats['terlambat']; ?>,
+                    <?php echo $presensi_stats['tidak_hadir']; ?>
+                ],
+                backgroundColor: [accentColor, '#FFC371', '#ff4d4d'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        font: { size: 12 }
+                    }
+                }
+            },
+            cutout: '70%'
+        }
+    });
+    <?php endif; ?>
+
+    new Chart(document.getElementById('chartTrendNilai'), {
+        type: 'line',
+        data: {
+            labels: <?php echo json_encode($nilai_labels); ?>,
+            datasets: [{
+                label: 'Rata-rata Nilai',
+                data: <?php echo json_encode($nilai_trend); ?>,
+                borderColor: primaryColor,
+                backgroundColor: 'rgba(142, 45, 226, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+
+    <?php if (!empty($top_pelajaran)): ?>
+    new Chart(document.getElementById('chartDistribusiSoal'), {
+        type: 'pie',
+        data: {
+            labels: <?php echo json_encode(array_column($top_pelajaran, 'nama_pelajaran')); ?>,
+            datasets: [{
+                data: <?php echo json_encode(array_column($top_pelajaran, 'total_soal')); ?>,
+                backgroundColor: [primaryColor, secondaryColor, accentColor, '#FFC371', '#ff4d4d'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        font: { size: 11 }
                     }
                 }
             }
         }
-    }
-});
+    });
+    <?php endif; ?>
 
-// Distribusi Soal Pie Chart
-<?php if (!empty($top_pelajaran)): ?>
-new Chart(document.getElementById('chartDistribusiSoal'), {
-    type: 'pie',
-    data: {
-        labels: <?php echo json_encode(array_column($top_pelajaran, 'nama_pelajaran')); ?>,
-        datasets: [{
-            data: <?php echo json_encode(array_column($top_pelajaran, 'total_soal')); ?>,
-            backgroundColor: [
-                '#3b82f6',
-                '#10b981',
-                '#f59e0b',
-                '#8b5cf6',
-                '#14b8a6'
-            ],
-            borderWidth: 0
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom',
-                labels: {
-                    padding: 15,
-                    font: { size: 11 }
-                }
-            }
-        }
-    }
-});
-<?php endif; ?>
+    <?php if (!empty($pelajaran_list)): ?>
+    const colors = [primaryColor, secondaryColor, accentColor, '#FFC371', '#ff4d4d', '#2980B9'];
+    const datasets = <?php echo json_encode($pelajaran_list); ?>.map((pelajaran, index) => ({
+        label: pelajaran,
+        data: <?php echo json_encode($soal_per_pelajaran); ?>[index] || [],
+        backgroundColor: colors[index % colors.length]
+    }));
 
-// Soal per Mata Pelajaran Stacked Bar Chart
-<?php if (!empty($pelajaran_list)): ?>
-const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#14b8a6', '#ef4444'];
-const datasets = <?php echo json_encode($pelajaran_list); ?>.map((pelajaran, index) => ({
-    label: pelajaran,
-    data: <?php echo json_encode($soal_per_pelajaran); ?>[index] || [],
-    backgroundColor: colors[index % colors.length]
-}));
-
-new Chart(document.getElementById('chartSoalPerPelajaran'), {
-    type: 'bar',
-    data: {
-        labels: <?php echo json_encode(array_slice($nilai_labels, -7)); ?>,
-        datasets: datasets
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: true,
-                position: 'top'
-            }
+    new Chart(document.getElementById('chartSoalPerPelajaran'), {
+        type: 'bar',
+        data: {
+            labels: <?php echo json_encode(array_slice($nilai_labels, -7)); ?>,
+            datasets: datasets
         },
-        scales: {
-            x: {
-                stacked: true
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
             },
-            y: {
-                stacked: true,
-                beginAtZero: true
+            scales: {
+                x: { stacked: true },
+                y: { stacked: true, beginAtZero: true }
             }
         }
-    }
-});
-<?php endif; ?>
+    });
+    <?php endif; ?>
 });
 </script>
 
