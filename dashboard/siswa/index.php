@@ -431,6 +431,24 @@ $conn->close();
     font-size: 0.9rem;
     color: var(--primary-color);
 }
+
+.chart-container-small {
+    height: 150px;
+}
+
+.small-chart-section {
+    padding: 1rem;
+    min-height: 300px;
+    max-height: 300px;
+}
+
+.small-chart-section .chart-section-title {
+    font-size: 1rem;
+}
+
+.small-chart-section .chart-section-desc {
+    font-size: 0.8rem;
+}
 </style>
 
 <!-- Greeting Section -->
@@ -556,7 +574,7 @@ $conn->close();
         <div class="row align-items-stretch">
             <!-- Top Mata Pelajaran -->
             <div class="col-lg-4 mb-4 d-flex">
-                <div class="chart-section w-100">
+                <div class="chart-section w-100 small-chart-section">
                     <div class="chart-section-header">
                         <h5 class="chart-section-title">Top Mata Pelajaran</h5>
                         <p class="chart-section-desc">Mata pelajaran dengan soal terbanyak yang telah Anda kerjakan.</p>
@@ -586,7 +604,7 @@ $conn->close();
             
             <!-- Presensi Donut Chart -->
             <div class="col-lg-4 mb-4 d-flex">
-                <div class="chart-section w-100">
+                <div class="chart-section w-100 small-chart-section">
                     <div class="chart-section-header">
                         <h5 class="chart-section-title">Presensi Minggu Ini</h5>
                         <p class="chart-section-desc">Persentase kehadiran Anda dalam pembelajaran minggu ini.</p>
@@ -626,7 +644,7 @@ $conn->close();
             
             <!-- Jadwal Besok -->
             <div class="col-lg-4 mb-4 d-flex">
-                <div class="chart-section w-100">
+                <div class="chart-section w-100 small-chart-section">
                     <div class="chart-section-header d-flex justify-content-between align-items-center">
                         <div>
                             <h5 class="chart-section-title">Jadwal Besok</h5>
