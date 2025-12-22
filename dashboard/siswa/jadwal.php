@@ -342,30 +342,7 @@ $day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     }
 }
 
-/* ============================================
-   CUSTOM UKURAN CARD JADWAL - EDIT DI SINI
-   ============================================ */
-   
-/* Pastikan tidak ada overflow di level page */
-.dashboard-card .card-body {
-    overflow-x: hidden !important;
-}
 
-.container-fluid {
-    overflow-x: hidden !important;
-}
-
-.content {
-    overflow-x: hidden !important;
-}
-
-.wrapper {
-    overflow-x: hidden !important;
-}
-
-body {
-    overflow-x: hidden !important;
-}
 </style>
 
 <script>

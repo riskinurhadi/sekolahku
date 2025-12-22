@@ -449,6 +449,15 @@ $conn->close();
 .small-chart-section .chart-section-desc {
     font-size: 0.8rem;
 }
+.responsive-row {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+}
+.responsive-row > .row {
+    flex-wrap: nowrap;
+    min-width: 800px;
+}
 </style>
 
 <!-- Greeting Section -->
@@ -496,6 +505,7 @@ $conn->close();
     <!-- Overview Tab -->
     <div class="tab-pane fade show active" id="overview" role="tabpanel">
         <!-- Statistics Cards dengan Mini Charts -->
+        <div class="responsive-row">
         <div class="row mb-4">
             <div class="col-xl-3 col-md-6 mb-4">
                 <div class="metric-card">
@@ -569,8 +579,9 @@ $conn->close();
                 </div>
             </div>
         </div>
+        </div>
         
-        <!-- Charts Row -->
+        <div class="responsive-row">
         <div class="row align-items-stretch">
             <!-- Top Mata Pelajaran -->
             <div class="col-lg-4 mb-4 d-flex">
@@ -682,7 +693,9 @@ $conn->close();
                 </div>
             </div>
         </div>
+        </div>
         
+        <div class="responsive-row">
         <!-- Charts Row 2 -->
         <div class="row">
             <!-- Trend Nilai -->
@@ -711,7 +724,9 @@ $conn->close();
                 </div>
             </div>
         </div>
+        </div>
         
+        <div class="responsive-row">
         <!-- Charts Row 3 -->
         <div class="row">
             <!-- Soal per Mata Pelajaran (Stacked Bar) -->
@@ -729,6 +744,7 @@ $conn->close();
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     </div>
     
