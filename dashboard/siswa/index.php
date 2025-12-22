@@ -320,7 +320,7 @@ $conn->close();
 }
 
 .dashboard-greeting h1 {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 700;
     background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
     -webkit-background-clip: text;
@@ -329,16 +329,16 @@ $conn->close();
 }
 
 .dashboard-greeting p {
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: var(--text-color-light);
 }
 
 .dashboard-tabs .nav-link {
     color: var(--text-color-light);
     font-weight: 600;
-    padding: 0.75rem 1.5rem;
+    padding: 0.5rem 1rem;
     border: none;
-    border-bottom: 3px solid transparent;
+    border-bottom: 2px solid transparent;
     transition: all 0.3s ease;
 }
 
@@ -355,20 +355,20 @@ $conn->close();
 .metric-card, .chart-section {
     background: var(--card-bg-color);
     border: none;
-    border-radius: 20px;
-    padding: 2rem;
-    box-shadow: 0 20px 50px var(--shadow-color);
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 15px 40px var(--shadow-color);
     transition: all 0.3s ease-in-out;
     height: 100%;
 }
 
 .metric-card:hover, .chart-section:hover {
-    transform: translateY(-15px);
-    box-shadow: 0 30px 60px var(--shadow-color-hover);
+    transform: translateY(-10px);
+    box-shadow: 0 25px 50px var(--shadow-color-hover);
 }
 
 .metric-card .bi {
-    font-size: 3rem;
+    font-size: 2.5rem;
     background: -webkit-linear-gradient(45deg, var(--primary-color), var(--secondary-color));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -376,13 +376,13 @@ $conn->close();
 }
 
 .metric-card-header .metric-title {
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 600;
     color: var(--text-color-light);
 }
 
 .metric-card-header .metric-value {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 700;
     color: var(--text-color);
     line-height: 1;
@@ -402,23 +402,23 @@ $conn->close();
 }
 
 .metric-chart {
-    height: 70px;
+    height: 50px;
     margin-top: 1rem;
 }
 
 .chart-section-header .chart-section-title {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: var(--text-color);
 }
 
 .chart-section-header .chart-section-desc {
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: var(--text-color-light);
 }
 
 .chart-container {
-    height: 280px;
+    height: 240px;
 }
 
 .top-list-item-name {
@@ -427,7 +427,7 @@ $conn->close();
 
 .top-list-item-value {
     font-weight: 700;
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: var(--primary-color);
 }
 </style>
