@@ -309,13 +309,13 @@ $conn->close();
 <style>
 /* Dashboard Modern Style */
 .dashboard-greeting {
-    margin-bottom: 2rem;
+    margin-bottom: 32px;
 }
 
 .dashboard-greeting h1 {
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: #1e293b;
+    font-size: 32px;
+    font-weight: 700;
+    color: #1e3a8a;
     margin-bottom: 8px;
 }
 
@@ -326,7 +326,7 @@ $conn->close();
 }
 
 .dashboard-tabs {
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 2px solid #e5e7eb;
     margin-bottom: 24px;
 }
 
@@ -341,23 +341,23 @@ $conn->close();
 }
 
 .dashboard-tabs .nav-link:hover {
-    color: #4361ee;
-    border-bottom-color: rgba(67, 97, 238, 0.3);
+    color: #3b82f6;
+    border-bottom-color: rgba(59, 130, 246, 0.3);
 }
 
 .dashboard-tabs .nav-link.active {
-    color: #4361ee;
-    border-bottom-color: #4361ee;
+    color: #3b82f6;
+    border-bottom-color: #3b82f6;
     background: transparent;
 }
 
 /* Stat Cards dengan Mini Charts */
 .metric-card {
     background: #ffffff;
-    border-radius: 1rem;
+    border-radius: 16px;
     padding: 24px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    border: 1px solid #f1f5f9;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
     transition: all 0.3s ease;
     height: 100%;
     position: relative;
@@ -365,9 +365,9 @@ $conn->close();
 }
 
 .metric-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    border-color: #4361ee;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    border-color: #3b82f6;
 }
 
 .metric-card-header {
@@ -385,7 +385,7 @@ $conn->close();
 }
 
 .metric-value {
-    font-size: 2rem;
+    font-size: 32px;
     font-weight: 700;
     color: #1e293b;
     line-height: 1;
@@ -417,10 +417,10 @@ $conn->close();
 /* Chart Sections */
 .chart-section {
     background: #ffffff;
-    border-radius: 1rem;
+    border-radius: 16px;
     padding: 24px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    border: 1px solid #f1f5f9;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
     margin-bottom: 24px;
     height: 100%;
     display: flex;
@@ -472,7 +472,7 @@ $conn->close();
     justify-content: space-between;
     align-items: center;
     padding: 16px 0;
-    border-bottom: 1px dashed #e2e8f0;
+    border-bottom: 1px solid #f1f5f9;
 }
 
 .top-list-item:last-child {
@@ -488,7 +488,7 @@ $conn->close();
 .top-list-item-value {
     font-size: 16px;
     font-weight: 700;
-    color: #4361ee;
+    color: #3b82f6;
 }
 
 /* Date Range Selector */
@@ -496,59 +496,54 @@ $conn->close();
     display: flex;
     align-items: center;
     gap: 12px;
-    background: rgba(255,255,255,0.2);
-    padding: 8px 16px;
-    border-radius: 50px;
-    backdrop-filter: blur(5px);
+    font-size: 14px;
+    color: #64748b;
 }
 
 .date-range-selector .date-text {
     font-weight: 600;
-    color: #fff;
+    color: #1e293b;
 }
 </style>
 
-<!-- Hero Section -->
-<div class="hero-section">
-    <div class="hero-bg-pattern"></div>
-    <div class="hero-content d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div>
-            <h1 class="hero-title">Hai, <?php echo htmlspecialchars(explode(' ', $user['nama_lengkap'])[0]); ?>! 👋</h1>
-            <p class="hero-subtitle mb-0">Siap untuk belajar hari ini? Berikut ringkasan aktivitasmu.</p>
+<!-- Greeting Section -->
+<div class="dashboard-greeting">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1>Hai, selamat datang kembali!</h1>
+            <p>Dashboard monitoring pembelajaran Anda.</p>
         </div>
-        <div class="date-range-selector">
-            <i class="bi bi-calendar-event text-white"></i>
-            <span class="date-text"><?php echo date('d M Y'); ?></span>
+        <div class="col-md-4 text-md-end">
+            <div class="date-range-selector">
+                <span class="date-text"><?php echo date('d M Y'); ?></span>
+                <span><?php echo date('l'); ?></span>
+            </div>
         </div>
     </div>
-</div>
-
-<!-- Tabs -->
-<div class="d-flex justify-content-center">
-    <div class="dashboard-tabs-container">
-        <ul class="nav nav-pills" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
-                    <i class="bi bi-grid-1x2 me-2"></i>Ringkasan
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="nilai-tab" data-bs-toggle="tab" data-bs-target="#nilai" type="button" role="tab">
-                    <i class="bi bi-award me-2"></i>Nilai
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="presensi-tab" data-bs-toggle="tab" data-bs-target="#presensi" type="button" role="tab">
-                    <i class="bi bi-person-check me-2"></i>Presensi
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="notifikasi-tab" data-bs-toggle="tab" data-bs-target="#notifikasi" type="button" role="tab">
-                    <i class="bi bi-bell me-2"></i>Notifikasi
-                </button>
-            </li>
-        </ul>
-    </div>
+    
+    <!-- Tabs -->
+    <ul class="nav dashboard-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
+                Ringkasan
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="nilai-tab" data-bs-toggle="tab" data-bs-target="#nilai" type="button" role="tab">
+                Nilai
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="presensi-tab" data-bs-toggle="tab" data-bs-target="#presensi" type="button" role="tab">
+                Presensi
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="notifikasi-tab" data-bs-toggle="tab" data-bs-target="#notifikasi" type="button" role="tab">
+                Notifikasi
+            </button>
+        </li>
+    </ul>
 </div>
 
 <!-- Tab Content -->
@@ -559,18 +554,15 @@ $conn->close();
         <div class="row mb-4">
             <div class="col-xl-3 col-md-6 mb-4">
                 <div class="metric-card">
-                    <div class="d-flex justify-content-between">
-                        <div class="metric-icon-wrapper bg-soft-primary">
-                            <i class="bi bi-file-text"></i>
-                        </div>
-                        <div class="metric-change <?php echo $change_soal_aktif >= 0 ? 'positive' : 'negative'; ?>">
-                            <i class="bi bi-arrow-<?php echo $change_soal_aktif >= 0 ? 'up' : 'down'; ?>"></i>
-                            <?php echo abs($change_soal_aktif); ?>%
-                        </div>
-                    </div>
                     <div class="metric-card-header">
-                        <div class="metric-value"><?php echo $stats['total_soal_aktif']; ?></div>
-                        <div class="metric-title">Soal Aktif</div>
+                        <div>
+                            <div class="metric-title">Soal Aktif</div>
+                            <div class="metric-value"><?php echo $stats['total_soal_aktif']; ?></div>
+                            <div class="metric-change <?php echo $change_soal_aktif >= 0 ? 'positive' : 'negative'; ?>">
+                                <i class="bi bi-arrow-<?php echo $change_soal_aktif >= 0 ? 'up' : 'down'; ?>"></i>
+                                <?php echo abs($change_soal_aktif); ?>%
+                            </div>
+                        </div>
                     </div>
                     <div class="metric-chart">
                         <canvas id="chartSoalAktif"></canvas>
@@ -580,18 +572,15 @@ $conn->close();
             
             <div class="col-xl-3 col-md-6 mb-4">
                 <div class="metric-card">
-                    <div class="d-flex justify-content-between">
-                        <div class="metric-icon-wrapper bg-soft-success">
-                            <i class="bi bi-check-circle"></i>
-                        </div>
-                        <div class="metric-change <?php echo $change_soal_selesai >= 0 ? 'positive' : 'negative'; ?>">
-                            <i class="bi bi-arrow-<?php echo $change_soal_selesai >= 0 ? 'up' : 'down'; ?>"></i>
-                            <?php echo abs($change_soal_selesai); ?>%
-                        </div>
-                    </div>
                     <div class="metric-card-header">
-                        <div class="metric-value"><?php echo $stats['total_soal_selesai']; ?></div>
-                        <div class="metric-title">Soal Selesai</div>
+                        <div>
+                            <div class="metric-title">Soal Selesai</div>
+                            <div class="metric-value"><?php echo $stats['total_soal_selesai']; ?></div>
+                            <div class="metric-change <?php echo $change_soal_selesai >= 0 ? 'positive' : 'negative'; ?>">
+                                <i class="bi bi-arrow-<?php echo $change_soal_selesai >= 0 ? 'up' : 'down'; ?>"></i>
+                                <?php echo abs($change_soal_selesai); ?>%
+                            </div>
+                        </div>
                     </div>
                     <div class="metric-chart">
                         <canvas id="chartSoalSelesai"></canvas>
@@ -601,18 +590,15 @@ $conn->close();
             
             <div class="col-xl-3 col-md-6 mb-4">
                 <div class="metric-card">
-                    <div class="d-flex justify-content-between">
-                        <div class="metric-icon-wrapper bg-soft-warning">
-                            <i class="bi bi-star"></i>
-                        </div>
-                        <div class="metric-change <?php echo $change_rata_nilai >= 0 ? 'positive' : 'negative'; ?>">
-                            <i class="bi bi-arrow-<?php echo $change_rata_nilai >= 0 ? 'up' : 'down'; ?>"></i>
-                            <?php echo abs($change_rata_nilai); ?>%
-                        </div>
-                    </div>
                     <div class="metric-card-header">
-                        <div class="metric-value"><?php echo $stats['rata_rata_nilai']; ?></div>
-                        <div class="metric-title">Rata-rata Nilai</div>
+                        <div>
+                            <div class="metric-title">Rata-rata Nilai</div>
+                            <div class="metric-value"><?php echo $stats['rata_rata_nilai']; ?></div>
+                            <div class="metric-change <?php echo $change_rata_nilai >= 0 ? 'positive' : 'negative'; ?>">
+                                <i class="bi bi-arrow-<?php echo $change_rata_nilai >= 0 ? 'up' : 'down'; ?>"></i>
+                                <?php echo abs($change_rata_nilai); ?>%
+                            </div>
+                        </div>
                     </div>
                     <div class="metric-chart">
                         <canvas id="chartRataNilai"></canvas>
@@ -622,18 +608,15 @@ $conn->close();
             
             <div class="col-xl-3 col-md-6 mb-4">
                 <div class="metric-card">
-                    <div class="d-flex justify-content-between">
-                        <div class="metric-icon-wrapper bg-soft-danger">
-                            <i class="bi bi-exclamation-circle"></i>
-                        </div>
-                        <div class="metric-change <?php echo $change_belum_dikerjakan >= 0 ? 'negative' : 'positive'; ?>">
-                            <i class="bi bi-arrow-<?php echo $change_belum_dikerjakan >= 0 ? 'up' : 'down'; ?>"></i>
-                            <?php echo abs($change_belum_dikerjakan); ?>%
-                        </div>
-                    </div>
                     <div class="metric-card-header">
-                        <div class="metric-value"><?php echo $stats['total_belum_dikerjakan']; ?></div>
-                        <div class="metric-title">Belum Dikerjakan</div>
+                        <div>
+                            <div class="metric-title">Belum Dikerjakan</div>
+                            <div class="metric-value"><?php echo $stats['total_belum_dikerjakan']; ?></div>
+                            <div class="metric-change <?php echo $change_belum_dikerjakan >= 0 ? 'negative' : 'positive'; ?>">
+                                <i class="bi bi-arrow-<?php echo $change_belum_dikerjakan >= 0 ? 'up' : 'down'; ?>"></i>
+                                <?php echo abs($change_belum_dikerjakan); ?>%
+                            </div>
+                        </div>
                     </div>
                     <div class="metric-chart">
                         <canvas id="chartBelumDikerjakan"></canvas>
@@ -648,17 +631,15 @@ $conn->close();
             <div class="col-lg-4 mb-4 d-flex">
                 <div class="chart-section w-100">
                     <div class="chart-section-header">
-                        <div>
-                            <h5 class="chart-section-title">Top Mata Pelajaran</h5>
-                            <p class="chart-section-desc">Paling sering dikerjakan</p>
-                        </div>
+                        <h5 class="chart-section-title">Top Mata Pelajaran</h5>
+                        <p class="chart-section-desc">Mata pelajaran dengan soal terbanyak yang telah Anda kerjakan.</p>
                     </div>
                     <?php if (!empty($top_pelajaran)): ?>
                         <ul class="top-list" style="flex: 1; overflow-y: auto;">
                             <?php foreach ($top_pelajaran as $index => $pel): ?>
                                 <li class="top-list-item">
                                     <span class="top-list-item-name">
-                                        <span style="display: inline-block; width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%); color: white; text-align: center; line-height: 24px; font-size: 12px; font-weight: 700; margin-right: 12px;">
+                                        <span style="display: inline-block; width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; text-align: center; line-height: 24px; font-size: 12px; font-weight: 700; margin-right: 12px;">
                                             <?php echo $index + 1; ?>
                                         </span>
                                         <?php echo htmlspecialchars($pel['nama_pelajaran']); ?>
@@ -680,10 +661,8 @@ $conn->close();
             <div class="col-lg-4 mb-4 d-flex">
                 <div class="chart-section w-100">
                     <div class="chart-section-header">
-                        <div>
-                            <h5 class="chart-section-title">Presensi Minggu Ini</h5>
-                            <p class="chart-section-desc">Kehadiran pembelajaran</p>
-                        </div>
+                        <h5 class="chart-section-title">Presensi Minggu Ini</h5>
+                        <p class="chart-section-desc">Persentase kehadiran Anda dalam pembelajaran minggu ini.</p>
                     </div>
                     <div class="chart-container-small">
                         <canvas id="chartPresensi"></canvas>
@@ -724,7 +703,7 @@ $conn->close();
                     <div class="chart-section-header d-flex justify-content-between align-items-center">
                         <div>
                             <h5 class="chart-section-title">Jadwal Besok</h5>
-                            <p class="chart-section-desc">Persiapkan dirimu</p>
+                            <p class="chart-section-desc">Pelajaran yang akan berlangsung besok.</p>
                         </div>
                         <a href="jadwal.php" class="text-decoration-none small text-primary">Lihat <i class="bi bi-arrow-right"></i></a>
                     </div>
@@ -732,7 +711,7 @@ $conn->close();
                         <div style="flex: 1; overflow-y: auto; min-height: 0;">
                             <?php foreach (array_slice($jadwal_besok, 0, 5) as $j): ?>
                                 <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
-                                    <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; margin-right: 12px;">
+                                    <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; margin-right: 12px;">
                                         <i class="bi bi-book"></i>
                                     </div>
                                     <div class="flex-grow-1">
@@ -762,10 +741,8 @@ $conn->close();
             <div class="col-lg-8 mb-4">
                 <div class="chart-section">
                     <div class="chart-section-header">
-                        <div>
-                            <h5 class="chart-section-title">Trend Nilai</h5>
-                            <p class="chart-section-desc">Perkembangan nilai 30 hari terakhir</p>
-                        </div>
+                        <h5 class="chart-section-title">Trend Nilai</h5>
+                        <p class="chart-section-desc">Perkembangan nilai rata-rata Anda selama 30 hari terakhir.</p>
                     </div>
                     <div class="chart-container">
                         <canvas id="chartTrendNilai"></canvas>
@@ -777,10 +754,8 @@ $conn->close();
             <div class="col-lg-4 mb-4">
                 <div class="chart-section">
                     <div class="chart-section-header">
-                        <div>
-                            <h5 class="chart-section-title">Distribusi Soal</h5>
-                            <p class="chart-section-desc">Per mata pelajaran</p>
-                        </div>
+                        <h5 class="chart-section-title">Distribusi Soal</h5>
+                        <p class="chart-section-desc">Jumlah soal yang telah dikerjakan per mata pelajaran.</p>
                     </div>
                     <div class="chart-container">
                         <canvas id="chartDistribusiSoal"></canvas>
@@ -796,8 +771,8 @@ $conn->close();
                 <div class="chart-section">
                     <div class="chart-section-header d-flex justify-content-between align-items-center">
                         <div>
-                            <h5 class="chart-section-title">Aktivitas Soal</h5>
-                            <p class="chart-section-desc">Per mata pelajaran (30 hari terakhir)</p>
+                            <h5 class="chart-section-title">Aktivitas Soal per Mata Pelajaran</h5>
+                            <p class="chart-section-desc">Distribusi soal yang dikerjakan per mata pelajaran selama 30 hari terakhir.</p>
                         </div>
                         <a href="soal_saya.php" class="text-decoration-none small text-primary">Lihat Semua <i class="bi bi-arrow-right"></i></a>
                     </div>
@@ -1016,8 +991,8 @@ new Chart(document.getElementById('chartSoalAktif'), {
         labels: ['', '', '', '', '', '', ''],
         datasets: [{
             data: <?php echo json_encode($trend_data['soal_aktif']); ?>,
-            borderColor: '#4361ee',
-            backgroundColor: 'rgba(67, 97, 238, 0.1)',
+            borderColor: '#8b5cf6',
+            backgroundColor: 'rgba(139, 92, 246, 0.1)',
             fill: true
         }]
     },
@@ -1031,8 +1006,8 @@ new Chart(document.getElementById('chartSoalSelesai'), {
         labels: ['', '', '', '', '', '', ''],
         datasets: [{
             data: <?php echo json_encode($trend_data['soal_selesai']); ?>,
-            borderColor: '#3f37c9',
-            backgroundColor: 'rgba(63, 55, 201, 0.1)',
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
             fill: true
         }]
     },
@@ -1110,8 +1085,8 @@ new Chart(document.getElementById('chartTrendNilai'), {
         datasets: [{
             label: 'Rata-rata Nilai',
             data: <?php echo json_encode($nilai_trend); ?>,
-            borderColor: '#4361ee',
-            backgroundColor: 'rgba(67, 97, 238, 0.1)',
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
             fill: true,
             tension: 0.4,
             pointRadius: 4,
@@ -1150,7 +1125,7 @@ new Chart(document.getElementById('chartDistribusiSoal'), {
         datasets: [{
             data: <?php echo json_encode(array_column($top_pelajaran, 'total_soal')); ?>,
             backgroundColor: [
-                '#4361ee',
+                '#3b82f6',
                 '#10b981',
                 '#f59e0b',
                 '#8b5cf6',
@@ -1177,7 +1152,7 @@ new Chart(document.getElementById('chartDistribusiSoal'), {
 
 // Soal per Mata Pelajaran Stacked Bar Chart
 <?php if (!empty($pelajaran_list)): ?>
-const colors = ['#4361ee', '#3f37c9', '#4895ef', '#4cc9f0', '#f72585', '#7209b7'];
+const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#14b8a6', '#ef4444'];
 const datasets = <?php echo json_encode($pelajaran_list); ?>.map((pelajaran, index) => ({
     label: pelajaran,
     data: <?php echo json_encode($soal_per_pelajaran); ?>[index] || [],
