@@ -604,37 +604,34 @@ $conn->close();
             
             <!-- Presensi Donut Chart -->
             <div class="col-lg-4 mb-4 d-flex">
-                <div class="chart-section w-100 small-chart-section">
-                    <div class="chart-section-header">
+                <div class="chart-section w-100 small-chart-section d-flex flex-column justify-content-center">
+                    <div class="chart-section-header text-center">
                         <h5 class="chart-section-title">Presensi Minggu Ini</h5>
-                        <p class="chart-section-desc">Persentase kehadiran Anda dalam pembelajaran minggu ini.</p>
-                    </div>
-                    <div class="chart-container-small">
-                        <canvas id="chartPresensi"></canvas>
+                        <p class="chart-section-desc">Persentase kehadiran Anda.</p>
                     </div>
                     <?php if ($presensi_stats['total'] > 0): ?>
-                        <div class="row text-center mt-3 pt-3 border-top" style="flex-shrink: 0;">
+                        <div class="row text-center my-auto">
                             <div class="col-4">
                                 <div class="py-2">
-                                    <h4 class="text-success mb-0" style="font-size: 1.5rem;"><?php echo $presensi_stats['hadir']; ?></h4>
+                                    <h4 class="text-success mb-0" style="font-size: 2rem;"><?php echo $presensi_stats['hadir']; ?></h4>
                                     <small class="text-muted">Hadir</small>
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="py-2">
-                                    <h4 class="text-warning mb-0" style="font-size: 1.5rem;"><?php echo $presensi_stats['terlambat']; ?></h4>
+                                    <h4 class="text-warning mb-0" style="font-size: 2rem;"><?php echo $presensi_stats['terlambat']; ?></h4>
                                     <small class="text-muted">Terlambat</small>
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="py-2">
-                                    <h4 class="text-danger mb-0" style="font-size: 1.5rem;"><?php echo $presensi_stats['tidak_hadir']; ?></h4>
+                                    <h4 class="text-danger mb-0" style="font-size: 2rem;"><?php echo $presensi_stats['tidak_hadir']; ?></h4>
                                     <small class="text-muted">Tidak Hadir</small>
                                 </div>
                             </div>
                         </div>
                     <?php else: ?>
-                        <div class="text-center py-4" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                        <div class="text-center py-4 my-auto">
                             <i class="bi bi-clipboard-check text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
                             <p class="text-muted mt-3 mb-0">Belum ada data presensi</p>
                         </div>
@@ -989,37 +986,7 @@ document.addEventListener('DOMContentLoaded', function() {
         options: chartOptions
     });
 
-    <?php if ($presensi_stats['total'] > 0): ?>
-    new Chart(document.getElementById('chartPresensi'), {
-        type: 'doughnut',
-        data: {
-            labels: ['Hadir', 'Terlambat', 'Tidak Hadir'],
-            datasets: [{
-                data: [
-                    <?php echo $presensi_stats['hadir']; ?>,
-                    <?php echo $presensi_stats['terlambat']; ?>,
-                    <?php echo $presensi_stats['tidak_hadir']; ?>
-                ],
-                backgroundColor: [accentColor, '#FFC371', '#ff4d4d'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 15,
-                        font: { size: 12 }
-                    }
-                }
-            },
-            cutout: '70%'
-        }
-    });
-    <?php endif; ?>
+    
 
     new Chart(document.getElementById('chartTrendNilai'), {
         type: 'line',
