@@ -17,73 +17,72 @@
 }
 
 html {
-    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%);
-    background-attachment: fixed;
-    background-size: cover;
-    background-position: center center;
-    background-repeat: no-repeat;
-    min-height: 100vh;
-    width: 100%;
+    background-color: #f3f4f6;
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%);
-    background-attachment: fixed;
-    background-size: cover;
-    background-position: center center;
-    background-repeat: no-repeat;
-    color: #ffffff;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f3f4f6;
+    color: #333;
     font-size: 14px;
     line-height: 1.6;
     overflow-x: hidden;
     min-height: 100vh;
     position: relative;
-    width: 100%;
 }
 
-body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%);
-    background-attachment: fixed;
-    background-size: cover;
-    background-position: center center;
-    background-repeat: no-repeat;
-    z-index: -1;
-    pointer-events: none;
-}
+
 
 .wrapper {
     display: flex;
     width: 100%;
     min-height: 100vh;
-    background: transparent;
     position: relative;
 }
 
-/* Sidebar - White Background with Blue Text */
+/* --- New Collapsible Sidebar --- */
 .sidebar {
     width: var(--sidebar-width);
-    min-width: var(--sidebar-width);
-    background: #ffffff;
+    height: 100vh;
     position: fixed;
-    top: var(--header-height);
+    top: 0;
     left: 0;
-    height: calc(100vh - var(--header-height));
-    z-index: 999;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
-    border-right: 1px solid #e5e7eb;
+    z-index: 1030;
+    background: #ffffff;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.05);
+    transition: width var(--transition-speed) ease, transform var(--transition-speed) ease;
     overflow-y: auto;
     overflow-x: hidden;
     display: flex;
     flex-direction: column;
-    padding-bottom: 100px;
 }
+
+body.sidebar-collapsed .sidebar {
+    width: var(--sidebar-collapsed-width);
+}
+
+body.sidebar-collapsed .sidebar .sidebar-header .logo-image {
+    opacity: 0;
+    visibility: hidden;
+}
+
+body.sidebar-collapsed .sidebar .components a span,
+body.sidebar-collapsed .sidebar .components a .bi-chevron-down {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+}
+
+body.sidebar-collapsed .sidebar .components a {
+    justify-content: center;
+}
+
+body.sidebar-collapsed .sidebar .components a i {
+    margin-right: 0;
+}
+
 
 .sidebar-header {
     padding: 24px 20px;
