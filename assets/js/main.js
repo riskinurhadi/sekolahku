@@ -18,10 +18,9 @@ $(document).ready(function() {
         $('.modal-backdrop').remove();
     }
     
-    // Sidebar Toggle
-    $('#sidebarCollapse').on('click', function() {
-        $('#sidebar').toggleClass('active');
-        $('#content').toggleClass('active');
+    // New Sidebar Toggle Logic
+    $('#sidebar-toggle').on('click', function() {
+        $('body').toggleClass('sidebar-collapsed');
     });
     
     // Auto-hide sidebar on mobile after click (exclude dropdown toggles)

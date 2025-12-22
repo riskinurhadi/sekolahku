@@ -346,7 +346,7 @@ if ($table_check && $table_check->num_rows > 0) {
         }
     </style>
 </head>
-<body class="sidebar-visible">
+<body>
     <div class="wrapper">
         <!-- Sidebar -->
         <nav id="sidebar" class="sidebar">

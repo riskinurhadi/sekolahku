@@ -4,14 +4,10 @@
     --primary-color: #2563eb;
     --primary-dark: #1e40af;
     --primary-light: #3b82f6;
-    --blue-light: #dbeafe;
-    --blue-dark: #1e3a8a;
-    --orange-color: #f5a97f;
-    --orange-light: #fff0e8;
-    --green-color: #7fb8a0;
-    --green-light: #e8f5ed;
-    --sidebar-width: 280px;
-    --header-height: 80px;
+    --sidebar-width: 260px;
+    --sidebar-collapsed-width: 80px;
+    --header-height: 70px;
+    --transition-speed: 0.3s;
 }
 
 * {
