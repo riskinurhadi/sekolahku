@@ -76,48 +76,80 @@ $mata_pelajaran_list = $conn->query("SELECT * FROM mata_pelajaran WHERE guru_id 
     </div>
 <?php endif; ?>
 
+<?php if (empty($materi_list)): ?>
 <div class="card shadow-sm">
-    <div class="card-body">
-        <?php if (empty($materi_list)): ?>
-            <div class="text-center py-5">
-                <i class="bi bi-journal-text text-muted" style="font-size: 4rem; opacity: 0.3;"></i>
-                <h5 class="mt-3 text-muted">Belum ada materi</h5>
-                <p class="text-muted">Mulai dengan menambahkan materi pembelajaran pertama Anda</p>
-                <a href="tambah_materi.php" class="btn btn-primary mt-2">
-                    <i class="bi bi-plus-circle me-1"></i> Tambah Materi Pertama
-                </a>
-            </div>
-        <?php else: ?>
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th width="5%">#</th>
-                            <th width="25%">Judul</th>
-                            <th width="20%">Mata Pelajaran</th>
-                            <th width="10%">Latihan</th>
-                            <th width="10%">Status</th>
-                            <th width="10%">Urutan</th>
-                            <th width="20%" class="text-end">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($materi_list as $index => $materi): ?>
-                            <tr>
-                                <td><?php echo $index + 1; ?></td>
-                                <td>
-                                    <div class="fw-bold"><?php echo htmlspecialchars($materi['judul']); ?></div>
-                                    <?php if ($materi['file_attachment']): ?>
-                                        <small class="text-muted">
-                                            <i class="bi bi-paperclip"></i> <?php echo htmlspecialchars($materi['file_name']); ?>
-                                        </small>
-                                    <?php endif; ?>
-                                </td>
-                                <td><?php echo htmlspecialchars($materi['nama_pelajaran']); ?></td>
-                                <td>
+    <div class="card-body text-center py-5">
+        <i class="bi bi-journal-text text-muted" style="font-size: 4rem; opacity: 0.3;"></i>
+        <h5 class="mt-3 text-muted">Belum ada materi</h5>
+        <p class="text-muted">Mulai dengan menambahkan materi pembelajaran pertama Anda</p>
+        <a href="tambah_materi.php" class="btn btn-primary mt-2">
+            <i class="bi bi-plus-circle me-1"></i> Tambah Materi Pertama
+        </a>
+    </div>
+</div>
+<?php else: ?>
+<?php
+// Group by pertemuan (urutan). Pertemuan = urutan+1
+$pertemuan_list = [];
+foreach ($materi_list as $materi) {
+    $pert = intval($materi['urutan']);
+    if (!isset($pertemuan_list[$pert])) {
+        $pertemuan_list[$pert] = [];
+    }
+    $pertemuan_list[$pert][] = $materi;
+}
+ksort($pertemuan_list);
+?>
+
+<div class="accordion" id="pertemuanAccordion">
+    <?php foreach ($pertemuan_list as $pert => $items): ?>
+        <?php $pertemuan_ke = $pert + 1; ?>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="heading<?php echo $pert; ?>">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<?php echo $pert; ?>" aria-expanded="false" aria-controls="collapse<?php echo $pert; ?>">
+                    <div class="d-flex justify-content-between w-100 align-items-center">
+                        <div>
+                            <strong>Pertemuan <?php echo $pertemuan_ke; ?></strong>
+                            <span class="text-muted ms-2">Total <?php echo count($items); ?> materi</span>
+                        </div>
+                        <div>
+                            <a href="tambah_materi.php?urutan=<?php echo $pert; ?>" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-plus-circle"></i> Upload Materi
+                            </a>
+                        </div>
+                    </div>
+                </button>
+            </h2>
+            <div id="collapse<?php echo $pert; ?>" class="accordion-collapse collapse" aria-labelledby="heading<?php echo $pert; ?>" data-bs-parent="#pertemuanAccordion">
+                <div class="accordion-body">
+                    <?php foreach ($items as $index => $materi): ?>
+                        <div class="card shadow-sm mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <div class="fw-bold"><?php echo htmlspecialchars($materi['judul']); ?></div>
+                                        <div class="text-muted small"><?php echo htmlspecialchars($materi['nama_pelajaran']); ?></div>
+                                        <?php if ($materi['file_attachment']): ?>
+                                            <small class="text-muted d-block mt-1"><i class="bi bi-paperclip"></i> <?php echo htmlspecialchars($materi['file_name']); ?></small>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <a href="tambah_latihan.php?materi_id=<?php echo $materi['id']; ?>" class="btn btn-sm btn-outline-primary" title="Tambah Latihan">
+                                            <i class="bi bi-plus-circle"></i>
+                                        </a>
+                                        <a href="edit_materi.php?id=<?php echo $materi['id']; ?>" class="btn btn-sm btn-outline-warning" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="submisi_latihan.php?materi_id=<?php echo $materi['id']; ?>" class="btn btn-sm btn-outline-info" title="Lihat Submisi">
+                                            <i class="bi bi-clipboard-check"></i>
+                                        </a>
+                                        <a href="?delete=<?php echo $materi['id']; ?>" class="btn btn-sm btn-outline-danger" title="Hapus" onclick="return confirm('Yakin ingin menghapus materi ini? Semua latihan terkait juga akan dihapus.');">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-3 flex-wrap">
                                     <span class="badge bg-info"><?php echo $materi['jumlah_latihan']; ?> Latihan</span>
-                                </td>
-                                <td>
                                     <?php
                                     $status_badges = [
                                         'draft' => 'bg-secondary',
@@ -127,32 +159,17 @@ $mata_pelajaran_list = $conn->query("SELECT * FROM mata_pelajaran WHERE guru_id 
                                     $badge_class = $status_badges[$materi['status']] ?? 'bg-secondary';
                                     ?>
                                     <span class="badge <?php echo $badge_class; ?>"><?php echo ucfirst($materi['status']); ?></span>
-                                </td>
-                                <td><?php echo $materi['urutan']; ?></td>
-                                <td class="text-end">
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="tambah_latihan.php?materi_id=<?php echo $materi['id']; ?>" class="btn btn-outline-primary" title="Tambah Latihan">
-                                            <i class="bi bi-plus-circle"></i>
-                                        </a>
-                                        <a href="edit_materi.php?id=<?php echo $materi['id']; ?>" class="btn btn-outline-warning" title="Edit">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <a href="submisi_latihan.php?materi_id=<?php echo $materi['id']; ?>" class="btn btn-outline-info" title="Lihat Submisi">
-                                            <i class="bi bi-clipboard-check"></i>
-                                        </a>
-                                        <a href="?delete=<?php echo $materi['id']; ?>" class="btn btn-outline-danger" title="Hapus" onclick="return confirm('Yakin ingin menghapus materi ini? Semua latihan terkait juga akan dihapus.');">
-                                            <i class="bi bi-trash"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                                    <span class="badge bg-light text-dark">Urutan: <?php echo $materi['urutan']; ?></span>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
             </div>
-        <?php endif; ?>
-    </div>
+        </div>
+    <?php endforeach; ?>
 </div>
+<?php endif; ?>
 
 <?php require_once '../../includes/footer.php'; ?>
 

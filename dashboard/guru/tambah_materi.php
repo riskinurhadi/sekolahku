@@ -2,7 +2,7 @@
 $page_title = 'Tambah Materi';
 require_once '../../config/session.php';
 requireRole(['guru']);
-require_once '../../includes/header.php';
+require_once '../../config/database.php';
 
 $conn = getConnection();
 $guru_id = $_SESSION['user_id'];
@@ -17,7 +17,7 @@ if (!file_exists($upload_dir)) {
     mkdir($upload_dir, 0777, true);
 }
 
-// Handle form submission
+// Handle form submission BEFORE sending any output
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $errors = [];
     
@@ -39,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $file_attachment = null;
         $file_name = null;
         $file_size = null;
+        $filepath = null;
         
         // Handle file upload
         if (isset($_FILES['file_attachment']) && $_FILES['file_attachment']['error'] == 0) {
@@ -85,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 exit;
             } else {
                 // Delete file if insert failed
-                if ($file_attachment && file_exists($filepath)) {
+                if ($file_attachment && $filepath && file_exists($filepath)) {
                     unlink($filepath);
                 }
                 $message = 'error:Gagal menyimpan materi.';
@@ -98,6 +99,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $message = 'error:' . implode(', ', $errors);
     }
 }
+
+// Setelah selesai proses POST, baru tampilkan header
+require_once '../../includes/header.php';
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
