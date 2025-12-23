@@ -49,58 +49,75 @@ $stmt->close();
         </div>
     </div>
 <?php else: ?>
-    <div class="row">
-        <?php foreach ($materi_list as $materi): ?>
-            <?php
-            $progress_status = $materi['progress_status'] ?? 'belum_dibaca';
-            $progress_percent = $materi['progress_percent'] ?? 0;
-            
-            $status_colors = [
-                'belum_dibaca' => 'secondary',
-                'sedang_dibaca' => 'warning',
-                'selesai' => 'success'
+    <?php
+    // Group materi by mata pelajaran
+    $materi_by_mapel = [];
+    foreach ($materi_list as $materi) {
+        $key = $materi['nama_pelajaran'];
+        if (!isset($materi_by_mapel[$key])) {
+            $materi_by_mapel[$key] = [
+                'kode' => $materi['kode_pelajaran'] ?? '',
+                'items' => []
             ];
-            $status_color = $status_colors[$progress_status] ?? 'secondary';
-            ?>
-            <div class="col-md-6 col-lg-4 mb-4">
+        }
+        $materi_by_mapel[$key]['items'][] = $materi;
+    }
+    ?>
+    <div class="row">
+        <?php foreach ($materi_by_mapel as $mapel => $data): ?>
+            <div class="col-md-6 col-lg-6 mb-4">
                 <div class="card shadow-sm h-100 hover-lift">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div class="flex-grow-1">
-                                <span class="badge bg-primary mb-2"><?php echo htmlspecialchars($materi['nama_pelajaran']); ?></span>
-                                <h5 class="card-title mb-2"><?php echo htmlspecialchars($materi['judul']); ?></h5>
-                                <?php if ($materi['deskripsi']): ?>
-                                    <p class="text-muted small mb-2"><?php echo htmlspecialchars(substr($materi['deskripsi'], 0, 100)); ?><?php echo strlen($materi['deskripsi']) > 100 ? '...' : ''; ?></p>
+                            <div>
+                                <h5 class="mb-1"><?php echo htmlspecialchars($mapel); ?></h5>
+                                <?php if (!empty($data['kode'])): ?>
+                                    <small class="text-muted"><?php echo htmlspecialchars($data['kode']); ?></small>
                                 <?php endif; ?>
                             </div>
-                            <?php if ($materi['file_attachment']): ?>
-                                <i class="bi bi-paperclip text-primary fs-4"></i>
-                            <?php endif; ?>
+                            <span class="badge bg-primary">Total <?php echo count($data['items']); ?> materi</span>
                         </div>
-                        
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <small class="text-muted">Progress</small>
-                                <small class="text-muted"><?php echo $progress_percent; ?>%</small>
-                            </div>
-                            <div class="progress" style="height: 8px;">
-                                <div class="progress-bar bg-<?php echo $status_color; ?>" role="progressbar" style="width: <?php echo $progress_percent; ?>%"></div>
-                            </div>
-                            <small class="text-muted">
-                                <span class="badge bg-<?php echo $status_color; ?> mt-1">
-                                    <?php echo ucfirst(str_replace('_', ' ', $progress_status)); ?>
-                                </span>
-                            </small>
-                        </div>
-                        
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <i class="bi bi-journal-check text-info"></i>
-                                <small class="text-muted"><?php echo $materi['jumlah_latihan']; ?> Latihan</small>
-                            </div>
-                            <a href="detail_materi.php?id=<?php echo $materi['id']; ?>" class="btn btn-sm btn-primary">
-                                Baca Materi <i class="bi bi-arrow-right ms-1"></i>
-                            </a>
+
+                        <div class="materi-list">
+                            <?php foreach ($data['items'] as $materi): ?>
+                                <?php
+                                $progress_status = $materi['progress_status'] ?? 'belum_dibaca';
+                                $progress_percent = $materi['progress_percent'] ?? 0;
+                                $status_colors = [
+                                    'belum_dibaca' => 'secondary',
+                                    'sedang_dibaca' => 'warning',
+                                    'selesai' => 'success'
+                                ];
+                                $status_color = $status_colors[$progress_status] ?? 'secondary';
+                                ?>
+                                <div class="materi-item mb-3 p-3 rounded border">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1"><?php echo htmlspecialchars($materi['judul']); ?></h6>
+                                            <?php if ($materi['deskripsi']): ?>
+                                                <p class="text-muted small mb-2"><?php echo htmlspecialchars(substr($materi['deskripsi'], 0, 90)); ?><?php echo strlen($materi['deskripsi']) > 90 ? '...' : ''; ?></p>
+                                            <?php endif; ?>
+                                            <div class="d-flex align-items-center gap-2 flex-wrap small text-muted">
+                                                <span><i class="bi bi-journal-check text-info"></i> <?php echo $materi['jumlah_latihan']; ?> Latihan</span>
+                                                <?php if ($materi['file_attachment']): ?>
+                                                    <span class="text-primary"><i class="bi bi-paperclip"></i> File</span>
+                                                <?php endif; ?>
+                                                <span class="badge bg-<?php echo $status_color; ?>"><?php echo ucfirst(str_replace('_', ' ', $progress_status)); ?></span>
+                                            </div>
+                                        </div>
+                                        <a href="detail_materi.php?id=<?php echo $materi['id']; ?>" class="btn btn-sm btn-outline-primary">Buka</a>
+                                    </div>
+                                    <div class="mt-2">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <small class="text-muted">Progress</small>
+                                            <small class="text-muted"><?php echo $progress_percent; ?>%</small>
+                                        </div>
+                                        <div class="progress" style="height: 6px;">
+                                            <div class="progress-bar bg-<?php echo $status_color; ?>" role="progressbar" style="width: <?php echo $progress_percent; ?>%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                 </div>
@@ -117,6 +134,16 @@ $stmt->close();
 .hover-lift:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+}
+
+.materi-item {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    transition: all 0.2s ease;
+}
+
+.materi-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 </style>
 
