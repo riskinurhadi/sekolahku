@@ -110,9 +110,7 @@ $unread_count = 0;
             <!-- Top Navbar -->
             <header class="dashboard-top-header">
                 <div class="header-left">
-                    <button type="button" id="sidebar-toggle" class="btn icon-btn">
-                        <i class="bi bi-list"></i>
-                    </button>
+                    <!-- Sidebar toggle removed as per request -->
                 </div>
 
                 <div class="user-profile-section">

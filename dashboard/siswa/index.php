@@ -79,6 +79,24 @@ if ($kelas_id) {
         return $j['tanggal'] == $tomorrow;
     });
 }
+
+// Get latest announcement
+$stmt = $conn->prepare("SELECT * FROM informasi_akademik ORDER BY tanggal_dibuat DESC LIMIT 1");
+$stmt->execute();
+$pengumuman_terbaru = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+// Get latest exam result
+$stmt = $conn->prepare("SELECT hu.*, s.judul as judul_soal, mp.nama_pelajaran 
+    FROM hasil_ujian hu 
+    JOIN soal s ON hu.soal_id = s.id 
+    JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id 
+    WHERE hu.siswa_id = ? AND hu.status = 'selesai' 
+    ORDER BY hu.tanggal_selesai DESC LIMIT 1");
+$stmt->bind_param("i", $siswa_id);
+$stmt->execute();
+$hasil_ujian_terakhir = $stmt->get_result()->fetch_assoc();
+$stmt->close();
 ?>
 
     <div class="row mb-4">
@@ -181,6 +199,51 @@ if ($kelas_id) {
                     <?php endif; ?>
                 </div>
             </div>
+
+            <!-- Hasil Ujian Terakhir -->
+            <div class="dashboard-card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-award"></i> Hasil Ujian Terakhir</h5>
+                    <a href="hasil_latihan.php" class="btn btn-sm btn-link text-primary p-0">Lihat Semua</a>
+                </div>
+                <div class="card-body">
+                    <?php if ($hasil_ujian_terakhir): ?>
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <h6 class="mb-1 fw-bold"><?php echo htmlspecialchars($hasil_ujian_terakhir['judul_soal']); ?></h6>
+                                <p class="text-muted small mb-0"><?php echo htmlspecialchars($hasil_ujian_terakhir['nama_pelajaran']); ?></p>
+                            </div>
+                            <div class="text-end">
+                                <div class="h4 fw-bold mb-0 text-primary"><?php echo number_format($hasil_ujian_terakhir['nilai'], 0); ?></div>
+                                <span class="badge <?php echo $hasil_ujian_terakhir['nilai'] >= 75 ? 'bg-success' : 'bg-warning'; ?>">
+                                    <?php echo $hasil_ujian_terakhir['nilai'] >= 75 ? 'Lulus' : 'Remedial'; ?>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-light rounded-3">
+                            <div class="row g-2 text-center">
+                                <div class="col-4">
+                                    <div class="small text-muted">Benar</div>
+                                    <div class="fw-bold text-success"><?php echo $hasil_ujian_terakhir['jumlah_benar']; ?></div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="small text-muted">Salah</div>
+                                    <div class="fw-bold text-danger"><?php echo $hasil_ujian_terakhir['jumlah_salah']; ?></div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="small text-muted">Tanggal</div>
+                                    <div class="fw-bold small"><?php echo date('d/m/y', strtotime($hasil_ujian_terakhir['tanggal_selesai'])); ?></div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <div class="text-center py-3">
+                            <i class="bi bi-clipboard2-data fs-2 text-muted opacity-50"></i>
+                            <p class="text-muted mt-2 mb-0">Belum ada hasil ujian</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
         </div>
 
         <!-- Kolom Kanan -->
@@ -220,6 +283,34 @@ if ($kelas_id) {
                         <div class="empty-state py-4">
                             <i class="bi bi-calendar2-x fs-2"></i>
                             <h6 class="mt-2">Tidak ada jadwal besok</h6>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Pengumuman Terbaru -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h5><i class="bi bi-megaphone"></i> Pengumuman</h5>
+                    <a href="informasi_akademik.php" class="btn btn-sm btn-link text-primary p-0">Lihat Semua</a>
+                </div>
+                <div class="card-body">
+                    <?php if ($pengumuman_terbaru): ?>
+                        <div class="mb-3">
+                            <span class="badge bg-primary mb-2"><?php echo htmlspecialchars($pengumuman_terbaru['kategori'] ?? 'Umum'); ?></span>
+                            <h6 class="fw-bold mb-1"><?php echo htmlspecialchars($pengumuman_terbaru['judul']); ?></h6>
+                            <p class="text-muted small mb-2">
+                                <i class="bi bi-clock me-1"></i> <?php echo date('d M Y', strtotime($pengumuman_terbaru['tanggal_dibuat'])); ?>
+                            </p>
+                            <div class="text-muted small mb-3 text-truncate-2">
+                                <?php echo strip_tags($pengumuman_terbaru['isi']); ?>
+                            </div>
+                            <a href="detail_informasi.php?id=<?php echo $pengumuman_terbaru['id']; ?>" class="btn btn-sm btn-outline-primary w-100">Baca Selengkapnya</a>
+                        </div>
+                    <?php else: ?>
+                        <div class="text-center py-3">
+                            <i class="bi bi-megaphone fs-2 text-muted opacity-50"></i>
+                            <p class="text-muted mt-2 mb-0">Belum ada pengumuman</p>
                         </div>
                     <?php endif; ?>
                 </div>
