@@ -17,20 +17,26 @@ $kelas_id = $siswa_info['kelas_id'] ?? null;
 $stmt->close();
 
 // Get materi aktif (materi yang status aktif dan mata pelajarannya sesuai dengan sekolah)
-$query = "SELECT m.*, mp.nama_pelajaran, mp.kode_pelajaran,
-    (SELECT COUNT(*) FROM latihan WHERE materi_id = m.id AND status = 'aktif') as jumlah_latihan,
-    (SELECT status FROM progress_materi_siswa WHERE materi_id = m.id AND siswa_id = ?) as progress_status,
-    (SELECT progress FROM progress_materi_siswa WHERE materi_id = m.id AND siswa_id = ?) as progress_percent
-    FROM materi_pelajaran m
-    JOIN mata_pelajaran mp ON m.mata_pelajaran_id = mp.id
-    WHERE m.status = 'aktif' AND mp.sekolah_id = ?
-    ORDER BY m.urutan ASC, m.created_at DESC";
-    
-$stmt = $conn->prepare($query);
-$stmt->bind_param("iii", $siswa_id, $siswa_id, $sekolah_id);
-$stmt->execute();
-$materi_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
+// Check if table exists first
+$table_check = $conn->query("SHOW TABLES LIKE 'materi_pelajaran'");
+if ($table_check->num_rows > 0) {
+    $query = "SELECT m.*, mp.nama_pelajaran, mp.kode_pelajaran,
+        (SELECT COUNT(*) FROM latihan WHERE materi_id = m.id AND status = 'aktif') as jumlah_latihan,
+        (SELECT status FROM progress_materi_siswa WHERE materi_id = m.id AND siswa_id = ?) as progress_status,
+        (SELECT progress FROM progress_materi_siswa WHERE materi_id = m.id AND siswa_id = ?) as progress_percent
+        FROM materi_pelajaran m
+        JOIN mata_pelajaran mp ON m.mata_pelajaran_id = mp.id
+        WHERE m.status = 'aktif' AND mp.sekolah_id = ?
+        ORDER BY mp.nama_pelajaran ASC, m.urutan ASC, m.created_at DESC";
+        
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("iii", $siswa_id, $siswa_id, $sekolah_id);
+    $stmt->execute();
+    $materi_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+} else {
+    $materi_list = [];
+}
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -40,7 +46,17 @@ $stmt->close();
     </div>
 </div>
 
-<?php if (empty($materi_list)): ?>
+<?php 
+// Debug: Check if table exists
+$table_exists = $conn->query("SHOW TABLES LIKE 'materi_pelajaran'")->num_rows > 0;
+?>
+
+<?php if (!$table_exists): ?>
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <strong>Perhatian:</strong> Tabel database untuk materi belum dibuat. Silakan import file <code>database/materi_schema.sql</code> terlebih dahulu.
+    </div>
+<?php elseif (empty($materi_list)): ?>
     <div class="card shadow-sm">
         <div class="card-body text-center py-5">
             <i class="bi bi-journal-text text-muted" style="font-size: 4rem; opacity: 0.3;"></i>
@@ -68,7 +84,7 @@ $stmt->close();
             <div class="col-md-6 col-lg-6 mb-4">
                 <div class="card shadow-sm h-100 hover-lift">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex justify-content-between align-items-start mb-3"> 
                             <div>
                                 <h5 class="mb-1"><?php echo htmlspecialchars($mapel); ?></h5>
                                 <?php if (!empty($data['kode'])): ?>
