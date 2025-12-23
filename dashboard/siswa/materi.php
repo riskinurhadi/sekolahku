@@ -20,7 +20,7 @@ $stmt->close();
 // Check if table exists first
 $table_check = $conn->query("SHOW TABLES LIKE 'materi_pelajaran'");
 if ($table_check->num_rows > 0) {
-    $query = "SELECT m.*, mp.nama_pelajaran, mp.kode_pelajaran,
+    $query = "SELECT m.*, mp.id as mapel_id, mp.nama_pelajaran, mp.kode_pelajaran,
         (SELECT COUNT(*) FROM latihan WHERE materi_id = m.id AND status = 'aktif') as jumlah_latihan,
         (SELECT status FROM progress_materi_siswa WHERE materi_id = m.id AND siswa_id = ?) as progress_status,
         (SELECT progress FROM progress_materi_siswa WHERE materi_id = m.id AND siswa_id = ?) as progress_percent
@@ -69,9 +69,11 @@ $table_exists = $conn->query("SHOW TABLES LIKE 'materi_pelajaran'")->num_rows > 
     // Group materi by mata pelajaran
     $materi_by_mapel = [];
     foreach ($materi_list as $materi) {
-        $key = $materi['nama_pelajaran'];
+        $key = $materi['mapel_id'];
         if (!isset($materi_by_mapel[$key])) {
             $materi_by_mapel[$key] = [
+                'mapel_id' => $materi['mapel_id'],
+                'nama' => $materi['nama_pelajaran'],
                 'kode' => $materi['kode_pelajaran'] ?? '',
                 'items' => []
             ];
@@ -84,7 +86,7 @@ $table_exists = $conn->query("SHOW TABLES LIKE 'materi_pelajaran'")->num_rows > 
     $gindex = 0;
     ?>
     <div class="row">
-        <?php foreach ($materi_by_mapel as $mapel => $data): ?>
+        <?php foreach ($materi_by_mapel as $mapelId => $data): ?>
             <?php
                 $card_class = $gradient_classes[$gindex % count($gradient_classes)];
                 $gindex++;
@@ -94,14 +96,13 @@ $table_exists = $conn->query("SHOW TABLES LIKE 'materi_pelajaran'")->num_rows > 
                 }
                 $avg_progress = $count_items > 0 ? round($total_progress / $count_items) : 0;
                 $kode = $data['kode'] ?: '-';
-                $collapse_id = 'mapelCollapse' . $gindex;
             ?>
             <div class="col-md-6 col-lg-4 mb-4">
                 <div class="mapel-card <?php echo $card_class; ?> shadow-sm h-100">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
                             <div class="text-muted small">Kode: <?php echo htmlspecialchars($kode); ?></div>
-                            <h5 class="mb-1"><?php echo htmlspecialchars($mapel); ?></h5>
+                            <h5 class="mb-1"><?php echo htmlspecialchars($data['nama']); ?></h5>
                             <div class="text-muted small">Start: <?php echo date('d M Y'); ?></div>
                         </div>
                         <div class="icon-badge">
@@ -119,56 +120,9 @@ $table_exists = $conn->query("SHOW TABLES LIKE 'materi_pelajaran'")->num_rows > 
                         </div>
                     </div>
                     <div class="text-end">
-                        <button class="btn btn-sm btn-outline-dark" type="button" data-bs-toggle="collapse" data-bs-target="#<?php echo $collapse_id; ?>" aria-expanded="false" aria-controls="<?php echo $collapse_id; ?>">
-                            Lihat Bab <i class="bi bi-chevron-down ms-1"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Daftar bab/materi per mapel -->
-            <div class="col-12">
-                <div class="collapse" id="<?php echo $collapse_id; ?>">
-                    <div class="mentor-list-card shadow-sm mb-4">
-                        <div class="d-flex justify-content-between align-items-center p-3">
-                            <h6 class="mb-0">Bab / Materi: <?php echo htmlspecialchars($mapel); ?></h6>
-                            <small class="text-muted">Total <?php echo $count_items; ?> materi</small>
-                        </div>
-                        <div class="mentor-list-body">
-                            <?php foreach ($data['items'] as $materi): ?>
-                                <?php
-                                $progress_status = $materi['progress_status'] ?? 'belum_dibaca';
-                                $progress_percent = $materi['progress_percent'] ?? 0;
-                                $status_colors = [
-                                    'belum_dibaca' => 'secondary',
-                                    'sedang_dibaca' => 'warning',
-                                    'selesai' => 'success'
-                                ];
-                                $status_color = $status_colors[$progress_status] ?? 'secondary';
-                                ?>
-                                <div class="mentor-row d-flex align-items-center">
-                                    <div class="mentor-avatar">
-                                        <i class="bi bi-book"></i>
-                                    </div>
-                                    <div class="mentor-info flex-grow-1">
-                                        <div class="d-flex flex-wrap align-items-center gap-2">
-                                            <h6 class="mb-0"><?php echo htmlspecialchars($materi['judul']); ?></h6>
-                                            <span class="badge bg-<?php echo $status_color; ?>"><?php echo ucfirst(str_replace('_', ' ', $progress_status)); ?></span>
-                                        </div>
-                                        <?php if ($materi['deskripsi']): ?>
-                                            <div class="text-muted small"><?php echo htmlspecialchars(substr($materi['deskripsi'], 0, 80)); ?><?php echo strlen($materi['deskripsi']) > 80 ? '...' : ''; ?></div>
-                                        <?php endif; ?>
-                                    </div>
-                                    <div class="mentor-meta text-center">
-                                        <div class="small text-muted"><?php echo $materi['jumlah_latihan']; ?> Latihan</div>
-                                        <div class="small text-muted"><?php echo $progress_percent; ?>% Progress</div>
-                                    </div>
-                                    <div class="mentor-actions ms-3">
-                                        <a href="detail_materi.php?id=<?php echo $materi['id']; ?>" class="btn btn-sm btn-primary">Buka</a>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
+                        <a href="materi_mapel.php?mapel_id=<?php echo $data['mapel_id']; ?>" class="btn btn-sm btn-outline-dark">
+                            Lihat Bab <i class="bi bi-chevron-right ms-1"></i>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -245,44 +199,6 @@ $table_exists = $conn->query("SHOW TABLES LIKE 'materi_pelajaran'")->num_rows > 
 }
 
 /* Mentor-style list for bab/materi */
-.mentor-list-card {
-    background: #f7fbff;
-    border-radius: 16px;
-    overflow: hidden;
-    border: 1px solid #e5e7eb;
-}
-.mentor-list-body {
-    padding: 0 12px 12px 12px;
-}
-.mentor-row {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 12px;
-    margin-top: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-.mentor-avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: #eef2ff;
-    color: #4338ca;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    margin-right: 12px;
-}
-.mentor-info h6 {
-    font-size: 15px;
-    font-weight: 600;
-}
-.mentor-meta {
-    min-width: 110px;
-}
-.mentor-actions .btn {
-    min-width: 70px;
-}
 </style>
 
 <?php require_once '../../includes/footer.php'; ?>
