@@ -81,7 +81,7 @@ if ($kelas_id) {
 }
 
 // Get latest announcement
-$stmt = $conn->prepare("SELECT * FROM informasi_akademik ORDER BY tanggal_dibuat DESC LIMIT 1");
+$stmt = $conn->prepare("SELECT * FROM informasi_akademik ORDER BY created_at DESC LIMIT 1");
 $stmt->execute();
 $pengumuman_terbaru = $stmt->get_result()->fetch_assoc();
 $stmt->close();
@@ -92,7 +92,7 @@ $stmt = $conn->prepare("SELECT hu.*, s.judul as judul_soal, mp.nama_pelajaran
     JOIN soal s ON hu.soal_id = s.id 
     JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id 
     WHERE hu.siswa_id = ? AND hu.status = 'selesai' 
-    ORDER BY hu.tanggal_selesai DESC LIMIT 1");
+    ORDER BY hu.waktu_selesai DESC LIMIT 1");
 $stmt->bind_param("i", $siswa_id);
 $stmt->execute();
 $hasil_ujian_terakhir = $stmt->get_result()->fetch_assoc();
@@ -222,17 +222,13 @@ $stmt->close();
                         </div>
                         <div class="p-3 bg-light rounded-3">
                             <div class="row g-2 text-center">
-                                <div class="col-4">
-                                    <div class="small text-muted">Benar</div>
-                                    <div class="fw-bold text-success"><?php echo $hasil_ujian_terakhir['jumlah_benar']; ?></div>
+                                <div class="col-6 border-end">
+                                    <div class="small text-muted">Poin</div>
+                                    <div class="fw-bold text-success"><?php echo number_format($hasil_ujian_terakhir['poin_diperoleh'], 0); ?> / <?php echo number_format($hasil_ujian_terakhir['total_poin'], 0); ?></div>
                                 </div>
-                                <div class="col-4">
-                                    <div class="small text-muted">Salah</div>
-                                    <div class="fw-bold text-danger"><?php echo $hasil_ujian_terakhir['jumlah_salah']; ?></div>
-                                </div>
-                                <div class="col-4">
+                                <div class="col-6">
                                     <div class="small text-muted">Tanggal</div>
-                                    <div class="fw-bold small"><?php echo date('d/m/y', strtotime($hasil_ujian_terakhir['tanggal_selesai'])); ?></div>
+                                    <div class="fw-bold small"><?php echo date('d/m/y', strtotime($hasil_ujian_terakhir['waktu_selesai'])); ?></div>
                                 </div>
                             </div>
                         </div>
@@ -300,7 +296,7 @@ $stmt->close();
                             <span class="badge bg-primary mb-2"><?php echo htmlspecialchars($pengumuman_terbaru['kategori'] ?? 'Umum'); ?></span>
                             <h6 class="fw-bold mb-1"><?php echo htmlspecialchars($pengumuman_terbaru['judul']); ?></h6>
                             <p class="text-muted small mb-2">
-                                <i class="bi bi-clock me-1"></i> <?php echo date('d M Y', strtotime($pengumuman_terbaru['tanggal_dibuat'])); ?>
+                                <i class="bi bi-clock me-1"></i> <?php echo date('d M Y', strtotime($pengumuman_terbaru['created_at'])); ?>
                             </p>
                             <div class="text-muted small mb-3 text-truncate-2">
                                 <?php echo strip_tags($pengumuman_terbaru['isi']); ?>
