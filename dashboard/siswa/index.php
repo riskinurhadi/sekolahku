@@ -118,36 +118,59 @@ $stmt->close();
     </div>
 
     <div class="row mb-4">
-        <div class="col-12 col-sm-6 col-xl-4 mb-3 mb-xl-0">
-            <div class="stat-card primary">
-                <div class="stat-icon">
-                    <i class="bi bi-journal-check"></i>
+        <div class="col-12 col-sm-6 col-xl-3 mb-3 mb-xl-0">
+            <div class="stat-card-modern stat-card-blue">
+                <div class="stat-title">Soal Aktif</div>
+                <div class="stat-value-modern"><?php echo $stats['total_soal_aktif']; ?></div>
+                <div class="stat-change text-success">
+                    <i class="bi bi-arrow-up"></i>
+                    <span>0%</span>
                 </div>
-                <div class="stat-content">
-                    <div class="stat-value"><?php echo $stats['total_soal_aktif']; ?></div>
-                    <div class="stat-label">Soal Aktif</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-sm-6 col-xl-4 mb-3 mb-xl-0">
-            <div class="stat-card success">
-                <div class="stat-icon">
-                    <i class="bi bi-patch-check-fill"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-value"><?php echo $stats['total_soal_selesai']; ?></div>
-                    <div class="stat-label">Soal Selesai</div>
+                <div class="stat-bar">
+                    <div class="stat-bar-line"></div>
+                    <div class="stat-bar-fill"></div>
                 </div>
             </div>
         </div>
-        <div class="col-12 col-sm-12 col-xl-4">
-            <div class="stat-card info">
-                <div class="stat-icon">
-                    <i class="bi bi-bar-chart-line-fill"></i>
+        <div class="col-12 col-sm-6 col-xl-3 mb-3 mb-xl-0">
+            <div class="stat-card-modern stat-card-green">
+                <div class="stat-title">Soal Selesai</div>
+                <div class="stat-value-modern"><?php echo $stats['total_soal_selesai']; ?></div>
+                <div class="stat-change text-success">
+                    <i class="bi bi-arrow-up"></i>
+                    <span>0%</span>
                 </div>
-                <div class="stat-content">
-                    <div class="stat-value"><?php echo $stats['rata_rata_nilai']; ?></div>
-                    <div class="stat-label">Rata-rata Nilai</div>
+                <div class="stat-bar">
+                    <div class="stat-bar-line"></div>
+                    <div class="stat-bar-fill"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3 mb-3 mb-xl-0">
+            <div class="stat-card-modern stat-card-orange">
+                <div class="stat-title">Total Soal</div>
+                <div class="stat-value-modern"><?php echo $stats['total_soal_aktif'] + $stats['total_soal_selesai']; ?></div>
+                <div class="stat-change text-success">
+                    <i class="bi bi-arrow-up"></i>
+                    <span>0%</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="stat-bar-line"></div>
+                    <div class="stat-bar-fill"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card-modern stat-card-purple">
+                <div class="stat-title">Rata-rata Nilai</div>
+                <div class="stat-value-modern"><?php echo $stats['rata_rata_nilai']; ?></div>
+                <div class="stat-change text-success">
+                    <i class="bi bi-arrow-up"></i>
+                    <span>0%</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="stat-bar-line"></div>
+                    <div class="stat-bar-fill"></div>
                 </div>
             </div>
         </div>
