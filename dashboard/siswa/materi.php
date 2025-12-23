@@ -78,63 +78,50 @@ $table_exists = $conn->query("SHOW TABLES LIKE 'materi_pelajaran'")->num_rows > 
         }
         $materi_by_mapel[$key]['items'][] = $materi;
     }
+    
+    // Warna gradient bergantian untuk card
+    $gradient_classes = ['mapel-card-purple', 'mapel-card-orange', 'mapel-card-blue', 'mapel-card-teal'];
+    $gindex = 0;
     ?>
     <div class="row">
         <?php foreach ($materi_by_mapel as $mapel => $data): ?>
-            <div class="col-md-6 col-lg-6 mb-4">
-                <div class="card shadow-sm h-100 hover-lift">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-3"> 
-                            <div>
-                                <h5 class="mb-1"><?php echo htmlspecialchars($mapel); ?></h5>
-                                <?php if (!empty($data['kode'])): ?>
-                                    <small class="text-muted"><?php echo htmlspecialchars($data['kode']); ?></small>
-                                <?php endif; ?>
-                            </div>
-                            <span class="badge bg-primary">Total <?php echo count($data['items']); ?> materi</span>
+            <?php
+                $card_class = $gradient_classes[$gindex % count($gradient_classes)];
+                $gindex++;
+                // Hitung progress rata-rata mapel
+                $total_progress = 0; $count_items = count($data['items']);
+                foreach ($data['items'] as $m) {
+                    $total_progress += ($m['progress_percent'] ?? 0);
+                }
+                $avg_progress = $count_items > 0 ? round($total_progress / $count_items) : 0;
+                $kode = $data['kode'] ?: '-';
+            ?>
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="mapel-card <?php echo $card_class; ?> shadow-sm h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <div class="text-muted small">Kode: <?php echo htmlspecialchars($kode); ?></div>
+                            <h5 class="mb-1"><?php echo htmlspecialchars($mapel); ?></h5>
+                            <div class="text-muted small">Start: <?php echo date('d M Y'); ?></div>
                         </div>
-
-                        <div class="materi-list">
-                            <?php foreach ($data['items'] as $materi): ?>
-                                <?php
-                                $progress_status = $materi['progress_status'] ?? 'belum_dibaca';
-                                $progress_percent = $materi['progress_percent'] ?? 0;
-                                $status_colors = [
-                                    'belum_dibaca' => 'secondary',
-                                    'sedang_dibaca' => 'warning',
-                                    'selesai' => 'success'
-                                ];
-                                $status_color = $status_colors[$progress_status] ?? 'secondary';
-                                ?>
-                                <div class="materi-item mb-3 p-3 rounded border">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div class="flex-grow-1">
-                                            <h6 class="mb-1"><?php echo htmlspecialchars($materi['judul']); ?></h6>
-                                            <?php if ($materi['deskripsi']): ?>
-                                                <p class="text-muted small mb-2"><?php echo htmlspecialchars(substr($materi['deskripsi'], 0, 90)); ?><?php echo strlen($materi['deskripsi']) > 90 ? '...' : ''; ?></p>
-                                            <?php endif; ?>
-                                            <div class="d-flex align-items-center gap-2 flex-wrap small text-muted">
-                                                <span><i class="bi bi-journal-check text-info"></i> <?php echo $materi['jumlah_latihan']; ?> Latihan</span>
-                                                <?php if ($materi['file_attachment']): ?>
-                                                    <span class="text-primary"><i class="bi bi-paperclip"></i> File</span>
-                                                <?php endif; ?>
-                                                <span class="badge bg-<?php echo $status_color; ?>"><?php echo ucfirst(str_replace('_', ' ', $progress_status)); ?></span>
-                                            </div>
-                                        </div>
-                                        <a href="detail_materi.php?id=<?php echo $materi['id']; ?>" class="btn btn-sm btn-outline-primary">Buka</a>
-                                    </div>
-                                    <div class="mt-2">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <small class="text-muted">Progress</small>
-                                            <small class="text-muted"><?php echo $progress_percent; ?>%</small>
-                                        </div>
-                                        <div class="progress" style="height: 6px;">
-                                            <div class="progress-bar bg-<?php echo $status_color; ?>" role="progressbar" style="width: <?php echo $progress_percent; ?>%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
+                        <div class="icon-badge">
+                            <i class="bi bi-journal-text"></i>
                         </div>
+                    </div>
+                    <p class="mb-3 text-muted small">Total <?php echo $count_items; ?> materi tersedia untuk mata pelajaran ini.</p>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <small>Progress</small>
+                            <small><?php echo $avg_progress; ?>%</small>
+                        </div>
+                        <div class="progress progress-thin">
+                            <div class="progress-bar" role="progressbar" style="width: <?php echo $avg_progress; ?>%"></div>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <a href="javascript:void(0);" class="btn btn-sm btn-light text-primary disabled" aria-disabled="true">
+                            Isi materi akan tampil di sini
+                        </a>
                     </div>
                 </div>
             </div>
@@ -160,6 +147,54 @@ $table_exists = $conn->query("SHOW TABLES LIKE 'materi_pelajaran'")->num_rows > 
 .materi-item:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Mapel cards */
+.mapel-card {
+    border: 0;
+    border-radius: 16px;
+    padding: 18px;
+    color: #0f172a;
+    position: relative;
+    overflow: hidden;
+}
+.mapel-card .progress-thin {
+    height: 6px;
+    background: rgba(255,255,255,0.4);
+    border-radius: 10px;
+}
+.mapel-card .progress-bar {
+    background: rgba(255,255,255,0.9);
+    border-radius: 10px;
+}
+.mapel-card .icon-badge {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.3);
+    color: #0f172a;
+    font-size: 1.2rem;
+}
+.mapel-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 28px rgba(0,0,0,0.12);
+}
+
+/* Gradient variants */
+.mapel-card-purple {
+    background: linear-gradient(135deg, #f1e8ff 0%, #d6c5ff 100%);
+}
+.mapel-card-orange {
+    background: linear-gradient(135deg, #ffe8d6 0%, #ffd1a1 100%);
+}
+.mapel-card-blue {
+    background: linear-gradient(135deg, #e6f4ff 0%, #c3e4ff 100%);
+}
+.mapel-card-teal {
+    background: linear-gradient(135deg, #e6fffb 0%, #c3f7ef 100%);
 }
 </style>
 
