@@ -41,7 +41,7 @@ if ($table_check->num_rows > 0) {
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h2 class="h4 mb-1">Materi Pembelajaran</h2>
+        <h2 class="h4 mb-1 fw-bold text-primary">Materi Pembelajaran</h2>
         <p class="text-muted mb-0">Pelajari materi dan kerjakan latihan</p>
     </div>
 </div>
@@ -81,8 +81,8 @@ $table_exists = $conn->query("SHOW TABLES LIKE 'materi_pelajaran'")->num_rows > 
         $materi_by_mapel[$key]['items'][] = $materi;
     }
     
-    // Warna gradient bergantian untuk card
-    $gradient_classes = ['mapel-card-purple', 'mapel-card-orange', 'mapel-card-blue', 'mapel-card-teal'];
+    // Warna gradient bergantian bernuansa biru
+    $gradient_classes = ['mapel-card-blue-1', 'mapel-card-blue-2', 'mapel-card-blue-3', 'mapel-card-blue-4'];
     $gindex = 0;
     ?>
     <div class="row">
@@ -102,10 +102,10 @@ $table_exists = $conn->query("SHOW TABLES LIKE 'materi_pelajaran'")->num_rows > 
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
                             <div class="text-muted small">Kode: <?php echo htmlspecialchars($kode); ?></div>
-                            <h5 class="mb-1"><?php echo htmlspecialchars($data['nama']); ?></h5>
+                            <h5 class="mb-1 fw-semibold text-dark"><?php echo htmlspecialchars($data['nama']); ?></h5>
                             <div class="text-muted small">Start: <?php echo date('d M Y'); ?></div>
                         </div>
-                        <div class="icon-badge">
+                        <div class="icon-badge text-primary">
                             <i class="bi bi-journal-text"></i>
                         </div>
                     </div>
@@ -120,7 +120,7 @@ $table_exists = $conn->query("SHOW TABLES LIKE 'materi_pelajaran'")->num_rows > 
                         </div>
                     </div>
                     <div class="text-end">
-                        <a href="materi_mapel.php?mapel_id=<?php echo $data['mapel_id']; ?>" class="btn btn-sm btn-outline-dark">
+                        <a href="materi_mapel.php?mapel_id=<?php echo $data['mapel_id']; ?>" class="btn btn-sm btn-primary shadow-sm">
                             Lihat Bab <i class="bi bi-chevron-right ms-1"></i>
                         </a>
                     </div>
@@ -153,12 +153,12 @@ $table_exists = $conn->query("SHOW TABLES LIKE 'materi_pelajaran'")->num_rows > 
 /* Mapel cards */
 .mapel-card {
     border: 0;
-    border-radius: 18px;
+    border-radius: 20px;
     padding: 18px;
     color: #0f172a;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.12);
 }
 .mapel-card::after {
     content: '';
@@ -184,32 +184,32 @@ $table_exists = $conn->query("SHOW TABLES LIKE 'materi_pelajaran'")->num_rows > 
 .mapel-card .icon-badge {
     width: 44px;
     height: 44px;
-    border-radius: 12px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255,255,255,0.35);
+    background: rgba(255,255,255,0.38);
     color: #0f172a;
     font-size: 1.2rem;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.14);
 }
 .mapel-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 16px 36px rgba(0,0,0,0.14);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
 }
 
-/* Gradient variants inspired by stats cards */
-.mapel-card-purple {
-    background: linear-gradient(135deg, #f0ebff 0%, #d5c9ff 100%);
+/* Gradient variants bernuansa biru (inspirasi stats card) */
+.mapel-card-blue-1 {
+    background: linear-gradient(135deg, #eef4ff 0%, #dfe9ff 100%);
 }
-.mapel-card-orange {
-    background: linear-gradient(135deg, #fff4e5 0%, #ffdca8 100%);
+.mapel-card-blue-2 {
+    background: linear-gradient(135deg, #e8f7ff 0%, #cfefff 100%);
 }
-.mapel-card-blue {
-    background: linear-gradient(135deg, #eef6ff 0%, #d2e8ff 100%);
+.mapel-card-blue-3 {
+    background: linear-gradient(135deg, #ecf5ff 0%, #d9eafe 100%);
 }
-.mapel-card-teal {
-    background: linear-gradient(135deg, #e9fffb 0%, #c8f4eb 100%);
+.mapel-card-blue-4 {
+    background: linear-gradient(135deg, #eaf8ff 0%, #d5f1ff 100%);
 }
 
 /* Mentor-style list for bab/materi */
