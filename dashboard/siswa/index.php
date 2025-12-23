@@ -413,13 +413,6 @@ $conn->close();
     font-size: 9px;
 }
 
-.metric-chart {
-    height: 50px;
-    margin-top: 12px;
-    position: relative;
-    z-index: 2;
-}
-
 /* Chart Sections */
 .chart-section {
     background: #ffffff;
@@ -518,9 +511,6 @@ $conn->close();
                             <?php echo abs($change_soal_aktif); ?>%
                         </div>
                     </div>
-                    <div class="metric-chart">
-                        <canvas id="chartSoalAktif"></canvas>
-                    </div>
                 </div>
             </div>
             
@@ -538,9 +528,6 @@ $conn->close();
                             <i class="bi bi-arrow-<?php echo $change_soal_selesai >= 0 ? 'up' : 'down'; ?>"></i>
                             <?php echo abs($change_soal_selesai); ?>%
                         </div>
-                    </div>
-                    <div class="metric-chart">
-                        <canvas id="chartSoalSelesai"></canvas>
                     </div>
                 </div>
             </div>
@@ -560,9 +547,6 @@ $conn->close();
                             <?php echo abs($change_total_soal); ?>%
                         </div>
                     </div>
-                    <div class="metric-chart">
-                        <canvas id="chartTotalSoal"></canvas>
-                    </div>
                 </div>
             </div>
             
@@ -580,9 +564,6 @@ $conn->close();
                             <i class="bi bi-arrow-<?php echo $change_rata_nilai >= 0 ? 'up' : 'down'; ?>"></i>
                             <?php echo abs($change_rata_nilai); ?>%
                         </div>
-                    </div>
-                    <div class="metric-chart">
-                        <canvas id="chartRataNilai"></canvas>
                     </div>
                 </div>
             </div>
@@ -838,87 +819,6 @@ $conn->close();
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-// Mini Charts untuk Stat Cards
-const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-        legend: { display: false },
-        tooltip: { enabled: false }
-    },
-    scales: {
-        x: { display: false },
-        y: { display: false }
-    },
-    elements: {
-        point: { radius: 0 },
-        line: { borderWidth: 2, tension: 0.4 }
-    }
-};
-
-// Chart Soal Aktif
-new Chart(document.getElementById('chartSoalAktif'), {
-    type: 'line',
-    data: {
-        labels: ['', '', '', '', '', '', ''],
-        datasets: [{
-            data: <?php echo json_encode($trend_data['soal_aktif']); ?>,
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            fill: true
-        }]
-    },
-    options: chartOptions
-});
-
-// Chart Soal Selesai
-new Chart(document.getElementById('chartSoalSelesai'), {
-    type: 'line',
-    data: {
-        labels: ['', '', '', '', '', '', ''],
-        datasets: [{
-            data: <?php echo json_encode($trend_data['soal_selesai']); ?>,
-            borderColor: '#10b981',
-            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-            fill: true
-        }]
-    },
-    options: chartOptions
-});
-
-// Chart Total Soal
-new Chart(document.getElementById('chartTotalSoal'), {
-    type: 'line',
-    data: {
-        labels: ['', '', '', '', '', '', ''],
-        datasets: [{
-            data: <?php echo json_encode($trend_data['total_soal']); ?>,
-            borderColor: '#f59e0b',
-            backgroundColor: 'rgba(245, 158, 11, 0.1)',
-            fill: true
-        }]
-    },
-    options: chartOptions
-});
-
-// Chart Rata Nilai
-new Chart(document.getElementById('chartRataNilai'), {
-    type: 'line',
-    data: {
-        labels: ['', '', '', '', '', '', ''],
-        datasets: [{
-            data: <?php echo json_encode($trend_data['rata_nilai']); ?>,
-            borderColor: '#8b5cf6',
-            backgroundColor: 'rgba(139, 92, 246, 0.1)',
-            fill: true
-        }]
-    },
-    options: chartOptions
-});
-});
-</script>
 <?php
 // Menggunakan footer standar
 require_once '../../includes/footer.php';
