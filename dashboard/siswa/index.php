@@ -161,10 +161,10 @@ $stmt->close();
                 <div class="card-header">
                     <h5><i class="bi bi-calendar-event"></i> Jadwal Hari Ini</h5>
                 </div>
-                <div class="card-body p-0">
+                <div class="card-body p-0" style="height: 350px; overflow-y: auto;">
                     <?php if (!empty($jadwal_hari_ini)): ?>
                         <div class="table-responsive">
-                            <table class="table mb-0">
+                            <table class="table mb-0 table-sticky-header">
                                 <thead>
                                     <tr>
                                         <th>Mata Pelajaran</th>
@@ -249,10 +249,10 @@ $stmt->close();
                 <div class="card-header">
                     <h5><i class="bi bi-calendar-plus"></i> Jadwal Besok</h5>
                 </div>
-                <div class="card-body">
+                <div class="card-body" style="height: 350px; overflow-y: auto;">
                     <?php if (!empty($jadwal_besok)): ?>
                         <div class="list-group list-group-flush mx-n3 mt-n3 mb-n3">
-                            <?php foreach (array_slice($jadwal_besok, 0, 4) as $jadwal): ?>
+                            <?php foreach ($jadwal_besok as $jadwal): ?>
                                 <div class="list-group-item border-0 py-3">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-shrink-0">

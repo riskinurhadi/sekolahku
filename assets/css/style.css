@@ -1215,6 +1215,14 @@ body.modal-open .watermark {
     overflow: hidden;
 }
 
+/* Sticky Table Header */
+.table-sticky-header thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f8fafc;
+    z-index: 10;
+}
+
 /* Animations */
 @keyframes fadeIn {
     from {
