@@ -88,13 +88,13 @@ $table_exists = $conn->query("SHOW TABLES LIKE 'materi_pelajaran'")->num_rows > 
             <?php
                 $card_class = $gradient_classes[$gindex % count($gradient_classes)];
                 $gindex++;
-                // Hitung progress rata-rata mapel
                 $total_progress = 0; $count_items = count($data['items']);
                 foreach ($data['items'] as $m) {
                     $total_progress += ($m['progress_percent'] ?? 0);
                 }
                 $avg_progress = $count_items > 0 ? round($total_progress / $count_items) : 0;
                 $kode = $data['kode'] ?: '-';
+                $collapse_id = 'mapelCollapse' . $gindex;
             ?>
             <div class="col-md-6 col-lg-4 mb-4">
                 <div class="mapel-card <?php echo $card_class; ?> shadow-sm h-100">
@@ -119,9 +119,56 @@ $table_exists = $conn->query("SHOW TABLES LIKE 'materi_pelajaran'")->num_rows > 
                         </div>
                     </div>
                     <div class="text-end">
-                        <a href="javascript:void(0);" class="btn btn-sm btn-light text-primary disabled" aria-disabled="true">
-                            Isi materi akan tampil di sini
-                        </a>
+                        <button class="btn btn-sm btn-outline-dark" type="button" data-bs-toggle="collapse" data-bs-target="#<?php echo $collapse_id; ?>" aria-expanded="false" aria-controls="<?php echo $collapse_id; ?>">
+                            Lihat Bab <i class="bi bi-chevron-down ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daftar bab/materi per mapel -->
+            <div class="col-12">
+                <div class="collapse" id="<?php echo $collapse_id; ?>">
+                    <div class="mentor-list-card shadow-sm mb-4">
+                        <div class="d-flex justify-content-between align-items-center p-3">
+                            <h6 class="mb-0">Bab / Materi: <?php echo htmlspecialchars($mapel); ?></h6>
+                            <small class="text-muted">Total <?php echo $count_items; ?> materi</small>
+                        </div>
+                        <div class="mentor-list-body">
+                            <?php foreach ($data['items'] as $materi): ?>
+                                <?php
+                                $progress_status = $materi['progress_status'] ?? 'belum_dibaca';
+                                $progress_percent = $materi['progress_percent'] ?? 0;
+                                $status_colors = [
+                                    'belum_dibaca' => 'secondary',
+                                    'sedang_dibaca' => 'warning',
+                                    'selesai' => 'success'
+                                ];
+                                $status_color = $status_colors[$progress_status] ?? 'secondary';
+                                ?>
+                                <div class="mentor-row d-flex align-items-center">
+                                    <div class="mentor-avatar">
+                                        <i class="bi bi-book"></i>
+                                    </div>
+                                    <div class="mentor-info flex-grow-1">
+                                        <div class="d-flex flex-wrap align-items-center gap-2">
+                                            <h6 class="mb-0"><?php echo htmlspecialchars($materi['judul']); ?></h6>
+                                            <span class="badge bg-<?php echo $status_color; ?>"><?php echo ucfirst(str_replace('_', ' ', $progress_status)); ?></span>
+                                        </div>
+                                        <?php if ($materi['deskripsi']): ?>
+                                            <div class="text-muted small"><?php echo htmlspecialchars(substr($materi['deskripsi'], 0, 80)); ?><?php echo strlen($materi['deskripsi']) > 80 ? '...' : ''; ?></div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="mentor-meta text-center">
+                                        <div class="small text-muted"><?php echo $materi['jumlah_latihan']; ?> Latihan</div>
+                                        <div class="small text-muted"><?php echo $progress_percent; ?>% Progress</div>
+                                    </div>
+                                    <div class="mentor-actions ms-3">
+                                        <a href="detail_materi.php?id=<?php echo $materi['id']; ?>" class="btn btn-sm btn-primary">Buka</a>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -195,6 +242,46 @@ $table_exists = $conn->query("SHOW TABLES LIKE 'materi_pelajaran'")->num_rows > 
 }
 .mapel-card-teal {
     background: linear-gradient(135deg, #e6fffb 0%, #c3f7ef 100%);
+}
+
+/* Mentor-style list for bab/materi */
+.mentor-list-card {
+    background: #f7fbff;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+}
+.mentor-list-body {
+    padding: 0 12px 12px 12px;
+}
+.mentor-row {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 12px;
+    margin-top: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+.mentor-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #eef2ff;
+    color: #4338ca;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-right: 12px;
+}
+.mentor-info h6 {
+    font-size: 15px;
+    font-weight: 600;
+}
+.mentor-meta {
+    min-width: 110px;
+}
+.mentor-actions .btn {
+    min-width: 70px;
 }
 </style>
 
