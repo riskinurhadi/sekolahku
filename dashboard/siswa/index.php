@@ -233,8 +233,8 @@ $conn->close();
 /* Stat Cards dengan Mini Charts - Enhanced Style */
 .metric-card {
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    border-radius: 20px;
-    padding: 24px;
+    border-radius: 16px;
+    padding: 18px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
     border: none;
     transition: all 0.3s ease;
@@ -264,11 +264,11 @@ $conn->close();
     position: absolute;
     top: 0;
     right: 0;
-    width: 8px;
+    width: 6px;
     height: 100%;
     background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
     z-index: 1;
-    border-radius: 0 20px 20px 0;
+    border-radius: 0 16px 16px 0;
 }
 
 .metric-card.metric-card-blue::before {
@@ -292,45 +292,45 @@ $conn->close();
 }
 
 .metric-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16), 0 6px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16), 0 5px 14px rgba(0, 0, 0, 0.12);
 }
 
 .metric-card.metric-card-blue:hover {
-    box-shadow: 0 12px 32px rgba(99, 102, 241, 0.25), 0 6px 16px rgba(99, 102, 241, 0.15);
+    box-shadow: 0 10px 28px rgba(99, 102, 241, 0.25), 0 5px 14px rgba(99, 102, 241, 0.15);
 }
 
 .metric-card.metric-card-green:hover {
-    box-shadow: 0 12px 32px rgba(16, 185, 129, 0.25), 0 6px 16px rgba(16, 185, 129, 0.15);
+    box-shadow: 0 10px 28px rgba(16, 185, 129, 0.25), 0 5px 14px rgba(16, 185, 129, 0.15);
 }
 
 .metric-card.metric-card-orange:hover {
-    box-shadow: 0 12px 32px rgba(245, 158, 11, 0.25), 0 6px 16px rgba(245, 158, 11, 0.15);
+    box-shadow: 0 10px 28px rgba(245, 158, 11, 0.25), 0 5px 14px rgba(245, 158, 11, 0.15);
 }
 
 .metric-card.metric-card-purple:hover {
-    box-shadow: 0 12px 32px rgba(139, 92, 246, 0.25), 0 6px 16px rgba(139, 92, 246, 0.15);
+    box-shadow: 0 10px 28px rgba(139, 92, 246, 0.25), 0 5px 14px rgba(139, 92, 246, 0.15);
 }
 
 .metric-card-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     position: relative;
     z-index: 2;
 }
 
 .metric-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 26px;
-    margin-bottom: 12px;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.15);
+    font-size: 20px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
     transition: all 0.3s ease;
 }
 
@@ -360,34 +360,34 @@ $conn->close();
 }
 
 .metric-title {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 600;
     color: #64748b;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .metric-value {
-    font-size: 36px;
+    font-size: 28px;
     font-weight: 700;
     color: #1e293b;
     line-height: 1;
-    margin-bottom: 8px;
-    letter-spacing: -1px;
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
 }
 
 .metric-change {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
-    padding: 8px 14px;
-    border-radius: 20px;
-    min-width: 65px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    gap: 3px;
+    padding: 6px 10px;
+    border-radius: 16px;
+    min-width: 55px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
 }
 
@@ -410,12 +410,12 @@ $conn->close();
 }
 
 .metric-change i {
-    font-size: 10px;
+    font-size: 9px;
 }
 
 .metric-chart {
-    height: 60px;
-    margin-top: 16px;
+    height: 50px;
+    margin-top: 12px;
     position: relative;
     z-index: 2;
 }
