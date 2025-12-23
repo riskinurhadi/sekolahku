@@ -41,170 +41,63 @@ $unread_count = 0;
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Custom CSS -->
-    <style>
-        :root {
-            --bs-primary-rgb: 67, 97, 238;
-            --bs-secondary-rgb: 63, 55, 201;
-        }
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
-        }
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            width: 280px;
-            z-index: 1000;
-            background-color: #fff;
-            box-shadow: 0 0 2rem rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-        }
-
-        @media (max-width: 991.98px) {
-            .sidebar {
-                left: -280px;
-            }
-            .sidebar.active {
-                left: 0;
-            }
-            .main-content {
-                width: 100%;
-                margin-left: 0;
-            }
-        }
-
-        .sidebar-header {
-            padding: 1.5rem;
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid #dee2e6;
-        }
-        .sidebar-header img {
-            max-height: 40px;
-        }
-
-        .sidebar-nav {
-            padding: 1rem;
-        }
-        .sidebar-nav .nav-link {
-            display: flex;
-            align-items: center;
-            padding: .75rem 1rem;
-            color: #495057;
-            border-radius: .5rem;
-            margin-bottom: .25rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .sidebar-nav .nav-link:hover {
-            color: var(--bs-primary);
-            background-color: rgba(var(--bs-primary-rgb), 0.08);
-        }
-        .sidebar-nav .nav-link.active {
-            color: #fff;
-            background: linear-gradient(45deg, rgb(var(--bs-primary-rgb)), rgb(var(--bs-secondary-rgb)));
-            box-shadow: 0 7px 15px rgba(var(--bs-primary-rgb), 0.3);
-        }
-        .sidebar-nav .nav-link i {
-            font-size: 1.2rem;
-            margin-right: 1rem;
-            width: 20px;
-            text-align: center;
-        }
-        .sidebar-nav .nav-item .collapse .nav-link {
-            padding-left: 3.5rem;
-            font-size: .9em;
-        }
-
-        .main-content {
-            margin-left: 280px;
-            transition: all 0.3s ease;
-            padding: 1.5rem;
-        }
-
-        .top-navbar {
-            background-color: #fff;
-            border-radius: .75rem;
-            padding: .75rem 1.5rem;
-            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.05);
-            margin-bottom: 1.5rem;
-        }
-        
-        .navbar-toggler {
-            border: none;
-        }
-        
-        .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        
-        .dropdown-menu-end {
-            border-radius: .75rem;
-            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
-            border: 1px solid #dee2e6;
-        }
-
-    </style>
+    <link rel="stylesheet" href="<?php echo getBasePath(); ?>assets/css/style.css">
 </head>
-<body>
-    <div class="d-flex">
+<body class="<?php echo isset($body_class) ? $body_class : ''; ?>">
+    <div class="wrapper">
         <!-- Sidebar -->
         <nav class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <a href="#"><img src="<?php echo getBasePath(); ?>assets/img/sekolahku.png" alt="Sekolahku"></a>
+                <a href="<?php echo getBasePath(); ?>dashboard/siswa/index.php">
+                    <img src="<?php echo getBasePath(); ?>assets/img/sekolahku.png" alt="Sekolahku" class="logo-image">
+                </a>
             </div>
 
-            <ul class="nav flex-column sidebar-nav">
-                <li class="nav-item">
-                    <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>" href="<?php echo getBasePath(); ?>dashboard/siswa/index.php">
+            <ul class="components">
+                <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">
+                    <a href="<?php echo getBasePath(); ?>dashboard/siswa/index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">
                         <i class="bi bi-house-door-fill"></i>
                         <span>Beranda</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'jadwal.php' ? 'active' : ''; ?>" href="<?php echo getBasePath(); ?>dashboard/siswa/jadwal.php">
+                <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'jadwal.php' ? 'active' : ''; ?>">
+                    <a href="<?php echo getBasePath(); ?>dashboard/siswa/jadwal.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'jadwal.php' ? 'active' : ''; ?>">
                         <i class="bi bi-calendar-week-fill"></i>
                         <span>Jadwal Pelajaran</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'informasi_akademik.php' ? 'active' : ''; ?>" href="<?php echo getBasePath(); ?>dashboard/siswa/informasi_akademik.php">
+                <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'informasi_akademik.php' ? 'active' : ''; ?>">
+                    <a href="<?php echo getBasePath(); ?>dashboard/siswa/informasi_akademik.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'informasi_akademik.php' ? 'active' : ''; ?>">
                         <i class="bi bi-megaphone-fill"></i>
                         <span>Informasi Akademik</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#ujianSubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="ujianSubmenu">
+                
+                <li>
+                    <a href="#ujianSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
                         <i class="bi bi-journal-text"></i>
                         <span>Ujian</span>
                     </a>
-                    <div class="collapse" id="ujianSubmenu">
-                        <ul class="nav flex-column">
-                            <li class="nav-item"><a class="nav-link" href="<?php echo getBasePath(); ?>dashboard/siswa/soal_saya.php">Latihan</a></li>
-                            <li class="nav-item"><a class="nav-link" href="<?php echo getBasePath(); ?>dashboard/siswa/uts.php">UTS</a></li>
-                            <li class="nav-item"><a class="nav-link" href="<?php echo getBasePath(); ?>dashboard/siswa/uas.php">UAS</a></li>
-                        </ul>
-                    </div>
+                    <ul class="collapse list-unstyled" id="ujianSubmenu">
+                        <li><a href="<?php echo getBasePath(); ?>dashboard/siswa/soal_saya.php">Latihan</a></li>
+                        <li><a href="<?php echo getBasePath(); ?>dashboard/siswa/uts.php">UTS</a></li>
+                        <li><a href="<?php echo getBasePath(); ?>dashboard/siswa/uas.php">UAS</a></li>
+                    </ul>
                 </li>
-                 <li class="nav-item">
-                    <a class="nav-link" href="#hasilSubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="hasilSubmenu">
+
+                <li>
+                    <a href="#hasilSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
                         <i class="bi bi-clipboard-check-fill"></i>
                         <span>Hasil</span>
                     </a>
-                    <div class="collapse" id="hasilSubmenu">
-                        <ul class="nav flex-column">
-                            <li class="nav-item"><a class="nav-link" href="<?php echo getBasePath(); ?>dashboard/siswa/presensi.php">Rekap Kehadiran</a></li>
-                            <li class="nav-item"><a class="nav-link" href="<?php echo getBasePath(); ?>dashboard/siswa/hasil_latihan.php">Hasil Latihan</a></li>
-                        </ul>
-                    </div>
+                    <ul class="collapse list-unstyled" id="hasilSubmenu">
+                        <li><a href="<?php echo getBasePath(); ?>dashboard/siswa/presensi.php">Rekap Kehadiran</a></li>
+                        <li><a href="<?php echo getBasePath(); ?>dashboard/siswa/hasil_latihan.php">Hasil Latihan</a></li>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'profil.php' ? 'active' : ''; ?>" href="<?php echo getBasePath(); ?>dashboard/siswa/profil.php">
+
+                <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'profil.php' ? 'active' : ''; ?>">
+                    <a href="<?php echo getBasePath(); ?>dashboard/siswa/profil.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'profil.php' ? 'active' : ''; ?>">
                         <i class="bi bi-person-circle"></i>
                         <span>Profil</span>
                     </a>
@@ -213,50 +106,59 @@ $unread_count = 0;
         </nav>
 
         <!-- Main Content -->
-        <div class="main-content" id="main-content">
+        <div class="content" id="content">
             <!-- Top Navbar -->
-            <nav class="navbar navbar-expand-lg navbar-light top-navbar">
-                <div class="container-fluid">
-                    <button class="navbar-toggler" type="button" id="sidebar-toggle">
-                        <span class="navbar-toggler-icon"></span>
+            <header class="dashboard-top-header">
+                <div class="header-left">
+                    <button type="button" id="sidebar-toggle" class="btn icon-btn">
+                        <i class="bi bi-list"></i>
                     </button>
+                </div>
 
-                    <div class="ms-auto">
-                        <ul class="navbar-nav align-items-center">
-                            <li class="nav-item me-3">
-                                <a class="nav-link" href="<?php echo getBasePath(); ?>dashboard/<?php echo $user_role; ?>/informasi_akademik.php">
-                                    <i class="bi bi-bell-fill fs-5"></i>
-                                    <?php if ($unread_count > 0): ?>
-                                        <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">
-                                            <?php echo $unread_count > 9 ? '9+' : $unread_count; ?>
-                                        </span>
-                                    <?php endif; ?>
+                <div class="user-profile-section">
+                    <div class="header-icons">
+                        <a href="<?php echo getBasePath(); ?>dashboard/<?php echo $user_role; ?>/informasi_akademik.php" class="icon-btn">
+                            <i class="bi bi-bell"></i>
+                            <?php if ($unread_count > 0): ?>
+                                <span class="badge"><?php echo $unread_count > 9 ? '9+' : $unread_count; ?></span>
+                            <?php endif; ?>
+                        </a>
+                    </div>
+
+                    <div class="dropdown">
+                        <button class="user-profile-info dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <?php 
+                            $foto_profil_path = getBasePath() . 'uploads/profil/' . ($user['foto_profil'] ?? '');
+                            if (!empty($user['foto_profil']) && file_exists(dirname(__DIR__).'/uploads/profil/' . $user['foto_profil'])):
+                            ?>
+                                <img src="<?php echo $foto_profil_path; ?>" alt="Avatar" class="user-avatar">
+                            <?php else: ?>
+                                <div class="user-avatar">
+                                    <?php echo strtoupper(substr($user['nama_lengkap'], 0, 1)); ?>
+                                </div>
+                            <?php endif; ?>
+                            <div class="user-details d-none d-md-flex">
+                                <span class="user-name"><?php echo htmlspecialchars($user['nama_lengkap']); ?></span>
+                                <span class="user-role"><?php echo ucfirst($user_role); ?></span>
+                            </div>
+                            <i class="bi bi-chevron-down dropdown-arrow"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end user-profile-dropdown" aria-labelledby="userDropdown">
+                            <li>
+                                <a class="dropdown-item" href="<?php echo getBasePath(); ?>dashboard/siswa/profil.php">
+                                    <i class="bi bi-person"></i> Profil Saya
                                 </a>
                             </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <?php 
-                                    $foto_profil_path = getBasePath() . 'uploads/profil/' . ($user['foto_profil'] ?? '');
-                                    if (!empty($user['foto_profil']) && file_exists(dirname(__DIR__).'/uploads/profil/' . $user['foto_profil'])):
-                                    ?>
-                                        <img src="<?php echo $foto_profil_path; ?>" alt="Avatar" class="avatar me-2">
-                                    <?php else: ?>
-                                        <div class="avatar me-2 bg-primary text-white d-flex justify-content-center align-items-center">
-                                            <?php echo strtoupper(substr($user['nama_lengkap'], 0, 1)); ?>
-                                        </div>
-                                    <?php endif; ?>
-                                    <span class="d-none d-md-inline"><?php echo htmlspecialchars($user['nama_lengkap']); ?></span>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="<?php echo getBasePath(); ?>logout.php">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" href="<?php echo getBasePath(); ?>dashboard/siswa/profil.php">Profil Saya</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item text-danger" href="<?php echo getBasePath(); ?>logout.php">Logout</a></li>
-                                </ul>
                             </li>
                         </ul>
                     </div>
                 </div>
-            </nav>
+            </header>
 
-            <!-- Page Content goes here -->
+            <!-- Page Content -->
             <div class="container-fluid">

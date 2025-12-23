@@ -20,19 +20,24 @@ $(document).ready(function() {
     
     // New Sidebar Toggle Logic
     $('#sidebar-toggle').on('click', function() {
-        $('body').toggleClass('sidebar-collapsed');
+        if ($(window).width() <= 768) {
+            $('body').toggleClass('sidebar-visible');
+            $('body').removeClass('sidebar-collapsed');
+        } else {
+            $('body').toggleClass('sidebar-collapsed');
+            $('body').removeClass('sidebar-visible');
+        }
     });
     
     // Auto-hide sidebar on mobile after click (exclude dropdown toggles)
-    if ($(window).width() <= 768) {
-        $('.sidebar a').on('click', function(e) {
+    $(document).on('click', '.sidebar a', function(e) {
+        if ($(window).width() <= 768) {
             // Don't hide sidebar if clicking dropdown toggle
-            if (!$(this).hasClass('dropdown-toggle')) {
-                $('#sidebar').removeClass('active');
-                $('#content').removeClass('active');
+            if (!$(this).hasClass('dropdown-toggle') && $(this).attr('href') !== '#') {
+                $('body').removeClass('sidebar-visible');
             }
-        });
-    }
+        }
+    });
     
     // Custom dropdown toggle without animation
     $(document).on('click', '.sidebar .dropdown-toggle', function(e) {
