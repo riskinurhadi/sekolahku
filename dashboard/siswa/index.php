@@ -230,23 +230,86 @@ $conn->close();
     background: transparent;
 }
 
-/* Stat Cards dengan Mini Charts */
+/* Stat Cards dengan Mini Charts - Enhanced Style */
 .metric-card {
-    background: #ffffff;
-    border-radius: 16px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 20px;
     padding: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e5e7eb;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: none;
     transition: all 0.3s ease;
     height: 100%;
     position: relative;
     overflow: hidden;
 }
 
+.metric-card.metric-card-blue {
+    background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%);
+}
+
+.metric-card.metric-card-green {
+    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+}
+
+.metric-card.metric-card-orange {
+    background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
+}
+
+.metric-card.metric-card-purple {
+    background: linear-gradient(135deg, #ffffff 0%, #faf5ff 100%);
+}
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 8px;
+    height: 100%;
+    background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+    z-index: 1;
+    border-radius: 0 20px 20px 0;
+}
+
+.metric-card.metric-card-blue::before {
+    background: linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+    box-shadow: -4px 0 20px rgba(99, 102, 241, 0.5), -2px 0 10px rgba(99, 102, 241, 0.3);
+}
+
+.metric-card.metric-card-green::before {
+    background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+    box-shadow: -4px 0 20px rgba(16, 185, 129, 0.5), -2px 0 10px rgba(16, 185, 129, 0.3);
+}
+
+.metric-card.metric-card-orange::before {
+    background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+    box-shadow: -4px 0 20px rgba(245, 158, 11, 0.5), -2px 0 10px rgba(245, 158, 11, 0.3);
+}
+
+.metric-card.metric-card-purple::before {
+    background: linear-gradient(180deg, #8b5cf6 0%, #7c3aed 100%);
+    box-shadow: -4px 0 20px rgba(139, 92, 246, 0.5), -2px 0 10px rgba(139, 92, 246, 0.3);
+}
+
 .metric-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    border-color: #3b82f6;
+    transform: translateY(-6px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16), 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.metric-card.metric-card-blue:hover {
+    box-shadow: 0 12px 32px rgba(99, 102, 241, 0.25), 0 6px 16px rgba(99, 102, 241, 0.15);
+}
+
+.metric-card.metric-card-green:hover {
+    box-shadow: 0 12px 32px rgba(16, 185, 129, 0.25), 0 6px 16px rgba(16, 185, 129, 0.15);
+}
+
+.metric-card.metric-card-orange:hover {
+    box-shadow: 0 12px 32px rgba(245, 158, 11, 0.25), 0 6px 16px rgba(245, 158, 11, 0.15);
+}
+
+.metric-card.metric-card-purple:hover {
+    box-shadow: 0 12px 32px rgba(139, 92, 246, 0.25), 0 6px 16px rgba(139, 92, 246, 0.15);
 }
 
 .metric-card-header {
@@ -254,6 +317,46 @@ $conn->close();
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 16px;
+    position: relative;
+    z-index: 2;
+}
+
+.metric-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin-bottom: 12px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+.metric-card:hover .metric-icon {
+    transform: scale(1.05) rotate(5deg);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.metric-card-blue .metric-icon {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: #ffffff;
+}
+
+.metric-card-green .metric-icon {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+}
+
+.metric-card-orange .metric-icon {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #ffffff;
+}
+
+.metric-card-purple .metric-icon {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: #ffffff;
 }
 
 .metric-title {
@@ -261,36 +364,60 @@ $conn->close();
     font-weight: 600;
     color: #64748b;
     margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .metric-value {
-    font-size: 32px;
+    font-size: 36px;
     font-weight: 700;
     color: #1e293b;
     line-height: 1;
     margin-bottom: 8px;
+    letter-spacing: -1px;
 }
 
 .metric-change {
     font-size: 12px;
-    font-weight: 600;
-    display: flex;
+    font-weight: 700;
+    display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 4px;
+    padding: 8px 14px;
+    border-radius: 20px;
+    min-width: 65px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
 }
 
 .metric-change.positive {
-    color: #10b981;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.15) 100%);
+    color: #059669;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3), 0 2px 6px rgba(16, 185, 129, 0.2);
+    border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 .metric-change.negative {
-    color: #ef4444;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.15) 100%);
+    color: #dc2626;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3), 0 2px 6px rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.metric-card:hover .metric-change {
+    transform: scale(1.05);
+}
+
+.metric-change i {
+    font-size: 10px;
 }
 
 .metric-chart {
     height: 60px;
     margin-top: 16px;
     position: relative;
+    z-index: 2;
 }
 
 /* Chart Sections */
@@ -375,17 +502,20 @@ $conn->close();
     <!-- Overview Tab -->
     <div class="tab-pane fade show active" id="overview" role="tabpanel">
         <!-- Statistics Cards dengan Mini Charts -->
-    <div class="row mb-4">
+        <div class="row mb-4">
             <div class="col-xl-3 col-md-6 mb-4">
-                <div class="metric-card">
+                <div class="metric-card metric-card-blue">
                     <div class="metric-card-header">
-                        <div>
+                        <div class="flex-grow-1">
+                            <div class="metric-icon">
+                                <i class="bi bi-journal-check"></i>
+                            </div>
                             <div class="metric-title">Soal Aktif</div>
                             <div class="metric-value"><?php echo $stats['total_soal_aktif']; ?></div>
-                            <div class="metric-change <?php echo $change_soal_aktif >= 0 ? 'positive' : 'negative'; ?>">
-                                <i class="bi bi-arrow-<?php echo $change_soal_aktif >= 0 ? 'up' : 'down'; ?>"></i>
-                                <?php echo abs($change_soal_aktif); ?>%
                         </div>
+                        <div class="metric-change <?php echo $change_soal_aktif >= 0 ? 'positive' : 'negative'; ?>">
+                            <i class="bi bi-arrow-<?php echo $change_soal_aktif >= 0 ? 'up' : 'down'; ?>"></i>
+                            <?php echo abs($change_soal_aktif); ?>%
                         </div>
                     </div>
                     <div class="metric-chart">
@@ -395,56 +525,65 @@ $conn->close();
             </div>
             
             <div class="col-xl-3 col-md-6 mb-4">
-                <div class="metric-card">
+                <div class="metric-card metric-card-green">
                     <div class="metric-card-header">
-                        <div>
+                        <div class="flex-grow-1">
+                            <div class="metric-icon">
+                                <i class="bi bi-patch-check-fill"></i>
+                            </div>
                             <div class="metric-title">Soal Selesai</div>
                             <div class="metric-value"><?php echo $stats['total_soal_selesai']; ?></div>
-                            <div class="metric-change <?php echo $change_soal_selesai >= 0 ? 'positive' : 'negative'; ?>">
-                                <i class="bi bi-arrow-<?php echo $change_soal_selesai >= 0 ? 'up' : 'down'; ?>"></i>
-                                <?php echo abs($change_soal_selesai); ?>%
-            </div>
-        </div>
-    </div>
+                        </div>
+                        <div class="metric-change <?php echo $change_soal_selesai >= 0 ? 'positive' : 'negative'; ?>">
+                            <i class="bi bi-arrow-<?php echo $change_soal_selesai >= 0 ? 'up' : 'down'; ?>"></i>
+                            <?php echo abs($change_soal_selesai); ?>%
+                        </div>
+                    </div>
                     <div class="metric-chart">
                         <canvas id="chartSoalSelesai"></canvas>
-                </div>
+                    </div>
                 </div>
             </div>
             
             <div class="col-xl-3 col-md-6 mb-4">
-                <div class="metric-card">
+                <div class="metric-card metric-card-orange">
                     <div class="metric-card-header">
-                        <div>
+                        <div class="flex-grow-1">
+                            <div class="metric-icon">
+                                <i class="bi bi-journal-text"></i>
+                            </div>
                             <div class="metric-title">Total Soal</div>
                             <div class="metric-value"><?php echo $stats['total_soal_aktif'] + $stats['total_soal_selesai']; ?></div>
-                            <div class="metric-change <?php echo $change_total_soal >= 0 ? 'positive' : 'negative'; ?>">
-                                <i class="bi bi-arrow-<?php echo $change_total_soal >= 0 ? 'up' : 'down'; ?>"></i>
-                                <?php echo abs($change_total_soal); ?>%
-                </div>
-            </div>
-        </div>
+                        </div>
+                        <div class="metric-change <?php echo $change_total_soal >= 0 ? 'positive' : 'negative'; ?>">
+                            <i class="bi bi-arrow-<?php echo $change_total_soal >= 0 ? 'up' : 'down'; ?>"></i>
+                            <?php echo abs($change_total_soal); ?>%
+                        </div>
+                    </div>
                     <div class="metric-chart">
                         <canvas id="chartTotalSoal"></canvas>
-                </div>
+                    </div>
                 </div>
             </div>
             
             <div class="col-xl-3 col-md-6 mb-4">
-                <div class="metric-card">
+                <div class="metric-card metric-card-purple">
                     <div class="metric-card-header">
-                        <div>
+                        <div class="flex-grow-1">
+                            <div class="metric-icon">
+                                <i class="bi bi-bar-chart-line-fill"></i>
+                            </div>
                             <div class="metric-title">Rata-rata Nilai</div>
                             <div class="metric-value"><?php echo $stats['rata_rata_nilai']; ?></div>
-                            <div class="metric-change <?php echo $change_rata_nilai >= 0 ? 'positive' : 'negative'; ?>">
-                                <i class="bi bi-arrow-<?php echo $change_rata_nilai >= 0 ? 'up' : 'down'; ?>"></i>
-                                <?php echo abs($change_rata_nilai); ?>%
-                </div>
-            </div>
-        </div>
+                        </div>
+                        <div class="metric-change <?php echo $change_rata_nilai >= 0 ? 'positive' : 'negative'; ?>">
+                            <i class="bi bi-arrow-<?php echo $change_rata_nilai >= 0 ? 'up' : 'down'; ?>"></i>
+                            <?php echo abs($change_rata_nilai); ?>%
+                        </div>
+                    </div>
                     <div class="metric-chart">
                         <canvas id="chartRataNilai"></canvas>
-                </div>
+                    </div>
                 </div>
             </div>
         </div>
