@@ -59,51 +59,47 @@ $stmt->close();
         </div>
     </div>
 <?php else: ?>
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <?php foreach ($materi_list as $materi): ?>
-                <?php
-                $progress_status = $materi['progress_status'] ?? 'belum_dibaca';
-                $progress_percent = $materi['progress_percent'] ?? 0;
-                $status_colors = [
-                    'belum_dibaca' => 'secondary',
-                    'sedang_dibaca' => 'warning',
-                    'selesai' => 'success'
-                ];
-                $status_color = $status_colors[$progress_status] ?? 'secondary';
-                ?>
-                <div class="mentor-row d-flex align-items-center mb-3">
-                    <div class="mentor-avatar">
-                        <i class="bi bi-book"></i>
-                    </div>
-                    <div class="mentor-info flex-grow-1">
-                        <div class="d-flex flex-wrap align-items-center gap-2">
-                            <h6 class="mb-0"><?php echo htmlspecialchars($materi['judul']); ?></h6>
-                            <span class="badge bg-<?php echo $status_color; ?>"><?php echo ucfirst(str_replace('_', ' ', $progress_status)); ?></span>
-                        </div>
-                        <?php if ($materi['deskripsi']): ?>
-                            <div class="text-muted small"><?php echo htmlspecialchars(substr($materi['deskripsi'], 0, 120)); ?><?php echo strlen($materi['deskripsi']) > 120 ? '...' : ''; ?></div>
-                        <?php endif; ?>
-                        <div class="d-flex align-items-center gap-3 small text-muted mt-1">
-                            <span><i class="bi bi-journal-check text-info"></i> <?php echo $materi['jumlah_latihan']; ?> Latihan</span>
-                            <span><?php echo $progress_percent; ?>% Progress</span>
-                        </div>
-                    </div>
-                    <div class="mentor-actions ms-3">
-                        <a href="detail_materi.php?id=<?php echo $materi['id']; ?>" class="btn btn-sm btn-primary">Buka</a>
-                    </div>
+    <?php foreach ($materi_list as $materi): ?>
+        <?php
+        $progress_status = $materi['progress_status'] ?? 'belum_dibaca';
+        $progress_percent = $materi['progress_percent'] ?? 0;
+        $status_colors = [
+            'belum_dibaca' => 'secondary',
+            'sedang_dibaca' => 'warning',
+            'selesai' => 'success'
+        ];
+        $status_color = $status_colors[$progress_status] ?? 'secondary';
+        ?>
+        <div class="mentor-row d-flex align-items-center mb-3">
+            <div class="mentor-avatar">
+                <i class="bi bi-book"></i>
+            </div>
+            <div class="mentor-info flex-grow-1">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <h6 class="mb-0"><?php echo htmlspecialchars($materi['judul']); ?></h6>
+                    <span class="badge bg-<?php echo $status_color; ?>"><?php echo ucfirst(str_replace('_', ' ', $progress_status)); ?></span>
                 </div>
-            <?php endforeach; ?>
+                <?php if ($materi['deskripsi']): ?>
+                    <div class="text-muted small"><?php echo htmlspecialchars(substr($materi['deskripsi'], 0, 120)); ?><?php echo strlen($materi['deskripsi']) > 120 ? '...' : ''; ?></div>
+                <?php endif; ?>
+                <div class="d-flex align-items-center gap-3 small text-muted mt-1">
+                    <span><i class="bi bi-journal-check text-info"></i> <?php echo $materi['jumlah_latihan']; ?> Latihan</span>
+                    <span><?php echo $progress_percent; ?>% Progress</span>
+                </div>
+            </div>
+            <div class="mentor-actions ms-3">
+                <a href="detail_materi.php?id=<?php echo $materi['id']; ?>" class="btn btn-sm btn-primary">Buka</a>
+            </div>
         </div>
-    </div>
+    <?php endforeach; ?>
 <?php endif; ?>
 
 <style>
 .mentor-row {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    background: transparent;
+    border-radius: 0;
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e7eb;
 }
 .mentor-avatar {
     width: 44px;

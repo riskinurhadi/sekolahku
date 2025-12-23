@@ -153,20 +153,33 @@ $table_exists = $conn->query("SHOW TABLES LIKE 'materi_pelajaran'")->num_rows > 
 /* Mapel cards */
 .mapel-card {
     border: 0;
-    border-radius: 16px;
+    border-radius: 18px;
     padding: 18px;
     color: #0f172a;
     position: relative;
     overflow: hidden;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+}
+.mapel-card::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 10px;
+    height: 90%;
+    border-radius: 999px;
+    background: rgba(0,0,0,0.12);
+    opacity: 0.25;
 }
 .mapel-card .progress-thin {
     height: 6px;
-    background: rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.35);
     border-radius: 10px;
 }
 .mapel-card .progress-bar {
-    background: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,0.95);
     border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
 }
 .mapel-card .icon-badge {
     width: 44px;
@@ -175,27 +188,28 @@ $table_exists = $conn->query("SHOW TABLES LIKE 'materi_pelajaran'")->num_rows > 
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.35);
     color: #0f172a;
     font-size: 1.2rem;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
 }
 .mapel-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 10px 28px rgba(0,0,0,0.12);
+    box-shadow: 0 16px 36px rgba(0,0,0,0.14);
 }
 
-/* Gradient variants */
+/* Gradient variants inspired by stats cards */
 .mapel-card-purple {
-    background: linear-gradient(135deg, #f1e8ff 0%, #d6c5ff 100%);
+    background: linear-gradient(135deg, #f0ebff 0%, #d5c9ff 100%);
 }
 .mapel-card-orange {
-    background: linear-gradient(135deg, #ffe8d6 0%, #ffd1a1 100%);
+    background: linear-gradient(135deg, #fff4e5 0%, #ffdca8 100%);
 }
 .mapel-card-blue {
-    background: linear-gradient(135deg, #e6f4ff 0%, #c3e4ff 100%);
+    background: linear-gradient(135deg, #eef6ff 0%, #d2e8ff 100%);
 }
 .mapel-card-teal {
-    background: linear-gradient(135deg, #e6fffb 0%, #c3f7ef 100%);
+    background: linear-gradient(135deg, #e9fffb 0%, #c8f4eb 100%);
 }
 
 /* Mentor-style list for bab/materi */
