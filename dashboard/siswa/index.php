@@ -415,17 +415,52 @@ $conn->close();
 
 /* Chart Sections */
 .chart-section {
-    background: #ffffff;
-    border-radius: 16px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 20px;
     padding: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e5e7eb;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: none;
     margin-bottom: 24px;
     height: 100%;
     display: flex;
     flex-direction: column;
     min-height: 400px;
     max-height: 400px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.chart-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6 0%, #10b981 50%, #f59e0b 100%);
+    background-size: 200% 100%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.chart-section:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16), 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.chart-section:hover::before {
+    opacity: 1;
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
 }
 
 .chart-section-header {
@@ -443,6 +478,17 @@ $conn->close();
 .chart-section-desc {
     font-size: 14px;
     color: #64748b;
+}
+
+/* Jadwal Items */
+.jadwal-item:hover {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(16, 185, 129, 0.03) 100%);
+    transform: translateX(4px);
+}
+
+.jadwal-item:hover .jadwal-icon {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25), 0 3px 8px rgba(0, 0, 0, 0.2);
 }
 
 .chart-container {
@@ -593,9 +639,9 @@ $conn->close();
                                 $style = $icon_styles[$index % count($icon_styles)];
                                 $index++;
                             ?>
-                                <div class="mb-3 pb-3 border-bottom">
+                                <div class="mb-3 pb-3 border-bottom jadwal-item" style="transition: all 0.3s ease; padding: 8px; border-radius: 12px; cursor: pointer;">
                                     <div class="d-flex align-items-start">
-                                        <div class="me-3 flex-shrink-0" style="width: 40px; height: 40px; border-radius: 10px; background: <?php echo $style['gradient']; ?>; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;">
+                                        <div class="me-3 flex-shrink-0 jadwal-icon" style="width: 48px; height: 48px; border-radius: 12px; background: <?php echo $style['gradient']; ?>; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15); transition: all 0.3s ease;">
                                             <i class="bi bi-<?php echo $style['icon']; ?>"></i>
                                         </div>
                                         <div class="flex-grow-1">
@@ -605,7 +651,7 @@ $conn->close();
                                             <p class="mb-1 text-muted" style="font-size: 13px;">
                                                 <?php echo htmlspecialchars($jadwal['nama_guru']); ?>
                                             </p>
-                                            <span class="badge bg-light text-dark" style="font-size: 12px;">
+                                            <span class="badge" style="font-size: 12px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);">
                                                     <?php echo date('H:i', strtotime($jadwal['jam_mulai'])); ?> - <?php echo date('H:i', strtotime($jadwal['jam_selesai'])); ?>
                                                 </span>
                                         </div>
