@@ -413,12 +413,12 @@ $conn->close();
     font-size: 9px;
 }
 
-/* Chart Sections */
+/* Chart Sections - Modern Health Dashboard Style */
 .chart-section {
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    border-radius: 20px;
-    padding: 24px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 28px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
     border: none;
     margin-bottom: 24px;
     height: 100%;
@@ -431,64 +431,150 @@ $conn->close();
     overflow: hidden;
 }
 
-.chart-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #3b82f6 0%, #10b981 50%, #f59e0b 100%);
-    background-size: 200% 100%;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
 .chart-section:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16), 0 6px 16px rgba(0, 0, 0, 0.12);
-}
-
-.chart-section:hover::before {
-    opacity: 1;
-    animation: shimmer 2s infinite;
-}
-
-@keyframes shimmer {
-    0% {
-        background-position: -200% 0;
-    }
-    100% {
-        background-position: 200% 0;
-    }
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .chart-section-header {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
 }
 
 .chart-section-title {
-    font-size: 18px;
-    font-weight: 700;
+    font-size: 16px;
+    font-weight: 600;
     color: #1e293b;
     margin-bottom: 4px;
+    letter-spacing: -0.3px;
 }
 
 .chart-section-desc {
-    font-size: 14px;
+    font-size: 13px;
     color: #64748b;
+    font-weight: 400;
 }
 
-/* Jadwal Items */
+/* List Items - Clean Modern Style */
+.dashboard-list-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f5f9;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.dashboard-list-item:last-child {
+    border-bottom: none;
+}
+
+.dashboard-list-item:hover {
+    padding-left: 4px;
+}
+
+.dashboard-list-item-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-right: 12px;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.dashboard-list-item:hover .dashboard-list-item-icon {
+    transform: scale(1.05);
+}
+
+.dashboard-list-item-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.dashboard-list-item-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 2px;
+    line-height: 1.4;
+}
+
+.dashboard-list-item-subtitle {
+    font-size: 12px;
+    color: #64748b;
+    margin: 0;
+}
+
+.dashboard-list-item-date {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 4px;
+}
+
+/* Icon Color Variants */
+.icon-blue {
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    color: #0284c7;
+}
+
+.icon-purple {
+    background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+    color: #9333ea;
+}
+
+.icon-teal {
+    background: linear-gradient(135deg, #e0fdfa 0%, #b2f5ea 100%);
+    color: #14b8a6;
+}
+
+.icon-green {
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+    color: #16a34a;
+}
+
+.icon-orange {
+    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+    color: #ea580c;
+}
+
+/* Jadwal Items - Updated Style */
+.jadwal-item {
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f5f9;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.jadwal-item:last-child {
+    border-bottom: none;
+}
+
 .jadwal-item:hover {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(16, 185, 129, 0.03) 100%);
-    transform: translateX(4px);
+    padding-left: 4px;
+}
+
+.jadwal-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-right: 12px;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
 }
 
 .jadwal-item:hover .jadwal-icon {
-    transform: scale(1.1) rotate(5deg);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25), 0 3px 8px rgba(0, 0, 0, 0.2);
+    transform: scale(1.05);
 }
 
 .chart-container {
@@ -628,36 +714,33 @@ $conn->close();
                     <?php if (!empty($jadwal_hari_ini)): ?>
                         <div style="flex: 1; overflow-y: auto;">
                             <?php 
-                            $icon_styles = [
-                                ['gradient' => 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', 'icon' => 'book'],
-                                ['gradient' => 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 'icon' => 'journal-bookmark'],
-                                ['gradient' => 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', 'icon' => 'book-half'],
-                                ['gradient' => 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', 'icon' => 'journal-text']
-                            ];
+                            $icon_classes = ['icon-blue', 'icon-purple', 'icon-teal', 'icon-green'];
+                            $icon_names = ['book', 'journal-bookmark', 'book-half', 'journal-text'];
                             $index = 0;
                             foreach ($jadwal_hari_ini as $jadwal): 
-                                $style = $icon_styles[$index % count($icon_styles)];
+                                $icon_class = $icon_classes[$index % count($icon_classes)];
+                                $icon_name = $icon_names[$index % count($icon_names)];
                                 $index++;
                             ?>
-                                <div class="mb-3 pb-3 border-bottom jadwal-item" style="transition: all 0.3s ease; padding: 8px; border-radius: 12px; cursor: pointer;">
-                                    <div class="d-flex align-items-start">
-                                        <div class="me-3 flex-shrink-0 jadwal-icon" style="width: 48px; height: 48px; border-radius: 12px; background: <?php echo $style['gradient']; ?>; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15); transition: all 0.3s ease;">
-                                            <i class="bi bi-<?php echo $style['icon']; ?>"></i>
+                                <div class="jadwal-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="jadwal-icon <?php echo $icon_class; ?>">
+                                            <i class="bi bi-<?php echo $icon_name; ?>"></i>
                                         </div>
                                         <div class="flex-grow-1">
-                                            <h6 class="mb-1" style="font-size: 14px; font-weight: 600; color: #1e293b;">
+                                            <div class="dashboard-list-item-title">
                                                 <?php echo htmlspecialchars($jadwal['nama_pelajaran']); ?>
-                                            </h6>
-                                            <p class="mb-1 text-muted" style="font-size: 13px;">
+                                            </div>
+                                            <div class="dashboard-list-item-subtitle">
                                                 <?php echo htmlspecialchars($jadwal['nama_guru']); ?>
-                                            </p>
-                                            <span class="badge" style="font-size: 12px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);">
-                                                    <?php echo date('H:i', strtotime($jadwal['jam_mulai'])); ?> - <?php echo date('H:i', strtotime($jadwal['jam_selesai'])); ?>
-                                                </span>
+                                            </div>
+                                            <div class="dashboard-list-item-date">
+                                                <?php echo date('H:i', strtotime($jadwal['jam_mulai'])); ?> - <?php echo date('H:i', strtotime($jadwal['jam_selesai'])); ?>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                    <?php endforeach; ?>
+                            <?php endforeach; ?>
                         </div>
                     <?php else: ?>
                         <div class="text-center py-4" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
@@ -677,36 +760,30 @@ $conn->close();
                 </div>
                     <?php if ($hasil_ujian_terakhir): ?>
                         <div style="flex: 1; overflow-y: auto;">
-                            <div class="mb-3 pb-3 border-bottom">
-                                <div class="d-flex align-items-center justify-content-between mb-2">
-                            <div>
-                                        <h6 class="mb-1 fw-bold" style="font-size: 15px; color: #1e293b;">
-                                            <?php echo htmlspecialchars($hasil_ujian_terakhir['judul_soal']); ?>
-                                        </h6>
-                                        <p class="text-muted small mb-0">
-                                            <?php echo htmlspecialchars($hasil_ujian_terakhir['nama_pelajaran']); ?>
-                                        </p>
-                            </div>
-                            <div class="text-end">
-                                <div class="h4 fw-bold mb-0 text-primary"><?php echo number_format($hasil_ujian_terakhir['nilai'], 0); ?></div>
-                                <span class="badge <?php echo $hasil_ujian_terakhir['nilai'] >= 75 ? 'bg-success' : 'bg-warning'; ?>">
-                                    <?php echo $hasil_ujian_terakhir['nilai'] >= 75 ? 'Lulus' : 'Remedial'; ?>
-                                </span>
-                            </div>
-                        </div>
-                            <div class="row g-2 text-center">
-                                <div class="col-6 border-end">
-                                    <div class="small text-muted">Poin</div>
-                                    <div class="fw-bold text-success"><?php echo number_format($hasil_ujian_terakhir['poin_diperoleh'], 0); ?> / <?php echo number_format($hasil_ujian_terakhir['total_poin'], 0); ?></div>
+                            <div class="dashboard-list-item">
+                                <div class="dashboard-list-item-icon icon-green">
+                                    <i class="bi bi-clipboard-check"></i>
                                 </div>
-                                <div class="col-6">
-                                    <div class="small text-muted">Tanggal</div>
-                                    <div class="fw-bold small"><?php echo date('d/m/y', strtotime($hasil_ujian_terakhir['waktu_selesai'])); ?></div>
+                                <div class="dashboard-list-item-content">
+                                    <div class="dashboard-list-item-title">
+                                        <?php echo htmlspecialchars($hasil_ujian_terakhir['judul_soal']); ?>
+                                    </div>
+                                    <div class="dashboard-list-item-subtitle">
+                                        <?php echo htmlspecialchars($hasil_ujian_terakhir['nama_pelajaran']); ?>
+                                    </div>
+                                    <div class="dashboard-list-item-date">
+                                        <?php echo date('d M Y', strtotime($hasil_ujian_terakhir['waktu_selesai'])); ?>
+                                    </div>
                                 </div>
+                                <div class="text-end ms-3">
+                                    <div class="h5 fw-bold mb-0" style="color: #3b82f6;"><?php echo number_format($hasil_ujian_terakhir['nilai'], 0); ?></div>
+                                    <span class="badge" style="background: <?php echo $hasil_ujian_terakhir['nilai'] >= 75 ? '#dcfce7' : '#fef3c7'; ?>; color: <?php echo $hasil_ujian_terakhir['nilai'] >= 75 ? '#16a34a' : '#d97706'; ?>; font-size: 11px; padding: 4px 8px;">
+                                        <?php echo $hasil_ujian_terakhir['nilai'] >= 75 ? 'Lulus' : 'Remedial'; ?>
+                                    </span>
                                 </div>
                             </div>
-                            <div class="text-center">
-                                <a href="hasil_latihan.php" class="btn btn-outline-primary btn-sm">
+                            <div class="text-center mt-3 pt-3 border-top">
+                                <a href="hasil_latihan.php" class="text-decoration-none" style="color: #3b82f6; font-size: 13px; font-weight: 500;">
                                     Lihat Semua Hasil <i class="bi bi-arrow-right ms-1"></i>
                                 </a>
                             </div>
@@ -733,23 +810,24 @@ $conn->close();
                     <?php if (!empty($jadwal_besok)): ?>
                         <div style="flex: 1; overflow-y: auto;">
                             <?php 
+                            $icon_classes = ['icon-blue', 'icon-purple', 'icon-teal', 'icon-green'];
+                            $icon_names = ['book', 'journal-bookmark', 'book-half', 'journal-text'];
                             $index = 0;
                             foreach ($jadwal_besok as $jadwal): 
-                                $style = $icon_styles[$index % count($icon_styles)];
+                                $icon_class = $icon_classes[$index % count($icon_classes)];
+                                $icon_name = $icon_names[$index % count($icon_names)];
                                 $index++;
                             ?>
-                                <div class="mb-3 pb-3 border-bottom">
-                                    <div class="d-flex align-items-start">
-                                        <div class="me-3 flex-shrink-0" style="width: 40px; height: 40px; border-radius: 10px; background: <?php echo $style['gradient']; ?>; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;">
-                                            <i class="bi bi-<?php echo $style['icon']; ?>"></i>
+                                <div class="dashboard-list-item">
+                                    <div class="dashboard-list-item-icon <?php echo $icon_class; ?>">
+                                        <i class="bi bi-<?php echo $icon_name; ?>"></i>
+                                    </div>
+                                    <div class="dashboard-list-item-content">
+                                        <div class="dashboard-list-item-title">
+                                            <?php echo htmlspecialchars($jadwal['nama_pelajaran']); ?>
                                         </div>
-                                        <div class="flex-grow-1">
-                                            <h6 class="mb-1" style="font-size: 14px; font-weight: 600; color: #1e293b;">
-                                                <?php echo htmlspecialchars($jadwal['nama_pelajaran']); ?>
-                                            </h6>
-                                            <span class="badge bg-light text-dark" style="font-size: 12px;">
-                                                <?php echo date('H:i', strtotime($jadwal['jam_mulai'])); ?> - <?php echo date('H:i', strtotime($jadwal['jam_selesai'])); ?>
-                                            </span>
+                                        <div class="dashboard-list-item-date">
+                                            <?php echo date('H:i', strtotime($jadwal['jam_mulai'])); ?> - <?php echo date('H:i', strtotime($jadwal['jam_selesai'])); ?>
                                         </div>
                                     </div>
                                 </div>
@@ -773,21 +851,26 @@ $conn->close();
                 </div>
                     <?php if ($pengumuman_terbaru): ?>
                         <div style="flex: 1; overflow-y: auto;">
-                        <div class="mb-3">
-                            <span class="badge bg-primary mb-2"><?php echo htmlspecialchars($pengumuman_terbaru['kategori'] ?? 'Umum'); ?></span>
-                                <h6 class="fw-bold mb-1" style="font-size: 15px; color: #1e293b;">
-                                    <?php echo htmlspecialchars($pengumuman_terbaru['judul']); ?>
-                                </h6>
-                            <p class="text-muted small mb-2">
-                                <i class="bi bi-clock me-1"></i> <?php echo date('d M Y', strtotime($pengumuman_terbaru['created_at'])); ?>
-                            </p>
-                                <div class="text-muted small mb-3" style="line-height: 1.6;">
-                                    <?php echo strip_tags(substr($pengumuman_terbaru['isi'], 0, 150)); ?>...
+                            <div class="dashboard-list-item">
+                                <div class="dashboard-list-item-icon icon-orange">
+                                    <i class="bi bi-megaphone"></i>
                                 </div>
-                                <a href="detail_informasi.php?id=<?php echo $pengumuman_terbaru['id']; ?>" class="btn btn-sm btn-outline-primary w-100">Baca Selengkapnya</a>
+                                <div class="dashboard-list-item-content">
+                                    <div class="dashboard-list-item-title">
+                                        <?php echo htmlspecialchars($pengumuman_terbaru['judul']); ?>
+                                    </div>
+                                    <div class="dashboard-list-item-subtitle">
+                                        <?php echo htmlspecialchars($pengumuman_terbaru['kategori'] ?? 'Umum'); ?>
+                                    </div>
+                                    <div class="dashboard-list-item-date">
+                                        <?php echo date('d M Y', strtotime($pengumuman_terbaru['created_at'])); ?>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="text-center">
-                                <a href="informasi_akademik.php" class="btn btn-sm btn-link text-primary p-0">Lihat Semua Pengumuman <i class="bi bi-arrow-right ms-1"></i></a>
+                            <div class="text-center mt-3 pt-3 border-top">
+                                <a href="informasi_akademik.php" class="text-decoration-none" style="color: #3b82f6; font-size: 13px; font-weight: 500;">
+                                    Lihat Semua Pengumuman <i class="bi bi-arrow-right ms-1"></i>
+                                </a>
                             </div>
                         </div>
                     <?php else: ?>
