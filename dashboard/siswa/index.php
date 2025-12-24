@@ -216,6 +216,72 @@ $change_soal_selesai = $prev_soal_selesai > 0 ? round((($stats['total_soal_seles
 $change_total_soal = $prev_total_soal > 0 ? round((($stats['total_soal_aktif'] + $stats['total_soal_selesai'] - $prev_total_soal) / $prev_total_soal) * 100, 1) : 0;
 $change_rata_nilai = $prev_rata_nilai > 0 ? round((($stats['rata_rata_nilai'] - $prev_rata_nilai) / $prev_rata_nilai) * 100, 1) : 0;
 
+// Get tugas reminders (aktif, hampir tenggat, overdue)
+$tugas_reminders = [
+    'aktif' => [],
+    'hampir_tenggat' => [],
+    'overdue' => []
+];
+
+$now = date('Y-m-d H:i:s');
+$three_days_later = date('Y-m-d H:i:s', strtotime('+3 days'));
+
+// Check if latihan table exists
+$table_check_latihan = $conn->query("SHOW TABLES LIKE 'latihan'");
+$table_check_submisi_tugas = $conn->query("SHOW TABLES LIKE 'submisi_tugas'");
+$table_check_submisi_soal = $conn->query("SHOW TABLES LIKE 'submisi_latihan_soal'");
+
+if ($table_check_latihan && $table_check_latihan->num_rows > 0 && $kelas_id) {
+    // Get all active latihan for student's class that haven't been completed
+    $query = "SELECT l.*, m.judul as materi_judul, m.id as materi_id, mp.nama_pelajaran,
+        (CASE 
+            WHEN l.jenis = 'tugas_file' THEN 
+                COALESCE((SELECT COUNT(*) FROM submisi_tugas st WHERE st.latihan_id = l.id AND st.siswa_id = ?), 0)
+            WHEN l.jenis = 'soal' THEN 
+                COALESCE((SELECT COUNT(*) FROM submisi_latihan_soal sls WHERE sls.latihan_id = l.id AND sls.siswa_id = ? AND sls.status = 'selesai'), 0)
+            ELSE 0
+        END) as sudah_dikerjakan
+        FROM latihan l
+        JOIN materi_pelajaran m ON l.materi_id = m.id
+        JOIN mata_pelajaran mp ON m.mata_pelajaran_id = mp.id
+        WHERE l.status = 'aktif' 
+        AND m.kelas_id = ? 
+        AND mp.sekolah_id = ?";
+    
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("iiii", $siswa_id, $siswa_id, $kelas_id, $sekolah_id);
+    $stmt->execute();
+    $all_latihan = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+    
+    foreach ($all_latihan as $latihan) {
+        $sudah_dikerjakan = intval($latihan['sudah_dikerjakan']) > 0;
+        
+        if ($sudah_dikerjakan) {
+            continue; // Skip tugas yang sudah dikerjakan
+        }
+        
+        if (!$latihan['deadline']) {
+            // Tugas tanpa deadline = aktif
+            $tugas_reminders['aktif'][] = $latihan;
+        } else {
+            $deadline_timestamp = strtotime($latihan['deadline']);
+            $now_timestamp = time();
+            
+            if ($deadline_timestamp < $now_timestamp) {
+                // Overdue
+                $tugas_reminders['overdue'][] = $latihan;
+            } elseif ($deadline_timestamp <= strtotime($three_days_later)) {
+                // Hampir tenggat (dalam 3 hari)
+                $tugas_reminders['hampir_tenggat'][] = $latihan;
+            } else {
+                // Aktif (masih ada waktu)
+                $tugas_reminders['aktif'][] = $latihan;
+            }
+        }
+    }
+}
+
 // Get soal aktif untuk tab soal
 $now = date('Y-m-d H:i:s');
 $stmt = $conn->prepare("SELECT s.*, mp.nama_pelajaran 
@@ -631,6 +697,130 @@ $conn->close();
 .chart-section:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Tugas Reminder Card Styles */
+.tugas-reminder-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-left: 4px solid #f59e0b;
+}
+
+.tugas-reminder-content {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.tugas-category {
+    margin-bottom: 20px;
+}
+
+.tugas-category:last-child {
+    margin-bottom: 0;
+}
+
+.tugas-category-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.overdue-header {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    color: #991b1b;
+    border-left: 3px solid #dc2626;
+}
+
+.warning-header {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    border-left: 3px solid #f59e0b;
+}
+
+.active-header {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #1e40af;
+    border-left: 3px solid #3b82f6;
+}
+
+.tugas-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.tugas-item {
+    padding: 14px 16px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+}
+
+.tugas-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateX(4px);
+}
+
+.tugas-item-overdue {
+    background: #fef2f2;
+    border-left: 3px solid #dc2626;
+}
+
+.tugas-item-warning {
+    background: #fffbeb;
+    border-left: 3px solid #f59e0b;
+}
+
+.tugas-item-active {
+    background: #f0f9ff;
+    border-left: 3px solid #3b82f6;
+}
+
+.tugas-judul {
+    font-weight: 600;
+    font-size: 15px;
+    color: #1e293b;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+}
+
+.tugas-judul i {
+    font-size: 16px;
+}
+
+.tugas-info {
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.tugas-deadline {
+    font-size: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+}
+
+.tugas-deadline i {
+    font-size: 13px;
+}
+
+.tugas-item .btn {
+    white-space: nowrap;
+    margin-left: 12px;
+    font-size: 13px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.tugas-item .btn:hover {
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .chart-section-header {
@@ -1056,6 +1246,159 @@ $conn->close();
                 </div>
             </div>
         </div>
+
+        <!-- Tugas Reminder Card -->
+        <?php if (!empty($tugas_reminders['aktif']) || !empty($tugas_reminders['hampir_tenggat']) || !empty($tugas_reminders['overdue'])): ?>
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="chart-section tugas-reminder-card">
+                    <div class="chart-section-header d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h5 class="chart-section-title mb-1">
+                                <i class="bi bi-bell-fill text-warning me-2"></i>
+                                Pengingat Tugas
+                            </h5>
+                            <p class="chart-section-desc mb-0">Tugas yang perlu perhatian Anda</p>
+                        </div>
+                    </div>
+                    
+                    <div class="tugas-reminder-content">
+                        <!-- Overdue Tasks -->
+                        <?php if (!empty($tugas_reminders['overdue'])): ?>
+                        <div class="tugas-category mb-3">
+                            <div class="tugas-category-header overdue-header">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                <span class="fw-bold">Tugas Terlambat</span>
+                                <span class="badge bg-danger ms-2"><?php echo count($tugas_reminders['overdue']); ?></span>
+                            </div>
+                            <div class="tugas-list">
+                                <?php foreach ($tugas_reminders['overdue'] as $tugas): ?>
+                                <div class="tugas-item tugas-item-overdue">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <div class="tugas-judul">
+                                                <i class="bi bi-<?php echo $tugas['jenis'] == 'tugas_file' ? 'file-earmark-arrow-up' : 'pencil-square'; ?> me-2"></i>
+                                                <?php echo htmlspecialchars($tugas['judul']); ?>
+                                            </div>
+                                            <div class="tugas-info">
+                                                <span class="text-muted small">
+                                                    <i class="bi bi-book me-1"></i><?php echo htmlspecialchars($tugas['materi_judul']); ?>
+                                                    <span class="ms-2"><i class="bi bi-mortarboard me-1"></i><?php echo htmlspecialchars($tugas['nama_pelajaran']); ?></span>
+                                                </span>
+                                            </div>
+                                            <div class="tugas-deadline text-danger mt-1">
+                                                <i class="bi bi-clock-history me-1"></i>
+                                                Terlambat sejak <?php echo date('d M Y H:i', strtotime($tugas['deadline'])); ?>
+                                            </div>
+                                        </div>
+                                        <a href="detail_materi.php?id=<?php echo $tugas['materi_id']; ?>" class="btn btn-sm btn-danger">
+                                            <i class="bi bi-arrow-right me-1"></i>Kerjakan
+                                        </a>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <!-- Hampir Tenggat Tasks -->
+                        <?php if (!empty($tugas_reminders['hampir_tenggat'])): ?>
+                        <div class="tugas-category mb-3">
+                            <div class="tugas-category-header warning-header">
+                                <i class="bi bi-clock-fill me-2"></i>
+                                <span class="fw-bold">Hampir Tenggat</span>
+                                <span class="badge bg-warning text-dark ms-2"><?php echo count($tugas_reminders['hampir_tenggat']); ?></span>
+                            </div>
+                            <div class="tugas-list">
+                                <?php foreach ($tugas_reminders['hampir_tenggat'] as $tugas): ?>
+                                <div class="tugas-item tugas-item-warning">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <div class="tugas-judul">
+                                                <i class="bi bi-<?php echo $tugas['jenis'] == 'tugas_file' ? 'file-earmark-arrow-up' : 'pencil-square'; ?> me-2"></i>
+                                                <?php echo htmlspecialchars($tugas['judul']); ?>
+                                            </div>
+                                            <div class="tugas-info">
+                                                <span class="text-muted small">
+                                                    <i class="bi bi-book me-1"></i><?php echo htmlspecialchars($tugas['materi_judul']); ?>
+                                                    <span class="ms-2"><i class="bi bi-mortarboard me-1"></i><?php echo htmlspecialchars($tugas['nama_pelajaran']); ?></span>
+                                                </span>
+                                            </div>
+                                            <div class="tugas-deadline text-warning mt-1">
+                                                <i class="bi bi-calendar-x me-1"></i>
+                                                Deadline: <?php echo date('d M Y H:i', strtotime($tugas['deadline'])); ?>
+                                                <?php 
+                                                $deadline_timestamp = strtotime($tugas['deadline']);
+                                                $now_timestamp = time();
+                                                $diff_hours = round(($deadline_timestamp - $now_timestamp) / 3600);
+                                                if ($diff_hours < 24) {
+                                                    echo '<span class="badge bg-warning text-dark ms-2">' . $diff_hours . ' jam lagi</span>';
+                                                } else {
+                                                    $diff_days = round($diff_hours / 24);
+                                                    echo '<span class="badge bg-warning text-dark ms-2">' . $diff_days . ' hari lagi</span>';
+                                                }
+                                                ?>
+                                            </div>
+                                        </div>
+                                        <a href="detail_materi.php?id=<?php echo $tugas['materi_id']; ?>" class="btn btn-sm btn-warning">
+                                            <i class="bi bi-arrow-right me-1"></i>Kerjakan
+                                        </a>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <!-- Aktif Tasks -->
+                        <?php if (!empty($tugas_reminders['aktif'])): ?>
+                        <div class="tugas-category">
+                            <div class="tugas-category-header active-header">
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                <span class="fw-bold">Tugas Aktif</span>
+                                <span class="badge bg-primary ms-2"><?php echo count($tugas_reminders['aktif']); ?></span>
+                            </div>
+                            <div class="tugas-list">
+                                <?php foreach (array_slice($tugas_reminders['aktif'], 0, 5) as $tugas): // Limit to 5 active tasks ?>
+                                <div class="tugas-item tugas-item-active">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <div class="tugas-judul">
+                                                <i class="bi bi-<?php echo $tugas['jenis'] == 'tugas_file' ? 'file-earmark-arrow-up' : 'pencil-square'; ?> me-2"></i>
+                                                <?php echo htmlspecialchars($tugas['judul']); ?>
+                                            </div>
+                                            <div class="tugas-info">
+                                                <span class="text-muted small">
+                                                    <i class="bi bi-book me-1"></i><?php echo htmlspecialchars($tugas['materi_judul']); ?>
+                                                    <span class="ms-2"><i class="bi bi-mortarboard me-1"></i><?php echo htmlspecialchars($tugas['nama_pelajaran']); ?></span>
+                                                </span>
+                                            </div>
+                                            <?php if ($tugas['deadline']): ?>
+                                            <div class="tugas-deadline text-muted mt-1">
+                                                <i class="bi bi-calendar me-1"></i>
+                                                Deadline: <?php echo date('d M Y H:i', strtotime($tugas['deadline'])); ?>
+                                            </div>
+                                            <?php else: ?>
+                                            <div class="tugas-deadline text-muted mt-1">
+                                                <i class="bi bi-infinity me-1"></i>
+                                                Tidak ada deadline
+                                            </div>
+                                            <?php endif; ?>
+                                        </div>
+                                        <a href="detail_materi.php?id=<?php echo $tugas['materi_id']; ?>" class="btn btn-sm btn-primary">
+                                            <i class="bi bi-arrow-right me-1"></i>Kerjakan
+                                        </a>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <!-- Jadwal Hari ini dan Besok -->
         <div class="row align-items-stretch mb-2">
