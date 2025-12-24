@@ -182,6 +182,131 @@ $stmt->execute();
 $soal_aktif = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
+// Get presensi data for this week (7 days)
+$presensi_mingguan = [];
+$presensi_summary = [
+    'hadir' => 0,
+    'terlambat' => 0,
+    'tidak_hadir' => 0,
+    'izin' => 0 // Assuming izin might be tracked separately, set to 0 for now
+];
+
+// Check if presensi table exists
+$table_check = $conn->query("SHOW TABLES LIKE 'presensi'");
+if ($table_check && $table_check->num_rows > 0) {
+    // Get presensi for last 7 days
+    $week_start_presensi = date('Y-m-d', strtotime('-6 days'));
+    $week_end_presensi = date('Y-m-d');
+    
+    for ($i = 6; $i >= 0; $i--) {
+        $date = date('Y-m-d', strtotime("-$i days"));
+        $date_start = $date . ' 00:00:00';
+        $date_end = $date . ' 23:59:59';
+        
+        // Get presensi for this date
+        $stmt = $conn->prepare("SELECT p.status, COUNT(*) as count
+            FROM presensi p
+            JOIN sesi_pelajaran sp ON p.sesi_pelajaran_id = sp.id
+            WHERE p.siswa_id = ? AND DATE(sp.waktu_mulai) = ?
+            GROUP BY p.status");
+        $stmt->bind_param("is", $siswa_id, $date);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        $day_data = [
+            'date' => $date,
+            'hadir' => 0,
+            'terlambat' => 0,
+            'tidak_hadir' => 0,
+            'total' => 0
+        ];
+        
+        while ($row = $result->fetch_assoc()) {
+            $day_data[$row['status']] = intval($row['count']);
+            $day_data['total'] += intval($row['count']);
+        }
+        $stmt->close();
+        
+        // Determine color for the day
+        if ($day_data['tidak_hadir'] > 0) {
+            $day_data['color'] = '#ef4444'; // Red
+        } elseif ($day_data['terlambat'] > 0) {
+            $day_data['color'] = '#f59e0b'; // Yellow/Orange
+        } elseif ($day_data['hadir'] > 0) {
+            $day_data['color'] = '#10b981'; // Green
+        } else {
+            $day_data['color'] = '#e5e7eb'; // Gray (no data)
+        }
+        
+        $presensi_mingguan[] = $day_data;
+        
+        // Add to summary
+        $presensi_summary['hadir'] += $day_data['hadir'];
+        $presensi_summary['terlambat'] += $day_data['terlambat'];
+        $presensi_summary['tidak_hadir'] += $day_data['tidak_hadir'];
+    }
+}
+
+// Get presensi data for this week (7 days)
+$presensi_mingguan = [];
+$presensi_summary = [
+    'hadir' => 0,
+    'terlambat' => 0,
+    'tidak_hadir' => 0,
+    'izin' => 0
+];
+
+// Check if presensi table exists
+$table_check = $conn->query("SHOW TABLES LIKE 'presensi'");
+if ($table_check && $table_check->num_rows > 0) {
+    // Get presensi for last 7 days
+    for ($i = 6; $i >= 0; $i--) {
+        $date = date('Y-m-d', strtotime("-$i days"));
+        
+        // Get presensi for this date
+        $stmt = $conn->prepare("SELECT p.status, COUNT(*) as count
+            FROM presensi p
+            JOIN sesi_pelajaran sp ON p.sesi_pelajaran_id = sp.id
+            WHERE p.siswa_id = ? AND DATE(sp.waktu_mulai) = ?
+            GROUP BY p.status");
+        $stmt->bind_param("is", $siswa_id, $date);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        $day_data = [
+            'date' => $date,
+            'hadir' => 0,
+            'terlambat' => 0,
+            'tidak_hadir' => 0,
+            'total' => 0
+        ];
+        
+        while ($row = $result->fetch_assoc()) {
+            $day_data[$row['status']] = intval($row['count']);
+            $day_data['total'] += intval($row['count']);
+        }
+        $stmt->close();
+        
+        // Determine color for the day
+        if ($day_data['tidak_hadir'] > 0) {
+            $day_data['color'] = '#ef4444'; // Red
+        } elseif ($day_data['terlambat'] > 0) {
+            $day_data['color'] = '#f59e0b'; // Yellow/Orange
+        } elseif ($day_data['hadir'] > 0 && $day_data['total'] > 0) {
+            $day_data['color'] = '#10b981'; // Green
+        } else {
+            $day_data['color'] = '#e5e7eb'; // Gray (no data)
+        }
+        
+        $presensi_mingguan[] = $day_data;
+        
+        // Add to summary
+        $presensi_summary['hadir'] += $day_data['hadir'];
+        $presensi_summary['terlambat'] += $day_data['terlambat'];
+        $presensi_summary['tidak_hadir'] += $day_data['tidak_hadir'];
+    }
+}
+
 $conn->close();
 ?>
 
@@ -544,6 +669,70 @@ $conn->close();
     color: #ea580c;
 }
 
+/* Presensi Chart Styles */
+.presensi-chart-container {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 8px;
+    height: 120px;
+    margin-bottom: 20px;
+    padding: 0 4px;
+}
+
+.presensi-bar {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.presensi-bar-fill {
+    width: 100%;
+    border-radius: 8px 8px 0 0;
+    transition: all 0.3s ease;
+    min-height: 8px;
+    position: relative;
+}
+
+.presensi-bar-fill:hover {
+    opacity: 0.8;
+    transform: scaleY(1.05);
+}
+
+.presensi-bar-label {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 500;
+    text-align: center;
+}
+
+.presensi-summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.presensi-summary-item:last-child {
+    border-bottom: none;
+}
+
+.presensi-summary-label {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.presensi-summary-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
 /* Jadwal Items - Updated Style */
 .jadwal-item {
     padding: 12px 0;
@@ -753,7 +942,7 @@ $conn->close();
 
         </div>
 
-        <!-- Hasil Ujian Terakhir & Jadwal Besok -->
+        <!-- Hasil Ujian Terakhir & Presensi Mingguan -->
         <div class="row align-items-stretch mb-4">
             <!-- Hasil Ujian Terakhir -->
             <div class="col-lg-6 mb-4 d-flex">
@@ -798,6 +987,74 @@ $conn->close();
                             <p class="text-muted mt-3 mb-0">Belum ada hasil ujian</p>
                         </div>
                     <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Presensi Mingguan -->
+            <div class="col-lg-6 mb-4 d-flex">
+                <div class="chart-section w-100">
+                    <div class="chart-section-header">
+                        <h5 class="chart-section-title">Presensi Mingguan</h5>
+                        <p class="chart-section-desc">Ringkasan kehadiran 7 hari terakhir.</p>
+                    </div>
+                    <div style="flex: 1; overflow-y: auto;">
+                        <!-- Chart -->
+                        <div class="presensi-chart-container">
+                            <?php 
+                            $max_value = 0;
+                            foreach ($presensi_mingguan as $day) {
+                                if ($day['total'] > $max_value) {
+                                    $max_value = $day['total'];
+                                }
+                            }
+                            $max_value = max($max_value, 1); // Prevent division by zero
+                            
+                            foreach ($presensi_mingguan as $day): 
+                                $day_name = date('D', strtotime($day['date']));
+                                $day_number = date('d', strtotime($day['date']));
+                                $height_percent = $day['total'] > 0 ? ($day['total'] / $max_value) * 100 : 0;
+                            ?>
+                                <div class="presensi-bar">
+                                    <div class="presensi-bar-fill" 
+                                         style="height: <?php echo $height_percent; ?>%; background: <?php echo $day['color']; ?>;"
+                                         title="<?php echo date('d M Y', strtotime($day['date'])); ?> - Hadir: <?php echo $day['hadir']; ?>, Terlambat: <?php echo $day['terlambat']; ?>, Tidak Hadir: <?php echo $day['tidak_hadir']; ?>">
+                                    </div>
+                                    <div class="presensi-bar-label">
+                                        <div style="font-weight: 600; color: #1e293b;"><?php echo $day_number; ?></div>
+                                        <div style="font-size: 10px; color: #94a3b8;"><?php echo substr($day_name, 0, 1); ?></div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+
+                        <!-- Summary -->
+                        <div class="mt-3 pt-3 border-top">
+                            <div class="presensi-summary-item">
+                                <span class="presensi-summary-label">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>Hadir
+                                </span>
+                                <span class="presensi-summary-value"><?php echo $presensi_summary['hadir']; ?></span>
+                            </div>
+                            <div class="presensi-summary-item">
+                                <span class="presensi-summary-label">
+                                    <i class="bi bi-file-earmark-text-fill text-warning me-2"></i>Izin
+                                </span>
+                                <span class="presensi-summary-value"><?php echo $presensi_summary['izin']; ?></span>
+                            </div>
+                            <div class="presensi-summary-item">
+                                <span class="presensi-summary-label">
+                                    <i class="bi bi-clock-fill text-warning me-2"></i>Terlambat
+                                </span>
+                                <span class="presensi-summary-value"><?php echo $presensi_summary['terlambat']; ?></span>
+                            </div>
+                            <div class="presensi-summary-item">
+                                <span class="presensi-summary-label">
+                                    <i class="bi bi-x-circle-fill text-danger me-2"></i>Tanpa Keterangan
+                                </span>
+                                <span class="presensi-summary-value"><?php echo $presensi_summary['tidak_hadir']; ?></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
