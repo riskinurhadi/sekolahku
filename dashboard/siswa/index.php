@@ -557,7 +557,7 @@ $conn->close();
 
 /* Large chart (col-8) */
 .col-lg-8 > .chart-section {
-    min-height: 450px;
+    min-height: 380px;
 }
 
 /* Small charts (col-4) */
@@ -839,7 +839,7 @@ $conn->close();
 
 /* Large chart container (col-8) */
 .col-lg-8 .chart-container {
-    min-height: 350px;
+    min-height: 280px;
 }
 
 /* Small chart container (col-4) */
