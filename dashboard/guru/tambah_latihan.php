@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         $stmt = $conn->prepare("INSERT INTO latihan (materi_id, judul, deskripsi, jenis, deadline, poin, random_soal, jumlah_soal, waktu_pengerjaan, status) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("issssiiiii", $materi_id, $judul, $deskripsi, $jenis, $deadline, $poin, $random_soal, $jumlah_soal, $waktu_pengerjaan, $status);
+        $stmt->bind_param("issssiiis", $materi_id, $judul, $deskripsi, $jenis, $deadline, $poin, $random_soal, $jumlah_soal, $waktu_pengerjaan, $status);
         
         if ($stmt->execute()) {
             $latihan_id = $stmt->insert_id;
