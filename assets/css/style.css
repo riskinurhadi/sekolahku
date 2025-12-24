@@ -220,9 +220,6 @@ body.sidebar-collapsed .sidebar .components a i {
     left: 0;
     width: var(--sidebar-width);
     padding: 1rem;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
     z-index: 1031;
     transition: width var(--transition-speed) ease, transform var(--transition-speed) ease;
 }
@@ -232,28 +229,50 @@ body.sidebar-collapsed .sidebar-ai-promo {
     padding: 0.5rem;
 }
 
-body.sidebar-collapsed .sidebar-ai-promo .ai-promo-text,
+.ai-promo-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+body.sidebar-collapsed .sidebar-ai-promo .ai-promo-card {
+    padding: 0.75rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.ai-promo-title {
+    font-size: 13px;
+    color: #1e293b;
+    line-height: 1.4;
+    margin: 0;
+    font-weight: 600;
+    text-align: center;
+}
+
+.ai-promo-subtitle {
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.4;
+    margin: 0;
+    font-weight: 400;
+    text-align: center;
+}
+
+body.sidebar-collapsed .sidebar-ai-promo .ai-promo-title,
+body.sidebar-collapsed .sidebar-ai-promo .ai-promo-subtitle,
 body.sidebar-collapsed .sidebar-ai-promo .ai-promo-button span {
     opacity: 0;
     visibility: hidden;
     width: 0;
     height: 0;
     overflow: hidden;
-}
-
-.ai-promo-content {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.ai-promo-text {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.9);
-    line-height: 1.4;
-    margin: 0;
-    font-weight: 500;
-    text-align: center;
+    display: none;
 }
 
 .ai-promo-button {
@@ -262,28 +281,29 @@ body.sidebar-collapsed .sidebar-ai-promo .ai-promo-button span {
     justify-content: center;
     gap: 0.5rem;
     padding: 0.75rem 1rem;
-    background: #ffffff;
-    color: #1e40af;
+    background: linear-gradient(180deg, #1e40af 0%, #1e3a8a 100%);
+    color: #ffffff;
     text-decoration: none;
     border-radius: 8px;
     font-weight: 600;
     font-size: 13px;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 8px rgba(30, 64, 175, 0.3);
     border: none;
     cursor: pointer;
+    width: 100%;
 }
 
 .ai-promo-button:hover {
-    background: #f8fafc;
-    color: #1e3a8a;
+    background: linear-gradient(180deg, #2563eb 0%, #1e40af 100%);
+    color: #ffffff;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.4);
 }
 
 .ai-promo-button:active {
     transform: translateY(0);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 6px rgba(30, 64, 175, 0.3);
 }
 
 .ai-promo-button i {
@@ -295,6 +315,7 @@ body.sidebar-collapsed .sidebar-ai-promo .ai-promo-button {
     padding: 0.75rem;
     width: 100%;
     justify-content: center;
+    min-width: auto;
 }
 
 body.sidebar-collapsed .sidebar-ai-promo .ai-promo-button i {
