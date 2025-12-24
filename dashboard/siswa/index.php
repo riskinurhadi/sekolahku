@@ -775,41 +775,24 @@ $conn->close();
     transform: scale(1.08);
 }
 
-.jadwal-content-horizontal {
+.jadwal-content-vertical {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
+    flex-direction: column;
     flex: 1;
     min-width: 0;
-    overflow: hidden;
-    width: 100%;
 }
 
 .jadwal-mata-pelajaran {
     font-size: 17px;
     font-weight: 600;
     color: #1e293b;
-    flex: 0 0 auto;
-    min-width: 200px;
-    line-height: 1.4;
-}
-
-.jadwal-guru {
-    font-size: 15px;
-    color: #64748b;
-    flex: 0 0 auto;
-    min-width: 160px;
+    margin-bottom: 4px;
     line-height: 1.4;
 }
 
 .jadwal-jam {
-    font-size: 15px;
+    font-size: 14px;
     color: #64748b;
-    flex: 0 0 auto;
-    white-space: nowrap;
-    padding-left: 20px;
-    border-left: 1px solid #e5e7eb;
     line-height: 1.4;
 }
 
@@ -959,16 +942,13 @@ $conn->close();
                                 $index++;
                             ?>
                                 <div class="jadwal-item">
-                                    <div class="d-flex align-items-center">
+                                    <div class="d-flex align-items-start">
                                         <div class="jadwal-icon <?php echo $icon_class; ?>">
                                             <i class="bi bi-<?php echo $icon_name; ?>"></i>
                                         </div>
-                                        <div class="jadwal-content-horizontal">
+                                        <div class="jadwal-content-vertical">
                                             <div class="jadwal-mata-pelajaran">
                                                 <?php echo htmlspecialchars($jadwal['nama_pelajaran']); ?>
-                                            </div>
-                                            <div class="jadwal-guru">
-                                                <?php echo htmlspecialchars($jadwal['nama_guru']); ?>
                                             </div>
                                             <div class="jadwal-jam">
                                                 <?php echo date('H:i', strtotime($jadwal['jam_mulai'])); ?> - <?php echo date('H:i', strtotime($jadwal['jam_selesai'])); ?>
