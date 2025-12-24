@@ -555,9 +555,9 @@ $conn->close();
     overflow: hidden;
 }
 
-/* Large chart (col-8) */
+/* Large chart (col-8) - align with total height of two small cards */
 .col-lg-8 > .chart-section {
-    min-height: 240px;
+    min-height: 340px;
     padding: 18px;
 }
 
@@ -565,6 +565,11 @@ $conn->close();
 .col-lg-4 > div > .chart-section {
     min-height: 150px;
     padding: 16px;
+}
+
+/* Progress Belajar card - slightly larger */
+.col-lg-4 > div:last-child > .chart-section {
+    min-height: 170px;
 }
 
 /* Spacing between stacked cards */
@@ -866,16 +871,22 @@ $conn->close();
     min-height: 0;
 }
 
-/* Large chart container (col-8) */
+/* Large chart container (col-8) - align with total height of two small cards */
 .col-lg-8 .chart-container {
-    min-height: 140px;
-    max-height: 140px;
+    min-height: 240px;
+    max-height: 240px;
 }
 
 /* Small chart container (col-4) */
 .col-lg-4 .chart-container {
     min-height: 100px;
     max-height: 100px;
+}
+
+/* Progress Belajar chart container - slightly larger */
+.col-lg-4 > div:last-child .chart-container {
+    min-height: 115px;
+    max-height: 115px;
 }
 
 .chart-container-small {
