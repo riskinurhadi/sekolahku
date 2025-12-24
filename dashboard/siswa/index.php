@@ -111,56 +111,105 @@ $stmt->execute();
 $recent_hasil_ujian = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
-// Get trend data untuk mini charts (7 hari terakhir)
+// Get trend data untuk charts (7 hari terakhir) - Materi dan Presensi
 $trend_data = [
-    'soal_aktif' => [],
-    'soal_selesai' => [],
-    'total_soal' => [],
-    'rata_nilai' => []
+    'materi_sudah_dibaca' => [],
+    'materi_belum_dibaca' => [],
+    'presensi_hadir' => [],
+    'presensi_tidak_hadir' => []
 ];
+
+// Get total materi aktif untuk siswa
+$table_check_materi = $conn->query("SHOW TABLES LIKE 'materi_pelajaran'");
+$table_check_progress = $conn->query("SHOW TABLES LIKE 'progress_materi_siswa'");
+$materi_exists = ($table_check_materi && $table_check_materi->num_rows > 0) && ($table_check_progress && $table_check_progress->num_rows > 0);
+
+if ($materi_exists && $kelas_id) {
+    // Get total materi aktif
+    $stmt = $conn->prepare("SELECT COUNT(*) as total FROM materi_pelajaran m
+        JOIN mata_pelajaran mp ON m.mata_pelajaran_id = mp.id
+        WHERE m.status = 'aktif' AND m.kelas_id = ? AND mp.sekolah_id = ?");
+    $stmt->bind_param("ii", $kelas_id, $sekolah_id);
+    $stmt->execute();
+    $total_materi = $stmt->get_result()->fetch_assoc()['total'];
+    $stmt->close();
+    
+    // Get materi sudah dibaca (status = 'selesai')
+    $stmt = $conn->prepare("SELECT COUNT(*) as total FROM progress_materi_siswa pms
+        JOIN materi_pelajaran m ON pms.materi_id = m.id
+        JOIN mata_pelajaran mp ON m.mata_pelajaran_id = mp.id
+        WHERE pms.siswa_id = ? AND pms.status = 'selesai' 
+        AND m.status = 'aktif' AND m.kelas_id = ? AND mp.sekolah_id = ?");
+    $stmt->bind_param("iii", $siswa_id, $kelas_id, $sekolah_id);
+    $stmt->execute();
+    $materi_sudah_dibaca = $stmt->get_result()->fetch_assoc()['total'];
+    $stmt->close();
+    
+    $materi_belum_dibaca = max(0, $total_materi - $materi_sudah_dibaca);
+} else {
+    $materi_sudah_dibaca = 0;
+    $materi_belum_dibaca = 0;
+}
 
 for ($i = 6; $i >= 0; $i--) {
     $date = date('Y-m-d', strtotime("-$i days"));
-    $date_end = date('Y-m-d H:i:s', strtotime("-$i days 23:59:59"));
     
-    // Total soal aktif sampai tanggal tersebut
-    $stmt = $conn->prepare("SELECT COUNT(*) as total FROM soal s 
-        JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id 
-        WHERE mp.sekolah_id = ? AND s.status = 'aktif' 
-        AND (s.tanggal_mulai IS NULL OR s.tanggal_mulai <= ?)
-        AND (s.tanggal_selesai IS NULL OR s.tanggal_selesai >= ?)
-        AND DATE(s.created_at) <= ?");
-    $stmt->bind_param("isss", $sekolah_id, $date_end, $date_end, $date);
-    $stmt->execute();
-    $trend_data['soal_aktif'][] = $stmt->get_result()->fetch_assoc()['total'];
-    $stmt->close();
+    // Materi sudah dibaca pada tanggal tersebut
+    if ($materi_exists && $kelas_id) {
+        $stmt = $conn->prepare("SELECT COUNT(DISTINCT pms.materi_id) as total FROM progress_materi_siswa pms
+            JOIN materi_pelajaran m ON pms.materi_id = m.id
+            JOIN mata_pelajaran mp ON m.mata_pelajaran_id = mp.id
+            WHERE pms.siswa_id = ? AND pms.status = 'selesai' 
+            AND m.status = 'aktif' AND m.kelas_id = ? AND mp.sekolah_id = ?
+            AND DATE(pms.updated_at) <= ?");
+        $stmt->bind_param("iiis", $siswa_id, $kelas_id, $sekolah_id, $date);
+        $stmt->execute();
+        $materi_sudah = $stmt->get_result()->fetch_assoc()['total'];
+        $stmt->close();
+        
+        // Total materi aktif sampai tanggal tersebut
+        $stmt = $conn->prepare("SELECT COUNT(*) as total FROM materi_pelajaran m
+            JOIN mata_pelajaran mp ON m.mata_pelajaran_id = mp.id
+            WHERE m.status = 'aktif' AND m.kelas_id = ? AND mp.sekolah_id = ?
+            AND DATE(m.created_at) <= ?");
+        $stmt->bind_param("iis", $kelas_id, $sekolah_id, $date);
+        $stmt->execute();
+        $total_materi_date = $stmt->get_result()->fetch_assoc()['total'];
+        $stmt->close();
+        
+        $trend_data['materi_sudah_dibaca'][] = $materi_sudah;
+        $trend_data['materi_belum_dibaca'][] = max(0, $total_materi_date - $materi_sudah);
+    } else {
+        $trend_data['materi_sudah_dibaca'][] = 0;
+        $trend_data['materi_belum_dibaca'][] = 0;
+    }
     
-    // Total soal selesai sampai tanggal tersebut
-    $stmt = $conn->prepare("SELECT COUNT(*) as total FROM hasil_ujian 
-        WHERE siswa_id = ? AND status = 'selesai' AND DATE(waktu_selesai) <= ?");
-    $stmt->bind_param("is", $siswa_id, $date);
-    $stmt->execute();
-    $trend_data['soal_selesai'][] = $stmt->get_result()->fetch_assoc()['total'];
-    $stmt->close();
-    
-    // Total soal (aktif + selesai)
-    $trend_data['total_soal'][] = $trend_data['soal_aktif'][count($trend_data['soal_aktif']) - 1] + $trend_data['soal_selesai'][count($trend_data['soal_selesai']) - 1];
-    
-    // Rata-rata nilai sampai tanggal tersebut
-    $stmt = $conn->prepare("SELECT AVG(nilai) as avg FROM hasil_ujian 
-        WHERE siswa_id = ? AND status = 'selesai' AND nilai IS NOT NULL AND DATE(waktu_selesai) <= ?");
-    $stmt->bind_param("is", $siswa_id, $date);
-    $stmt->execute();
-    $result = $stmt->get_result()->fetch_assoc();
-    $trend_data['rata_nilai'][] = $result['avg'] ? round($result['avg'], 2) : 0;
-    $stmt->close();
+    // Presensi hadir vs tidak hadir pada tanggal tersebut
+    $table_check_presensi = $conn->query("SHOW TABLES LIKE 'presensi'");
+    if ($table_check_presensi && $table_check_presensi->num_rows > 0) {
+        $stmt = $conn->prepare("SELECT 
+            SUM(CASE WHEN p.status = 'hadir' THEN 1 ELSE 0 END) as hadir,
+            SUM(CASE WHEN p.status = 'tidak_hadir' THEN 1 ELSE 0 END) as tidak_hadir
+            FROM presensi p
+            JOIN sesi_pelajaran sp ON p.sesi_pelajaran_id = sp.id
+            WHERE p.siswa_id = ? AND DATE(sp.waktu_mulai) = ?");
+        $stmt->bind_param("is", $siswa_id, $date);
+        $stmt->execute();
+        $presensi_result = $stmt->get_result()->fetch_assoc();
+        $trend_data['presensi_hadir'][] = intval($presensi_result['hadir'] ?? 0);
+        $trend_data['presensi_tidak_hadir'][] = intval($presensi_result['tidak_hadir'] ?? 0);
+        $stmt->close();
+    } else {
+        $trend_data['presensi_hadir'][] = 0;
+        $trend_data['presensi_tidak_hadir'][] = 0;
+    }
 }
 
-// Calculate percentage changes
-$prev_soal_aktif = count($trend_data['soal_aktif']) > 1 ? $trend_data['soal_aktif'][count($trend_data['soal_aktif']) - 2] : $stats['total_soal_aktif'];
-$prev_soal_selesai = count($trend_data['soal_selesai']) > 1 ? $trend_data['soal_selesai'][count($trend_data['soal_selesai']) - 2] : $stats['total_soal_selesai'];
-$prev_total_soal = count($trend_data['total_soal']) > 1 ? $trend_data['total_soal'][count($trend_data['total_soal']) - 2] : ($stats['total_soal_aktif'] + $stats['total_soal_selesai']);
-$prev_rata_nilai = count($trend_data['rata_nilai']) > 1 ? $trend_data['rata_nilai'][count($trend_data['rata_nilai']) - 2] : $stats['rata_rata_nilai'];
+// Calculate percentage changes for stats cards (still using soal data)
+$prev_soal_aktif = isset($trend_data['soal_aktif']) && count($trend_data['soal_aktif']) > 1 ? $trend_data['soal_aktif'][count($trend_data['soal_aktif']) - 2] : $stats['total_soal_aktif'];
+$prev_soal_selesai = isset($trend_data['soal_selesai']) && count($trend_data['soal_selesai']) > 1 ? $trend_data['soal_selesai'][count($trend_data['soal_selesai']) - 2] : $stats['total_soal_selesai'];
+$prev_total_soal = isset($trend_data['total_soal']) && count($trend_data['total_soal']) > 1 ? $trend_data['total_soal'][count($trend_data['total_soal']) - 2] : ($stats['total_soal_aktif'] + $stats['total_soal_selesai']);
+$prev_rata_nilai = isset($trend_data['rata_nilai']) && count($trend_data['rata_nilai']) > 1 ? $trend_data['rata_nilai'][count($trend_data['rata_nilai']) - 2] : $stats['rata_rata_nilai'];
 
 $change_soal_aktif = $prev_soal_aktif > 0 ? round((($stats['total_soal_aktif'] - $prev_soal_aktif) / $prev_soal_aktif) * 100, 1) : 0;
 $change_soal_selesai = $prev_soal_selesai > 0 ? round((($stats['total_soal_selesai'] - $prev_soal_selesai) / $prev_soal_selesai) * 100, 1) : 0;
@@ -1032,8 +1081,8 @@ $conn->close();
                     <div class="chart-section h-100">
                         <div class="chart-section-header">
                             <div>
-                                <h5 class="chart-section-title">Trend Nilai</h5>
-                                <p class="chart-section-desc">Perkembangan nilai rata-rata 7 hari terakhir</p>
+                                <h5 class="chart-section-title">Trend Presensi</h5>
+                                <p class="chart-section-desc">Perkembangan kehadiran 7 hari terakhir</p>
                             </div>
                         </div>
                         <div class="chart-container">
@@ -1047,8 +1096,8 @@ $conn->close();
                     <div class="chart-section w-100 h-100">
                         <div class="chart-section-header">
                             <div>
-                                <h5 class="chart-section-title">Progress Belajar</h5>
-                                <p class="chart-section-desc">Persentase soal yang sudah dikerjakan</p>
+                                <h5 class="chart-section-title">Progress Materi</h5>
+                                <p class="chart-section-desc">Persentase materi yang sudah dibaca</p>
                             </div>
                         </div>
                         <div class="chart-container">
@@ -1336,9 +1385,10 @@ $conn->close();
 
 <script>
 // Prepare data for charts
-const trendNilaiData = <?php echo json_encode($trend_data['rata_nilai']); ?>;
-const trendSoalAktifData = <?php echo json_encode($trend_data['soal_aktif']); ?>;
-const trendSoalSelesaiData = <?php echo json_encode($trend_data['soal_selesai']); ?>;
+const trendPresensiHadirData = <?php echo json_encode($trend_data['presensi_hadir']); ?>;
+const trendPresensiTidakHadirData = <?php echo json_encode($trend_data['presensi_tidak_hadir']); ?>;
+const trendMateriSudahDibacaData = <?php echo json_encode($trend_data['materi_sudah_dibaca']); ?>;
+const trendMateriBelumDibacaData = <?php echo json_encode($trend_data['materi_belum_dibaca']); ?>;
 const labels = <?php 
     $chart_labels = [];
     for ($i = 6; $i >= 0; $i--) {
@@ -1347,30 +1397,49 @@ const labels = <?php
     echo json_encode($chart_labels);
 ?>;
 
-// Chart 1: Trend Nilai (Line Chart)
+// Chart 1: Trend Presensi (Line Chart)
 const ctx1 = document.getElementById('trendNilaiChart');
 if (ctx1) {
     new Chart(ctx1, {
         type: 'line',
         data: {
             labels: labels,
-            datasets: [{
-                label: 'Rata-rata Nilai',
-                data: trendNilaiData,
-                borderColor: '#3b82f6',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.4,
-                pointRadius: 3,
-                pointBackgroundColor: '#3b82f6',
-                pointBorderColor: '#ffffff',
-                pointBorderWidth: 1.5,
-                pointHoverRadius: 5,
-                pointHoverBackgroundColor: '#2563eb',
-                pointHoverBorderColor: '#ffffff',
-                pointHoverBorderWidth: 1.5
-            }]
+            datasets: [
+                {
+                    label: 'Hadir',
+                    data: trendPresensiHadirData,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 3,
+                    pointBackgroundColor: '#10b981',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 1.5,
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: '#059669',
+                    pointHoverBorderColor: '#ffffff',
+                    pointHoverBorderWidth: 1.5
+                },
+                {
+                    label: 'Tidak Hadir',
+                    data: trendPresensiTidakHadirData,
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 3,
+                    pointBackgroundColor: '#ef4444',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 1.5,
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: '#dc2626',
+                    pointHoverBorderColor: '#ffffff',
+                    pointHoverBorderWidth: 1.5
+                }
+            ]
         },
         options: {
             responsive: true,
@@ -1398,17 +1467,17 @@ if (ctx1) {
                     bodyFont: {
                         size: 11
                     },
-                    displayColors: false,
+                    displayColors: true,
                     callbacks: {
                         label: function(context) {
-                            return 'Nilai: ' + context.parsed.y.toFixed(2);
+                            return context.dataset.label + ': ' + context.parsed.y;
                         }
                     }
                 }
             },
             scales: {
                 y: {
-                    beginAtZero: false,
+                    beginAtZero: true,
                     grid: {
                         color: 'rgba(0, 0, 0, 0.05)',
                         drawBorder: false
@@ -1417,7 +1486,8 @@ if (ctx1) {
                         font: {
                             size: 10
                         },
-                        color: '#64748b'
+                        color: '#64748b',
+                        stepSize: 1
                     }
                 },
                 x: {
@@ -1436,20 +1506,20 @@ if (ctx1) {
     });
 }
 
-// Chart 2: Progress Belajar (Donut Chart)
+// Chart 2: Progress Materi (Donut Chart)
 const ctx2 = document.getElementById('progressBelajarChart');
 if (ctx2) {
-    const totalSoal = <?php echo $stats['total_soal_aktif'] + $stats['total_soal_selesai']; ?>;
-    const soalSelesai = <?php echo $stats['total_soal_selesai']; ?>;
-    const soalAktif = <?php echo $stats['total_soal_aktif']; ?>;
-    const persentase = totalSoal > 0 ? Math.round((soalSelesai / totalSoal) * 100) : 0;
+    const materiSudahDibaca = <?php echo $materi_sudah_dibaca; ?>;
+    const materiBelumDibaca = <?php echo $materi_belum_dibaca; ?>;
+    const totalMateri = materiSudahDibaca + materiBelumDibaca;
+    const persentase = totalMateri > 0 ? Math.round((materiSudahDibaca / totalMateri) * 100) : 0;
 
     new Chart(ctx2, {
         type: 'doughnut',
         data: {
-            labels: ['Selesai', 'Belum Dikerjakan'],
+            labels: ['Sudah Dibaca', 'Belum Dibaca'],
             datasets: [{
-                data: [soalSelesai, soalAktif],
+                data: [materiSudahDibaca, materiBelumDibaca],
                 backgroundColor: [
                     '#10b981',
                     '#e5e7eb'
@@ -1513,14 +1583,14 @@ if (ctx2) {
                 
                 ctx.font = '11px Inter, sans-serif';
                 ctx.fillStyle = '#64748b';
-                ctx.fillText('Selesai', centerX, centerY + 12);
+                ctx.fillText('Sudah Dibaca', centerX, centerY + 12);
                 ctx.restore();
             }
         }]
     });
 }
 
-// Chart 3: Aktivitas Belajar (Stacked Bar Chart)
+// Chart 3: Aktivitas Materi (Stacked Bar Chart)
 const ctx3 = document.getElementById('aktivitasBelajarChart');
 if (ctx3) {
     new Chart(ctx3, {
@@ -1529,8 +1599,8 @@ if (ctx3) {
             labels: labels,
             datasets: [
                 {
-                    label: 'Soal Selesai',
-                    data: trendSoalSelesaiData,
+                    label: 'Sudah Dibaca',
+                    data: trendMateriSudahDibacaData,
                     backgroundColor: '#10b981',
                     borderColor: '#059669',
                     borderWidth: 0.5,
@@ -1540,8 +1610,8 @@ if (ctx3) {
                     maxBarThickness: 35
                 },
                 {
-                    label: 'Soal Aktif',
-                    data: trendSoalAktifData,
+                    label: 'Belum Dibaca',
+                    data: trendMateriBelumDibacaData,
                     backgroundColor: '#3b82f6',
                     borderColor: '#2563eb',
                     borderWidth: 0.5,
