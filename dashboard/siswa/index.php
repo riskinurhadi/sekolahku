@@ -735,26 +735,22 @@ $conn->close();
 
 /* Jadwal Items - Updated Style */
 .jadwal-item {
-    padding: 18px 20px;
+    padding: 14px 0;
     border-bottom: 1px solid #f1f5f9;
     transition: all 0.2s ease;
     cursor: pointer;
-    background: #ffffff;
-    border-radius: 8px;
-    margin-bottom: 8px;
+    background: transparent;
+    margin-bottom: 0;
     width: 100%;
     box-sizing: border-box;
-    overflow: hidden;
 }
 
 .jadwal-item:last-child {
     border-bottom: none;
-    margin-bottom: 0;
 }
 
 .jadwal-item:hover {
     transform: translateX(4px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .jadwal-icon {
