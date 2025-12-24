@@ -557,12 +557,12 @@ $conn->close();
 
 /* Large chart (col-8) */
 .col-lg-8 > .chart-section {
-    min-height: 380px;
+    min-height: 320px;
 }
 
 /* Small charts (col-4) */
 .col-lg-4 > div > .chart-section {
-    min-height: 210px;
+    min-height: 180px;
 }
 
 .chart-section:hover {
@@ -839,12 +839,12 @@ $conn->close();
 
 /* Large chart container (col-8) */
 .col-lg-8 .chart-container {
-    min-height: 280px;
+    min-height: 220px;
 }
 
 /* Small chart container (col-4) */
 .col-lg-4 .chart-container {
-    min-height: 150px;
+    min-height: 120px;
 }
 
 .chart-container-small {
@@ -1315,17 +1315,17 @@ if (ctx1) {
                 data: trendNilaiData,
                 borderColor: '#3b82f6',
                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                borderWidth: 3,
+                borderWidth: 2,
                 fill: true,
                 tension: 0.4,
-                pointRadius: 5,
+                pointRadius: 3,
                 pointBackgroundColor: '#3b82f6',
                 pointBorderColor: '#ffffff',
-                pointBorderWidth: 2,
-                pointHoverRadius: 7,
+                pointBorderWidth: 1.5,
+                pointHoverRadius: 5,
                 pointHoverBackgroundColor: '#2563eb',
                 pointHoverBorderColor: '#ffffff',
-                pointHoverBorderWidth: 2
+                pointHoverBorderWidth: 1.5
             }]
         },
         options: {
@@ -1337,22 +1337,22 @@ if (ctx1) {
                     position: 'top',
                     labels: {
                         usePointStyle: true,
-                        padding: 15,
+                        padding: 10,
                         font: {
-                            size: 12,
+                            size: 11,
                             weight: '500'
                         }
                     }
                 },
                 tooltip: {
                     backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    padding: 12,
+                    padding: 10,
                     titleFont: {
-                        size: 13,
+                        size: 12,
                         weight: '600'
                     },
                     bodyFont: {
-                        size: 12
+                        size: 11
                     },
                     displayColors: false,
                     callbacks: {
@@ -1371,7 +1371,7 @@ if (ctx1) {
                     },
                     ticks: {
                         font: {
-                            size: 11
+                            size: 10
                         },
                         color: '#64748b'
                     }
@@ -1382,7 +1382,7 @@ if (ctx1) {
                     },
                     ticks: {
                         font: {
-                            size: 11
+                            size: 10
                         },
                         color: '#64748b'
                     }
@@ -1424,22 +1424,22 @@ if (ctx2) {
                     position: 'bottom',
                     labels: {
                         usePointStyle: true,
-                        padding: 15,
+                        padding: 10,
                         font: {
-                            size: 12,
+                            size: 11,
                             weight: '500'
                         }
                     }
                 },
                 tooltip: {
                     backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    padding: 12,
+                    padding: 10,
                     titleFont: {
-                        size: 13,
+                        size: 12,
                         weight: '600'
                     },
                     bodyFont: {
-                        size: 12
+                        size: 11
                     },
                     callbacks: {
                         label: function(context) {
@@ -1461,15 +1461,15 @@ if (ctx2) {
                 const centerY = chart.chartArea.top + (chart.chartArea.bottom - chart.chartArea.top) / 2;
                 
                 ctx.save();
-                ctx.font = 'bold 24px Inter, sans-serif';
+                ctx.font = 'bold 20px Inter, sans-serif';
                 ctx.fillStyle = '#1e293b';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(persentase + '%', centerX, centerY - 10);
+                ctx.fillText(persentase + '%', centerX, centerY - 8);
                 
-                ctx.font = '12px Inter, sans-serif';
+                ctx.font = '11px Inter, sans-serif';
                 ctx.fillStyle = '#64748b';
-                ctx.fillText('Selesai', centerX, centerY + 15);
+                ctx.fillText('Selesai', centerX, centerY + 12);
                 ctx.restore();
             }
         }]
@@ -1489,18 +1489,22 @@ if (ctx3) {
                     data: trendSoalSelesaiData,
                     backgroundColor: '#10b981',
                     borderColor: '#059669',
-                    borderWidth: 1,
-                    borderRadius: 6,
-                    borderSkipped: false
+                    borderWidth: 0.5,
+                    borderRadius: 4,
+                    borderSkipped: false,
+                    barThickness: 30,
+                    maxBarThickness: 35
                 },
                 {
                     label: 'Soal Aktif',
                     data: trendSoalAktifData,
                     backgroundColor: '#3b82f6',
                     borderColor: '#2563eb',
-                    borderWidth: 1,
-                    borderRadius: 6,
-                    borderSkipped: false
+                    borderWidth: 0.5,
+                    borderRadius: 4,
+                    borderSkipped: false,
+                    barThickness: 30,
+                    maxBarThickness: 35
                 }
             ]
         },
@@ -1513,22 +1517,22 @@ if (ctx3) {
                     position: 'top',
                     labels: {
                         usePointStyle: true,
-                        padding: 15,
+                        padding: 10,
                         font: {
-                            size: 12,
+                            size: 11,
                             weight: '500'
                         }
                     }
                 },
                 tooltip: {
                     backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    padding: 12,
+                    padding: 10,
                     titleFont: {
-                        size: 13,
+                        size: 12,
                         weight: '600'
                     },
                     bodyFont: {
-                        size: 12
+                        size: 11
                     }
                 }
             },
@@ -1540,7 +1544,7 @@ if (ctx3) {
                     },
                     ticks: {
                         font: {
-                            size: 11
+                            size: 10
                         },
                         color: '#64748b'
                     }
@@ -1554,7 +1558,7 @@ if (ctx3) {
                     },
                     ticks: {
                         font: {
-                            size: 11
+                            size: 10
                         },
                         color: '#64748b',
                         stepSize: 1
