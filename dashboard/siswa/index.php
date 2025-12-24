@@ -557,7 +557,7 @@ $conn->close();
 
 /* Large chart (col-8) - align with total height of two small cards */
 .col-lg-8 > .chart-section {
-    height: 380px;
+    height: 396px;
     padding: 18px;
     display: flex;
     flex-direction: column;
@@ -1026,9 +1026,9 @@ $conn->close();
             </div>
 
             <!-- Right Column - Two Stacked Cards -->
-            <div class="col-lg-4 d-flex flex-column" style="height: 380px;">
+            <div class="col-lg-4 d-flex flex-column" style="height: 396px;">
                 <!-- Trend Nilai Chart - Top Card -->
-                <div class="mb-3 flex-shrink-0">
+                <div class="mb-3" style="height: 182px;">
                     <div class="chart-section h-100">
                         <div class="chart-section-header">
                             <div>
@@ -1043,7 +1043,7 @@ $conn->close();
                 </div>
 
                 <!-- Progress Belajar Chart - Bottom Card -->
-                <div class="flex-grow-1 d-flex">
+                <div class="flex-grow-1 d-flex" style="min-height: 0;">
                     <div class="chart-section w-100 h-100">
                         <div class="chart-section-header">
                             <div>
