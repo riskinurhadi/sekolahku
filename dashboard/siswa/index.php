@@ -705,7 +705,7 @@ $conn->close();
         <!-- Charts Row -->
         <div class="row align-items-stretch mb-4">
             <!-- Jadwal Hari Ini -->
-            <div class="col-lg-6 mb-4 d-flex">
+            <div class="col-12 mb-4 d-flex">
                 <div class="chart-section w-100">
                     <div class="chart-section-header">
                         <h5 class="chart-section-title">Jadwal Hari Ini</h5>
@@ -751,7 +751,11 @@ $conn->close();
                 </div>
             </div>
 
-            <!-- Hasil Ujian Terakhir & Jadwal Besok -->
+        </div>
+
+        <!-- Hasil Ujian Terakhir & Jadwal Besok -->
+        <div class="row align-items-stretch mb-4">
+            <!-- Hasil Ujian Terakhir -->
             <div class="col-lg-6 mb-4 d-flex">
                 <div class="chart-section w-100">
                     <div class="chart-section-header">
@@ -798,7 +802,7 @@ $conn->close();
             </div>
         </div>
 
-        <!-- Jadwal Besok & Pengumuman -->
+        <!-- Jadwal Besok -->
         <div class="row align-items-stretch mb-4">
             <!-- Jadwal Besok -->
             <div class="col-lg-6 mb-4 d-flex">
@@ -837,46 +841,6 @@ $conn->close();
                         <div class="text-center py-4" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                             <i class="bi bi-calendar2-x text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
                             <p class="text-muted mt-3 mb-0">Tidak ada jadwal untuk besok</p>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-
-            <!-- Pengumuman Terbaru -->
-            <div class="col-lg-6 mb-4 d-flex">
-                <div class="chart-section w-100">
-                    <div class="chart-section-header">
-                        <h5 class="chart-section-title">Pengumuman</h5>
-                        <p class="chart-section-desc">Informasi terbaru dari sekolah.</p>
-                </div>
-                    <?php if ($pengumuman_terbaru): ?>
-                        <div style="flex: 1; overflow-y: auto;">
-                            <div class="dashboard-list-item">
-                                <div class="dashboard-list-item-icon icon-orange">
-                                    <i class="bi bi-megaphone"></i>
-                                </div>
-                                <div class="dashboard-list-item-content">
-                                    <div class="dashboard-list-item-title">
-                                        <?php echo htmlspecialchars($pengumuman_terbaru['judul']); ?>
-                                    </div>
-                                    <div class="dashboard-list-item-subtitle">
-                                        <?php echo htmlspecialchars($pengumuman_terbaru['kategori'] ?? 'Umum'); ?>
-                                    </div>
-                                    <div class="dashboard-list-item-date">
-                                        <?php echo date('d M Y', strtotime($pengumuman_terbaru['created_at'])); ?>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="text-center mt-3 pt-3 border-top">
-                                <a href="informasi_akademik.php" class="text-decoration-none" style="color: #3b82f6; font-size: 13px; font-weight: 500;">
-                                    Lihat Semua Pengumuman <i class="bi bi-arrow-right ms-1"></i>
-                                </a>
-                            </div>
-                        </div>
-                    <?php else: ?>
-                        <div class="text-center py-4" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                            <i class="bi bi-megaphone text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
-                            <p class="text-muted mt-3 mb-0">Belum ada pengumuman</p>
                         </div>
                     <?php endif; ?>
                 </div>
