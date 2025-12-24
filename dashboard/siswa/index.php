@@ -643,7 +643,13 @@ $conn->close();
     margin-top: 4px;
 }
 
-/* Jadwal Besok - Larger Font */
+/* Jadwal Besok - Larger Font & Icon */
+.jadwal-besok .dashboard-list-item-icon {
+    width: 52px;
+    height: 52px;
+    font-size: 24px;
+}
+
 .jadwal-besok .dashboard-list-item-title {
     font-size: 17px;
     font-weight: 600;
@@ -655,6 +661,16 @@ $conn->close();
     font-size: 14px;
     color: #64748b;
     margin-top: 0;
+}
+
+/* Jadwal Card Headers - Larger Font */
+.chart-section.jadwal-card .chart-section-title {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.chart-section.jadwal-card .chart-section-desc {
+    font-size: 14px;
 }
 
 /* Icon Color Variants */
@@ -934,7 +950,7 @@ $conn->close();
         <div class="row align-items-stretch mb-4">
             <!-- Jadwal Hari Ini -->
             <div class="col-lg-6 mb-4 d-flex">
-                <div class="chart-section w-100">
+                <div class="chart-section jadwal-card w-100">
                     <div class="chart-section-header">
                         <h5 class="chart-section-title">Jadwal Hari Ini</h5>
                         <p class="chart-section-desc">Daftar jadwal pelajaran untuk hari ini.</p>
@@ -978,7 +994,7 @@ $conn->close();
 
             <!-- Jadwal Besok -->
             <div class="col-lg-6 mb-4 d-flex">
-                <div class="chart-section w-100">
+                <div class="chart-section jadwal-card w-100">
                     <div class="chart-section-header">
                         <h5 class="chart-section-title">Jadwal Besok</h5>
                         <p class="chart-section-desc">Persiapan jadwal pelajaran untuk besok.</p>
