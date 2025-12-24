@@ -66,8 +66,8 @@ body {
     top: 0;
     left: 0;
     z-index: 1030;
-    background: linear-gradient(180deg, #6366f1 0%, #8b5cf6 50%, #9333ea 100%);
-    box-shadow: 4px 0 24px rgba(99, 102, 241, 0.3);
+    background: linear-gradient(180deg, #6366f1 0%, #8b5cf6 50%, #9333ea 100%) !important;
+    box-shadow: 4px 0 24px rgba(99, 102, 241, 0.3) !important;
     transition: width var(--transition-speed) ease, transform var(--transition-speed) ease;
     overflow-y: auto;
     overflow-x: hidden;
@@ -119,9 +119,9 @@ body.sidebar-collapsed .sidebar .components a i {
     align-items: center;
     justify-content: center;
     padding: 0 1.25rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
     flex-shrink: 0;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.05) !important;
 }
 
 /* BACKUP STYLE LOGO (ORIGINAL):
@@ -178,7 +178,7 @@ body.sidebar-collapsed .sidebar .components a i {
     padding: 0.6rem 0.85rem;
     display: flex;
     align-items: center;
-    color: rgba(255, 255, 255, 0.85);
+    color: rgba(255, 255, 255, 0.85) !important;
     text-decoration: none;
     border-radius: 8px;
     font-weight: 500;
@@ -187,14 +187,14 @@ body.sidebar-collapsed .sidebar .components a i {
 }
 
 .sidebar .components a:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.15) !important;
     transform: translateX(4px);
 }
 
 .sidebar .components a.active {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.25);
+    color: #fff !important;
+    background: rgba(255, 255, 255, 0.25) !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     font-weight: 600;
 }
@@ -1303,7 +1303,7 @@ form.hidden textarea,
 }
 
 .sidebar .components a i {
-    color: inherit;
+    color: inherit !important;
 }
 
 /* Watermark */
