@@ -41,20 +41,18 @@ if (isset($_GET['delete'])) {
 
 require_once '../../includes/header.php';
 
-// Get all materi
-$stmt = $conn->prepare("SELECT m.*, mp.nama_pelajaran, 
+// Get all materi dengan info kelas
+$stmt = $conn->prepare("SELECT m.*, mp.nama_pelajaran, k.nama_kelas, k.tingkat,
     (SELECT COUNT(*) FROM latihan WHERE materi_id = m.id) as jumlah_latihan
     FROM materi_pelajaran m
     JOIN mata_pelajaran mp ON m.mata_pelajaran_id = mp.id
+    LEFT JOIN kelas k ON m.kelas_id = k.id
     WHERE m.guru_id = ?
-    ORDER BY m.urutan ASC, m.created_at DESC");
+    ORDER BY m.id ASC");
 $stmt->bind_param("i", $guru_id);
 $stmt->execute();
 $materi_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
-
-// Get mata pelajaran for filter
-$mata_pelajaran_list = $conn->query("SELECT * FROM mata_pelajaran WHERE guru_id = $guru_id ORDER BY nama_pelajaran")->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -91,40 +89,53 @@ $mata_pelajaran_list = $conn->query("SELECT * FROM mata_pelajaran WHERE guru_id 
 </div>
 <?php else: ?>
 <?php
-// Group by pertemuan (urutan). Pertemuan = urutan+1
-$pertemuan_list = [];
+// Group by kelas
+$materi_by_kelas = [];
 foreach ($materi_list as $materi) {
-    $pert = intval($materi['urutan']);
-    if (!isset($pertemuan_list[$pert])) {
-        $pertemuan_list[$pert] = [];
+    $kelas_key = $materi['kelas_id'] ?? 'no_class';
+    $kelas_name = $materi['nama_kelas'] ?? 'Belum ada kelas';
+    if (!isset($materi_by_kelas[$kelas_key])) {
+        $materi_by_kelas[$kelas_key] = [
+            'nama_kelas' => $kelas_name,
+            'tingkat' => $materi['tingkat'] ?? null,
+            'items' => []
+        ];
     }
-    $pertemuan_list[$pert][] = $materi;
+    $materi_by_kelas[$kelas_key]['items'][] = $materi;
 }
-ksort($pertemuan_list);
+// Sort by kelas name
+uasort($materi_by_kelas, function($a, $b) {
+    if ($a['tingkat'] != $b['tingkat']) {
+        return ($a['tingkat'] ?? 0) - ($b['tingkat'] ?? 0);
+    }
+    return strcmp($a['nama_kelas'], $b['nama_kelas']);
+});
 ?>
 
-<div class="accordion" id="pertemuanAccordion">
-    <?php foreach ($pertemuan_list as $pert => $items): ?>
-        <?php $pertemuan_ke = $pert + 1; ?>
+<div class="accordion" id="kelasAccordion">
+    <?php foreach ($materi_by_kelas as $kelas_id => $kelas_data): ?>
         <div class="accordion-item">
-            <h2 class="accordion-header" id="heading<?php echo $pert; ?>">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<?php echo $pert; ?>" aria-expanded="false" aria-controls="collapse<?php echo $pert; ?>">
+            <h2 class="accordion-header" id="heading<?php echo $kelas_id; ?>">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<?php echo $kelas_id; ?>" aria-expanded="false" aria-controls="collapse<?php echo $kelas_id; ?>">
                     <div class="d-flex justify-content-between w-100 align-items-center">
                         <div>
-                            <strong>Pertemuan <?php echo $pertemuan_ke; ?></strong>
-                            <span class="text-muted ms-2">Total <?php echo count($items); ?> materi</span>
+                            <strong><?php echo htmlspecialchars($kelas_data['nama_kelas']); ?></strong>
+                            <?php if ($kelas_data['tingkat']): ?>
+                                <span class="text-muted ms-2">(Kelas <?php echo $kelas_data['tingkat']; ?>)</span>
+                            <?php endif; ?>
+                            <span class="text-muted ms-2">- Total <?php echo count($kelas_data['items']); ?> materi</span>
                         </div>
                         <div>
-                            <a href="tambah_materi.php?urutan=<?php echo $pert; ?>" class="btn btn-sm btn-outline-primary">
+                            <a href="tambah_materi.php" class="btn btn-sm btn-outline-primary">
                                 <i class="bi bi-plus-circle"></i> Upload Materi
                             </a>
                         </div>
                     </div>
                 </button>
             </h2>
-            <div id="collapse<?php echo $pert; ?>" class="accordion-collapse collapse" aria-labelledby="heading<?php echo $pert; ?>" data-bs-parent="#pertemuanAccordion">
+            <div id="collapse<?php echo $kelas_id; ?>" class="accordion-collapse collapse" aria-labelledby="heading<?php echo $kelas_id; ?>" data-bs-parent="#kelasAccordion">
                 <div class="accordion-body">
-                    <?php foreach ($items as $index => $materi): ?>
+                    <?php foreach ($kelas_data['items'] as $index => $materi): ?>
                         <div class="card shadow-sm mb-3">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
@@ -161,7 +172,6 @@ ksort($pertemuan_list);
                                     $badge_class = $status_badges[$materi['status']] ?? 'bg-secondary';
                                     ?>
                                     <span class="badge <?php echo $badge_class; ?>"><?php echo ucfirst($materi['status']); ?></span>
-                                    <span class="badge bg-light text-dark">Urutan: <?php echo $materi['urutan']; ?></span>
                                 </div>
                             </div>
                         </div>

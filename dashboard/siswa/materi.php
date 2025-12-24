@@ -16,21 +16,21 @@ $siswa_info = $stmt->get_result()->fetch_assoc();
 $kelas_id = $siswa_info['kelas_id'] ?? null;
 $stmt->close();
 
-// Get materi aktif (materi yang status aktif dan mata pelajarannya sesuai dengan sekolah)
+// Get materi aktif (materi yang status aktif, sesuai kelas siswa, dan mata pelajarannya sesuai dengan sekolah)
 // Check if table exists first
 $table_check = $conn->query("SHOW TABLES LIKE 'materi_pelajaran'");
-if ($table_check->num_rows > 0) {
+if ($table_check->num_rows > 0 && $kelas_id) {
     $query = "SELECT m.*, mp.id as mapel_id, mp.nama_pelajaran, mp.kode_pelajaran,
         (SELECT COUNT(*) FROM latihan WHERE materi_id = m.id AND status = 'aktif') as jumlah_latihan,
         (SELECT status FROM progress_materi_siswa WHERE materi_id = m.id AND siswa_id = ?) as progress_status,
         (SELECT progress FROM progress_materi_siswa WHERE materi_id = m.id AND siswa_id = ?) as progress_percent
         FROM materi_pelajaran m
         JOIN mata_pelajaran mp ON m.mata_pelajaran_id = mp.id
-        WHERE m.status = 'aktif' AND mp.sekolah_id = ?
-        ORDER BY mp.nama_pelajaran ASC, m.urutan ASC, m.created_at DESC";
+        WHERE m.status = 'aktif' AND m.kelas_id = ? AND mp.sekolah_id = ?
+        ORDER BY mp.nama_pelajaran ASC, m.id ASC";
         
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("iii", $siswa_id, $siswa_id, $sekolah_id);
+    $stmt->bind_param("iiii", $siswa_id, $siswa_id, $kelas_id, $sekolah_id);
     $stmt->execute();
     $materi_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $stmt->close();

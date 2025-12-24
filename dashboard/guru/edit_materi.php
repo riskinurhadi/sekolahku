@@ -1,11 +1,12 @@
 <?php
 $page_title = 'Edit Materi';
 require_once '../../config/session.php';
+require_once '../../config/database.php';
 requireRole(['guru']);
-require_once '../../includes/header.php';
 
 $conn = getConnection();
 $guru_id = $_SESSION['user_id'];
+$sekolah_id = $_SESSION['sekolah_id'];
 $message = '';
 
 $id = intval($_GET['id'] ?? 0);
@@ -26,8 +27,16 @@ if (!$materi) {
     exit;
 }
 
-// Get mata pelajaran
-$mata_pelajaran = $conn->query("SELECT * FROM mata_pelajaran WHERE guru_id = $guru_id ORDER BY nama_pelajaran")->fetch_all(MYSQLI_ASSOC);
+// Get mata pelajaran pertama dari guru
+$stmt = $conn->prepare("SELECT * FROM mata_pelajaran WHERE guru_id = ? ORDER BY nama_pelajaran LIMIT 1");
+$stmt->bind_param("i", $guru_id);
+$stmt->execute();
+$mata_pelajaran_result = $stmt->get_result();
+$mata_pelajaran_first = $mata_pelajaran_result->fetch_assoc();
+$stmt->close();
+
+// Get semua kelas di sekolah untuk form pilihan kelas
+$kelas_list = $conn->query("SELECT * FROM kelas WHERE sekolah_id = $sekolah_id ORDER BY tingkat ASC, nama_kelas ASC")->fetch_all(MYSQLI_ASSOC);
 
 // Create uploads/materi directory if not exists
 $upload_dir = __DIR__ . '/../../uploads/materi/';
@@ -35,24 +44,23 @@ if (!file_exists($upload_dir)) {
     mkdir($upload_dir, 0777, true);
 }
 
-// Handle form submission
+// Handle form submission BEFORE sending any output
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $errors = [];
     
-    if (empty($_POST['mata_pelajaran_id'])) {
-        $errors[] = 'Mata pelajaran harus dipilih';
+    if (empty($_POST['kelas_id'])) {
+        $errors[] = 'Kelas harus dipilih';
     }
     if (empty(trim($_POST['judul']))) {
         $errors[] = 'Judul materi harus diisi';
     }
     
     if (empty($errors)) {
-        $mata_pelajaran_id = intval($_POST['mata_pelajaran_id']);
+        $kelas_id = intval($_POST['kelas_id']);
         $judul = trim($_POST['judul']);
         $deskripsi = trim($_POST['deskripsi'] ?? '');
         $konten = $_POST['konten'] ?? '';
-        $urutan = intval($_POST['urutan'] ?? 0);
-        $status = $_POST['status'] ?? 'draft';
+        $status = 'aktif'; // Auto set ke aktif
         
         $file_attachment = $materi['file_attachment'];
         $file_name = $materi['file_name'];
@@ -108,8 +116,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         
         if (empty($errors)) {
-            $stmt = $conn->prepare("UPDATE materi_pelajaran SET mata_pelajaran_id = ?, judul = ?, deskripsi = ?, konten = ?, file_attachment = ?, file_name = ?, file_size = ?, urutan = ?, status = ? WHERE id = ?");
-            $stmt->bind_param("isssssiisi", $mata_pelajaran_id, $judul, $deskripsi, $konten, $file_attachment, $file_name, $file_size, $urutan, $status, $id);
+            $stmt = $conn->prepare("UPDATE materi_pelajaran SET kelas_id = ?, judul = ?, deskripsi = ?, konten = ?, file_attachment = ?, file_name = ?, file_size = ?, status = ? WHERE id = ?");
+            $stmt->bind_param("isssssisi", $kelas_id, $judul, $deskripsi, $konten, $file_attachment, $file_name, $file_size, $status, $id);
             
             if ($stmt->execute()) {
                 $message = 'success:Materi berhasil diupdate.';
@@ -126,6 +134,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $message = 'error:' . implode(', ', $errors);
     }
 }
+
+require_once '../../includes/header.php';
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -151,27 +161,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <div class="card shadow-sm">
     <div class="card-body">
         <form method="POST" enctype="multipart/form-data">
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Mata Pelajaran <span class="text-danger">*</span></label>
-                    <select name="mata_pelajaran_id" class="form-select" required>
-                        <option value="">Pilih Mata Pelajaran</option>
-                        <?php foreach ($mata_pelajaran as $mp): ?>
-                            <option value="<?php echo $mp['id']; ?>" <?php echo ($materi['mata_pelajaran_id'] == $mp['id']) ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($mp['nama_pelajaran']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+            <?php if ($mata_pelajaran_first): ?>
+                <div class="alert alert-info mb-3">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Mata Pelajaran:</strong> <?php echo htmlspecialchars($mata_pelajaran_first['nama_pelajaran']); ?>
+                    <?php if ($mata_pelajaran_first['kode_pelajaran']): ?>
+                        <span class="text-muted">(<?php echo htmlspecialchars($mata_pelajaran_first['kode_pelajaran']); ?>)</span>
+                    <?php endif; ?>
                 </div>
-                
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Status</label>
-                    <select name="status" class="form-select">
-                        <option value="draft" <?php echo ($materi['status'] == 'draft') ? 'selected' : ''; ?>>Draft</option>
-                        <option value="aktif" <?php echo ($materi['status'] == 'aktif') ? 'selected' : ''; ?>>Aktif</option>
-                        <option value="arsip" <?php echo ($materi['status'] == 'arsip') ? 'selected' : ''; ?>>Arsip</option>
-                    </select>
-                </div>
+            <?php endif; ?>
+            
+            <div class="mb-3">
+                <label class="form-label">Kelas <span class="text-danger">*</span></label>
+                <select name="kelas_id" class="form-select" required>
+                    <option value="">Pilih Kelas</option>
+                    <?php foreach ($kelas_list as $kelas): ?>
+                        <option value="<?php echo $kelas['id']; ?>" <?php echo ($materi['kelas_id'] == $kelas['id']) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($kelas['nama_kelas']); ?> (Kelas <?php echo $kelas['tingkat']; ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <small class="text-muted">Pilih kelas yang akan menerima materi ini</small>
             </div>
             
             <div class="mb-3">
@@ -208,12 +218,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <?php endif; ?>
                 <input type="file" name="file_attachment" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png">
                 <small class="text-muted">Format: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, JPG, PNG (Maks 50MB)</small>
-            </div>
-            
-            <div class="mb-3">
-                <label class="form-label">Urutan</label>
-                <input type="number" name="urutan" class="form-control" value="<?php echo $materi['urutan']; ?>" min="0">
-                <small class="text-muted">Urutan tampil materi (0 = paling atas)</small>
             </div>
             
             <div class="d-flex justify-content-end gap-2">
