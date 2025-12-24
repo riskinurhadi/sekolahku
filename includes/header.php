@@ -189,6 +189,44 @@ $unread_count = 0;
                             <span>Profil</span>
                         </a>
                     </li>
+                <?php elseif ($user_role == 'kepala_sekolah'): ?>
+                    <!-- Menu Kepala Sekolah -->
+                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">
+                        <a href="<?php echo getBasePath(); ?>dashboard/kepala_sekolah/index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-house-door-fill"></i>
+                            <span>Beranda</span>
+                        </a>
+                    </li>
+                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'guru.php' || basename($_SERVER['PHP_SELF']) == 'tambah_guru.php' ? 'active' : ''; ?>">
+                        <a href="<?php echo getBasePath(); ?>dashboard/kepala_sekolah/guru.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'guru.php' || basename($_SERVER['PHP_SELF']) == 'tambah_guru.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-person-badge"></i>
+                            <span>Guru</span>
+                        </a>
+                    </li>
+                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'siswa.php' || basename($_SERVER['PHP_SELF']) == 'tambah_siswa.php' ? 'active' : ''; ?>">
+                        <a href="<?php echo getBasePath(); ?>dashboard/kepala_sekolah/siswa.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'siswa.php' || basename($_SERVER['PHP_SELF']) == 'tambah_siswa.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-people"></i>
+                            <span>Siswa</span>
+                        </a>
+                    </li>
+                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'kelas.php' || basename($_SERVER['PHP_SELF']) == 'tambah_kelas.php' || basename($_SERVER['PHP_SELF']) == 'edit_kelas.php' ? 'active' : ''; ?>">
+                        <a href="<?php echo getBasePath(); ?>dashboard/kepala_sekolah/kelas.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'kelas.php' || basename($_SERVER['PHP_SELF']) == 'tambah_kelas.php' || basename($_SERVER['PHP_SELF']) == 'edit_kelas.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-building"></i>
+                            <span>Kelas</span>
+                        </a>
+                    </li>
+                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'informasi_akademik.php' || basename($_SERVER['PHP_SELF']) == 'tambah_informasi.php' || basename($_SERVER['PHP_SELF']) == 'detail_informasi.php' ? 'active' : ''; ?>">
+                        <a href="<?php echo getBasePath(); ?>dashboard/kepala_sekolah/informasi_akademik.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'informasi_akademik.php' || basename($_SERVER['PHP_SELF']) == 'tambah_informasi.php' || basename($_SERVER['PHP_SELF']) == 'detail_informasi.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-megaphone-fill"></i>
+                            <span>Informasi Akademik</span>
+                        </a>
+                    </li>
+                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'profil.php' ? 'active' : ''; ?>">
+                        <a href="<?php echo getBasePath(); ?>dashboard/kepala_sekolah/profil.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'profil.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-person-circle"></i>
+                            <span>Profil</span>
+                        </a>
+                    </li>
                 <?php endif; ?>
             </ul>
         </nav>
