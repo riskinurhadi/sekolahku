@@ -235,7 +235,7 @@ $unread_count = 0;
                 <div class="ai-promo-card">
                     <p class="ai-promo-title">Perlu AI Asisten untuk belajar?</p>
                     <p class="ai-promo-subtitle">kunjungi Ilmuna AI</p>
-                    <a href="https://ilmuna.ai" target="_blank" class="ai-promo-button">
+                    <a href="https://chatgpt.com/g/g-tR22j7U8L-ilmuna/" target="_blank" class="ai-promo-button">
                         <i class="bi bi-chat-dots-fill"></i>
                         <span>Chat Ilmuna Ai</span>
                     </a>
