@@ -229,6 +229,17 @@ $unread_count = 0;
                     </li>
                 <?php endif; ?>
             </ul>
+
+            <!-- Ilmuna AI Promo Section -->
+            <div class="sidebar-ai-promo">
+                <div class="ai-promo-content">
+                    <p class="ai-promo-text">Perlu Ai Asisten untuk belajar, kunjungi Ilmuna Ai</p>
+                    <a href="https://ilmuna.ai" target="_blank" class="ai-promo-button">
+                        <i class="bi bi-chat-dots-fill"></i>
+                        <span>Chat Ilmuna Ai</span>
+                    </a>
+                </div>
+            </div>
         </nav>
 
         <!-- Main Content -->
