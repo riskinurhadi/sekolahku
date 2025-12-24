@@ -151,6 +151,44 @@ $unread_count = 0;
                             <span>Profil</span>
                         </a>
                     </li>
+                <?php elseif ($user_role == 'akademik'): ?>
+                    <!-- Menu Akademik -->
+                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">
+                        <a href="<?php echo getBasePath(); ?>dashboard/akademik/index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-house-door-fill"></i>
+                            <span>Beranda</span>
+                        </a>
+                    </li>
+                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'jadwal.php' || basename($_SERVER['PHP_SELF']) == 'tambah_jadwal.php' || basename($_SERVER['PHP_SELF']) == 'edit_jadwal.php' ? 'active' : ''; ?>">
+                        <a href="<?php echo getBasePath(); ?>dashboard/akademik/jadwal.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'jadwal.php' || basename($_SERVER['PHP_SELF']) == 'tambah_jadwal.php' || basename($_SERVER['PHP_SELF']) == 'edit_jadwal.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-calendar-week-fill"></i>
+                            <span>Jadwal</span>
+                        </a>
+                    </li>
+                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'mata_pelajaran.php' || basename($_SERVER['PHP_SELF']) == 'tambah_mata_pelajaran.php' || basename($_SERVER['PHP_SELF']) == 'edit_mata_pelajaran.php' ? 'active' : ''; ?>">
+                        <a href="<?php echo getBasePath(); ?>dashboard/akademik/mata_pelajaran.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'mata_pelajaran.php' || basename($_SERVER['PHP_SELF']) == 'tambah_mata_pelajaran.php' || basename($_SERVER['PHP_SELF']) == 'edit_mata_pelajaran.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-book"></i>
+                            <span>Mata Pelajaran</span>
+                        </a>
+                    </li>
+                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'jadwal_ujian.php' ? 'active' : ''; ?>">
+                        <a href="<?php echo getBasePath(); ?>dashboard/akademik/jadwal_ujian.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'jadwal_ujian.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-calendar-check-fill"></i>
+                            <span>Jadwal Ujian</span>
+                        </a>
+                    </li>
+                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'slider.php' ? 'active' : ''; ?>">
+                        <a href="<?php echo getBasePath(); ?>dashboard/akademik/slider.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'slider.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-images"></i>
+                            <span>Slider</span>
+                        </a>
+                    </li>
+                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'profil.php' ? 'active' : ''; ?>">
+                        <a href="<?php echo getBasePath(); ?>dashboard/akademik/profil.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'profil.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-person-circle"></i>
+                            <span>Profil</span>
+                        </a>
+                    </li>
                 <?php endif; ?>
             </ul>
         </nav>
