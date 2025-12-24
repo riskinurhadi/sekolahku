@@ -557,7 +557,8 @@ $conn->close();
 
 /* Large chart (col-8) */
 .col-lg-8 > .chart-section {
-    min-height: 280px;
+    min-height: 240px;
+    padding: 16px;
 }
 
 /* Small charts (col-4) */
@@ -576,6 +577,11 @@ $conn->close();
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+}
+
+/* Reduce header margin for large charts */
+.col-lg-8 .chart-section-header {
+    margin-bottom: 12px;
 }
 
 .chart-section-title {
@@ -839,7 +845,8 @@ $conn->close();
 
 /* Large chart container (col-8) */
 .col-lg-8 .chart-container {
-    min-height: 180px;
+    min-height: 140px;
+    max-height: 140px;
 }
 
 /* Small chart container (col-4) */
