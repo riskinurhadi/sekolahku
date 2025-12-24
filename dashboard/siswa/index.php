@@ -735,13 +735,16 @@ $conn->close();
 
 /* Jadwal Items - Updated Style */
 .jadwal-item {
-    padding: 16px;
+    padding: 18px 20px;
     border-bottom: 1px solid #f1f5f9;
     transition: all 0.2s ease;
     cursor: pointer;
     background: #ffffff;
     border-radius: 8px;
     margin-bottom: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .jadwal-item:last-child {
@@ -756,14 +759,14 @@ $conn->close();
 }
 
 .jadwal-icon {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
-    margin-right: 16px;
+    font-size: 22px;
+    margin-right: 18px;
     flex-shrink: 0;
     transition: all 0.3s ease;
 }
@@ -776,33 +779,38 @@ $conn->close();
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: 20px;
     flex: 1;
     min-width: 0;
+    overflow: hidden;
+    width: 100%;
 }
 
 .jadwal-mata-pelajaran {
-    font-size: 15px;
+    font-size: 17px;
     font-weight: 600;
     color: #1e293b;
     flex: 0 0 auto;
-    min-width: 180px;
+    min-width: 200px;
+    line-height: 1.4;
 }
 
 .jadwal-guru {
-    font-size: 13px;
+    font-size: 15px;
     color: #64748b;
     flex: 0 0 auto;
-    min-width: 140px;
+    min-width: 160px;
+    line-height: 1.4;
 }
 
 .jadwal-jam {
-    font-size: 13px;
+    font-size: 15px;
     color: #64748b;
     flex: 0 0 auto;
     white-space: nowrap;
-    padding-left: 16px;
+    padding-left: 20px;
     border-left: 1px solid #e5e7eb;
+    line-height: 1.4;
 }
 
 .chart-container {
@@ -940,7 +948,7 @@ $conn->close();
                         <p class="chart-section-desc">Daftar jadwal pelajaran untuk hari ini.</p>
                 </div>
                     <?php if (!empty($jadwal_hari_ini)): ?>
-                        <div style="flex: 1; overflow-y: auto;">
+                        <div style="flex: 1; overflow-y: auto; overflow-x: hidden; width: 100%; box-sizing: border-box;">
                             <?php 
                             $icon_classes = ['icon-blue', 'icon-purple', 'icon-teal', 'icon-green'];
                             $icon_names = ['book', 'journal-bookmark', 'book-half', 'journal-text'];
