@@ -563,7 +563,8 @@ $conn->close();
 
 /* Small charts (col-4) */
 .col-lg-4 > div > .chart-section {
-    min-height: 180px;
+    min-height: 150px;
+    padding: 14px;
 }
 
 .chart-section:hover {
@@ -851,7 +852,13 @@ $conn->close();
 
 /* Small chart container (col-4) */
 .col-lg-4 .chart-container {
-    min-height: 120px;
+    min-height: 100px;
+    max-height: 100px;
+}
+
+/* Reduce header margin for small charts */
+.col-lg-4 .chart-section-header {
+    margin-bottom: 10px;
 }
 
 .chart-container-small {
@@ -972,7 +979,7 @@ $conn->close();
         </div>
 
         <!-- Charts Section -->
-        <div class="row mb-4">
+        <div class="row mb-4 align-items-start">
             <!-- Aktivitas Belajar Chart - Large Card (Left) -->
             <div class="col-lg-8 mb-4">
                 <div class="chart-section">
