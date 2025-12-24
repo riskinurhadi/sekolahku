@@ -1,6 +1,7 @@
 <?php
 $page_title = 'Kelola Materi';
 require_once '../../config/session.php';
+require_once '../../config/database.php';
 requireRole(['guru']);
 
 $conn = getConnection();
