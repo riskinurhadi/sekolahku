@@ -558,13 +558,18 @@ $conn->close();
 /* Large chart (col-8) */
 .col-lg-8 > .chart-section {
     min-height: 240px;
-    padding: 16px;
+    padding: 18px;
 }
 
 /* Small charts (col-4) */
 .col-lg-4 > div > .chart-section {
     min-height: 150px;
-    padding: 14px;
+    padding: 16px;
+}
+
+/* Spacing between stacked cards */
+.col-lg-4 > div:first-child {
+    margin-bottom: 16px;
 }
 
 .chart-section:hover {
@@ -582,7 +587,12 @@ $conn->close();
 
 /* Reduce header margin for large charts */
 .col-lg-8 .chart-section-header {
-    margin-bottom: 12px;
+    margin-bottom: 14px;
+}
+
+/* Reduce header margin for small charts */
+.col-lg-4 .chart-section-header {
+    margin-bottom: 10px;
 }
 
 .chart-section-title {
@@ -593,10 +603,22 @@ $conn->close();
     letter-spacing: -0.3px;
 }
 
+/* Smaller title for small charts */
+.col-lg-4 .chart-section-title {
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
 .chart-section-desc {
     font-size: 13px;
     color: #64748b;
     font-weight: 400;
+}
+
+/* Smaller desc for small charts */
+.col-lg-4 .chart-section-desc {
+    font-size: 11px;
+    line-height: 1.3;
 }
 
 /* List Items - Clean Modern Style */
@@ -856,11 +878,6 @@ $conn->close();
     max-height: 100px;
 }
 
-/* Reduce header margin for small charts */
-.col-lg-4 .chart-section-header {
-    margin-bottom: 10px;
-}
-
 .chart-container-small {
     position: relative;
     height: 200px;
@@ -998,7 +1015,7 @@ $conn->close();
             <!-- Right Column - Two Stacked Cards -->
             <div class="col-lg-4">
                 <!-- Trend Nilai Chart - Top Card -->
-                <div class="mb-4">
+                <div class="mb-3">
                     <div class="chart-section">
                         <div class="chart-section-header">
                             <div>
@@ -1013,7 +1030,7 @@ $conn->close();
                 </div>
 
                 <!-- Progress Belajar Chart - Bottom Card -->
-                <div class="mb-4">
+                <div>
                     <div class="chart-section">
                         <div class="chart-section-header">
                             <div>
