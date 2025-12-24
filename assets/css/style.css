@@ -66,7 +66,7 @@ body {
     top: 0;
     left: 0;
     z-index: 1030;
-    background: linear-gradient(180deg, #2563eb 0%, #1e40af 50%, #1e3a8a 100%) !important;
+    background: #2563eb !important;
     box-shadow: 4px 0 24px rgba(37, 99, 235, 0.4) !important;
     transition: width var(--transition-speed) ease, transform var(--transition-speed) ease;
     overflow-y: auto;
