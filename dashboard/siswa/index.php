@@ -1058,7 +1058,7 @@ $conn->close();
         </div>
 
         <!-- Jadwal Hari ini dan Besok -->
-        <div class="row align-items-stretch mb-4">
+        <div class="row align-items-stretch mb-2">
             <!-- Jadwal Hari Ini -->
             <div class="col-lg-6 mb-4 d-flex">
                 <div class="chart-section jadwal-card w-100">
@@ -1148,7 +1148,7 @@ $conn->close();
 
 
         <!-- Charts Section -->
-        <div class="row mb-4 align-items-start">
+        <div class="row mb-3 align-items-start">
             <!-- Aktivitas Belajar Chart - Large Card (Left) -->
             <div class="col-lg-8 mb-4">
                 <div class="chart-section">
