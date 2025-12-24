@@ -2,13 +2,12 @@
 $page_title = 'Kelola Materi';
 require_once '../../config/session.php';
 requireRole(['guru']);
-require_once '../../includes/header.php';
 
 $conn = getConnection();
 $guru_id = $_SESSION['user_id'];
 $message = '';
 
-// Handle delete
+// Handle delete - MUST be before header.php to prevent "headers already sent" error
 if (isset($_GET['delete'])) {
     $id = intval($_GET['delete']);
     $check_stmt = $conn->prepare("SELECT id, file_attachment FROM materi_pelajaran WHERE id = ? AND guru_id = ?");
@@ -38,6 +37,8 @@ if (isset($_GET['delete'])) {
     header("Location: materi.php?msg=" . urlencode($message));
     exit;
 }
+
+require_once '../../includes/header.php';
 
 // Get all materi
 $stmt = $conn->prepare("SELECT m.*, mp.nama_pelajaran, 
