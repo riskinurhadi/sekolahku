@@ -1057,6 +1057,95 @@ $conn->close();
             </div>
         </div>
 
+        <div class="row align-items-stretch mb-4">
+            <!-- Jadwal Hari Ini -->
+            <div class="col-lg-6 mb-4 d-flex">
+                <div class="chart-section jadwal-card w-100">
+                    <div class="chart-section-header">
+                        <h5 class="chart-section-title">Jadwal Hari Ini</h5>
+                        <p class="chart-section-desc">Daftar jadwal pelajaran untuk hari ini.</p>
+                </div>
+                    <?php if (!empty($jadwal_hari_ini)): ?>
+                        <div style="flex: 1; overflow-y: auto; overflow-x: hidden; width: 100%; box-sizing: border-box;">
+                            <?php 
+                            $icon_classes = ['icon-blue', 'icon-purple', 'icon-teal', 'icon-green'];
+                            $icon_names = ['book', 'journal-bookmark', 'book-half', 'journal-text'];
+                            $index = 0;
+                            foreach ($jadwal_hari_ini as $jadwal): 
+                                $icon_class = $icon_classes[$index % count($icon_classes)];
+                                $icon_name = $icon_names[$index % count($icon_names)];
+                                $index++;
+                            ?>
+                                <div class="jadwal-item">
+                                    <div class="d-flex align-items-start">
+                                        <div class="jadwal-icon <?php echo $icon_class; ?>">
+                                            <i class="bi bi-<?php echo $icon_name; ?>"></i>
+                                        </div>
+                                        <div class="jadwal-content-vertical">
+                                            <div class="jadwal-mata-pelajaran">
+                                                <?php echo htmlspecialchars($jadwal['nama_pelajaran']); ?>
+                                            </div>
+                                            <div class="jadwal-jam">
+                                                <?php echo date('H:i', strtotime($jadwal['jam_mulai'])); ?> - <?php echo date('H:i', strtotime($jadwal['jam_selesai'])); ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="text-center py-4" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                            <i class="bi bi-calendar-x text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
+                            <p class="text-muted mt-3 mb-0">Tidak ada jadwal untuk hari ini</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Jadwal Besok -->
+            <div class="col-lg-6 mb-4 d-flex">
+                <div class="chart-section jadwal-card w-100">
+                    <div class="chart-section-header">
+                        <h5 class="chart-section-title">Jadwal Besok</h5>
+                        <p class="chart-section-desc">Persiapan jadwal pelajaran untuk besok.</p>
+                </div>
+                    <?php if (!empty($jadwal_besok)): ?>
+                        <div class="jadwal-besok" style="flex: 1; overflow-y: auto;">
+                            <?php 
+                            $icon_classes = ['icon-blue', 'icon-purple', 'icon-teal', 'icon-green'];
+                            $icon_names = ['book', 'journal-bookmark', 'book-half', 'journal-text'];
+                            $index = 0;
+                            foreach ($jadwal_besok as $jadwal): 
+                                $icon_class = $icon_classes[$index % count($icon_classes)];
+                                $icon_name = $icon_names[$index % count($icon_names)];
+                                $index++;
+                            ?>
+                                <div class="dashboard-list-item">
+                                    <div class="dashboard-list-item-icon <?php echo $icon_class; ?>">
+                                        <i class="bi bi-<?php echo $icon_name; ?>"></i>
+                                    </div>
+                                    <div class="dashboard-list-item-content">
+                                        <div class="dashboard-list-item-title">
+                                            <?php echo htmlspecialchars($jadwal['nama_pelajaran']); ?>
+                                        </div>
+                                        <div class="dashboard-list-item-date">
+                                            <?php echo date('H:i', strtotime($jadwal['jam_mulai'])); ?> - <?php echo date('H:i', strtotime($jadwal['jam_selesai'])); ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="text-center py-4" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                            <i class="bi bi-calendar2-x text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
+                            <p class="text-muted mt-3 mb-0">Tidak ada jadwal untuk besok</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+
         <!-- Charts Section -->
         <div class="row mb-4 align-items-start">
             <!-- Aktivitas Belajar Chart - Large Card (Left) -->
