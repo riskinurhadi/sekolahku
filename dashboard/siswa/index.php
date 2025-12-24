@@ -643,6 +643,20 @@ $conn->close();
     margin-top: 4px;
 }
 
+/* Jadwal Besok - Larger Font */
+.jadwal-besok .dashboard-list-item-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.jadwal-besok .dashboard-list-item-date {
+    font-size: 14px;
+    color: #64748b;
+    margin-top: 0;
+}
+
 /* Icon Color Variants */
 .icon-blue {
     background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
@@ -970,7 +984,7 @@ $conn->close();
                         <p class="chart-section-desc">Persiapan jadwal pelajaran untuk besok.</p>
                 </div>
                     <?php if (!empty($jadwal_besok)): ?>
-                        <div style="flex: 1; overflow-y: auto;">
+                        <div class="jadwal-besok" style="flex: 1; overflow-y: auto;">
                             <?php 
                             $icon_classes = ['icon-blue', 'icon-purple', 'icon-teal', 'icon-green'];
                             $icon_names = ['book', 'journal-bookmark', 'book-half', 'journal-text'];
