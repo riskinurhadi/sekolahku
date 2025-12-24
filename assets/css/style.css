@@ -41,6 +41,7 @@ body {
 }
 
 /* --- New Collapsible Sidebar --- */
+/* BACKUP STYLE SIDEBAR (ORIGINAL - PUTIH):
 .sidebar {
     width: var(--sidebar-width);
     height: 100vh;
@@ -50,6 +51,23 @@ body {
     z-index: 1030;
     background: #ffffff;
     box-shadow: 4px 0 24px rgba(0,0,0,0.05);
+    transition: width var(--transition-speed) ease, transform var(--transition-speed) ease;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+}
+*/
+
+.sidebar {
+    width: var(--sidebar-width);
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1030;
+    background: linear-gradient(180deg, #6366f1 0%, #8b5cf6 50%, #9333ea 100%);
+    box-shadow: 4px 0 24px rgba(99, 102, 241, 0.3);
     transition: width var(--transition-speed) ease, transform var(--transition-speed) ease;
     overflow-y: auto;
     overflow-x: hidden;
@@ -83,6 +101,7 @@ body.sidebar-collapsed .sidebar .components a i {
     margin-right: 0;
 }
 
+/* BACKUP STYLE SIDEBAR HEADER (ORIGINAL):
 .sidebar-header {
     height: var(--header-height);
     display: flex;
@@ -92,11 +111,32 @@ body.sidebar-collapsed .sidebar .components a i {
     border-bottom: 1px solid #f1f5f9;
     flex-shrink: 0;
 }
+*/
+
+.sidebar-header {
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* BACKUP STYLE LOGO (ORIGINAL):
+.sidebar-header .logo-image {
+    max-height: 32px;
+    width: auto;
+    transition: opacity var(--transition-speed) ease, visibility var(--transition-speed) ease;
+}
+*/
 
 .sidebar-header .logo-image {
     max-height: 32px;
     width: auto;
     transition: opacity var(--transition-speed) ease, visibility var(--transition-speed) ease;
+    filter: brightness(0) invert(1); /* Membuat logo putih untuk kontras dengan background biru/ungu */
 }
 
 .sidebar .components {
@@ -109,6 +149,7 @@ body.sidebar-collapsed .sidebar .components a i {
     margin-bottom: 0.2rem;
 }
 
+/* BACKUP STYLE SIDEBAR LINKS (ORIGINAL):
 .sidebar .components a {
     padding: 0.6rem 0.85rem;
     display: flex;
@@ -130,6 +171,32 @@ body.sidebar-collapsed .sidebar .components a i {
     color: #fff;
     background: linear-gradient(45deg, var(--primary-light), var(--primary-color));
     box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+}
+*/
+
+.sidebar .components a {
+    padding: 0.6rem 0.85rem;
+    display: flex;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.sidebar .components a:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(4px);
+}
+
+.sidebar .components a.active {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-weight: 600;
 }
 
 .sidebar .components a i {
@@ -1199,6 +1266,7 @@ form.hidden textarea,
 }
 
 /* Scrollbar */
+/* BACKUP STYLE SIDEBAR SCROLLBAR (ORIGINAL):
 .sidebar::-webkit-scrollbar {
     width: 6px;
 }
@@ -1214,6 +1282,24 @@ form.hidden textarea,
 
 .sidebar::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
+}
+*/
+
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
 }
 
 .sidebar .components a i {
