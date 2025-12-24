@@ -541,19 +541,28 @@ $conn->close();
 /* Chart Sections - Modern Health Dashboard Style */
 .chart-section {
     background: #ffffff;
-    border-radius: 24px;
-    padding: 28px;
+    border-radius: 16px;
+    padding: 20px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
     border: none;
-    margin-bottom: 24px;
+    margin-bottom: 0;
     height: 100%;
     display: flex;
     flex-direction: column;
-    min-height: 400px;
-    max-height: 400px;
+    min-height: 380px;
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+}
+
+/* Large chart (col-8) */
+.col-lg-8 > .chart-section {
+    min-height: 450px;
+}
+
+/* Small charts (col-4) */
+.col-lg-4 > div > .chart-section {
+    min-height: 210px;
 }
 
 .chart-section:hover {
@@ -823,9 +832,19 @@ $conn->close();
 
 .chart-container {
     position: relative;
-    height: 300px;
+    height: 100%;
     flex: 1;
     min-height: 0;
+}
+
+/* Large chart container (col-8) */
+.col-lg-8 .chart-container {
+    min-height: 350px;
+}
+
+/* Small chart container (col-4) */
+.col-lg-4 .chart-container {
+    min-height: 150px;
 }
 
 .chart-container-small {
@@ -947,40 +966,8 @@ $conn->close();
 
         <!-- Charts Section -->
         <div class="row mb-4">
-            <!-- Trend Nilai Chart -->
-            <div class="col-lg-6 mb-4">
-                <div class="chart-section">
-                    <div class="chart-section-header">
-                        <div>
-                            <h5 class="chart-section-title">Trend Nilai</h5>
-                            <p class="chart-section-desc">Perkembangan nilai rata-rata 7 hari terakhir</p>
-                        </div>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="trendNilaiChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Progress Belajar Chart -->
-            <div class="col-lg-6 mb-4">
-                <div class="chart-section">
-                    <div class="chart-section-header">
-                        <div>
-                            <h5 class="chart-section-title">Progress Belajar</h5>
-                            <p class="chart-section-desc">Persentase soal yang sudah dikerjakan</p>
-                        </div>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="progressBelajarChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Aktivitas Belajar Chart -->
-        <div class="row mb-4">
-            <div class="col-12">
+            <!-- Aktivitas Belajar Chart - Large Card (Left) -->
+            <div class="col-lg-8 mb-4">
                 <div class="chart-section">
                     <div class="chart-section-header">
                         <div>
@@ -990,6 +977,39 @@ $conn->close();
                     </div>
                     <div class="chart-container">
                         <canvas id="aktivitasBelajarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Two Stacked Cards -->
+            <div class="col-lg-4">
+                <!-- Trend Nilai Chart - Top Card -->
+                <div class="mb-4">
+                    <div class="chart-section">
+                        <div class="chart-section-header">
+                            <div>
+                                <h5 class="chart-section-title">Trend Nilai</h5>
+                                <p class="chart-section-desc">Perkembangan nilai rata-rata 7 hari terakhir</p>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="trendNilaiChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Belajar Chart - Bottom Card -->
+                <div class="mb-4">
+                    <div class="chart-section">
+                        <div class="chart-section-header">
+                            <div>
+                                <h5 class="chart-section-title">Progress Belajar</h5>
+                                <p class="chart-section-desc">Persentase soal yang sudah dikerjakan</p>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="progressBelajarChart"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
