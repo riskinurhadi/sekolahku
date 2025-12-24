@@ -945,6 +945,55 @@ $conn->close();
             </div>
         </div>
 
+        <!-- Charts Section -->
+        <div class="row mb-4">
+            <!-- Trend Nilai Chart -->
+            <div class="col-lg-6 mb-4">
+                <div class="chart-section">
+                    <div class="chart-section-header">
+                        <div>
+                            <h5 class="chart-section-title">Trend Nilai</h5>
+                            <p class="chart-section-desc">Perkembangan nilai rata-rata 7 hari terakhir</p>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="trendNilaiChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Belajar Chart -->
+            <div class="col-lg-6 mb-4">
+                <div class="chart-section">
+                    <div class="chart-section-header">
+                        <div>
+                            <h5 class="chart-section-title">Progress Belajar</h5>
+                            <p class="chart-section-desc">Persentase soal yang sudah dikerjakan</p>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="progressBelajarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aktivitas Belajar Chart -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="chart-section">
+                    <div class="chart-section-header">
+                        <div>
+                            <h5 class="chart-section-title">Aktivitas Belajar</h5>
+                            <p class="chart-section-desc">Perbandingan soal aktif dan selesai dalam 7 hari terakhir</p>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="aktivitasBelajarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Jadwal Hari Ini & Jadwal Besok -->
         <div class="row align-items-stretch mb-4">
@@ -1217,6 +1266,285 @@ $conn->close();
         </div>
     </div>
 </div>
+
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+// Prepare data for charts
+const trendNilaiData = <?php echo json_encode($trend_data['rata_nilai']); ?>;
+const trendSoalAktifData = <?php echo json_encode($trend_data['soal_aktif']); ?>;
+const trendSoalSelesaiData = <?php echo json_encode($trend_data['soal_selesai']); ?>;
+const labels = <?php 
+    $chart_labels = [];
+    for ($i = 6; $i >= 0; $i--) {
+        $chart_labels[] = date('d M', strtotime("-$i days"));
+    }
+    echo json_encode($chart_labels);
+?>;
+
+// Chart 1: Trend Nilai (Line Chart)
+const ctx1 = document.getElementById('trendNilaiChart');
+if (ctx1) {
+    new Chart(ctx1, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Rata-rata Nilai',
+                data: trendNilaiData,
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5,
+                pointBackgroundColor: '#3b82f6',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointHoverRadius: 7,
+                pointHoverBackgroundColor: '#2563eb',
+                pointHoverBorderColor: '#ffffff',
+                pointHoverBorderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 15,
+                        font: {
+                            size: 12,
+                            weight: '500'
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: {
+                        size: 13,
+                        weight: '600'
+                    },
+                    bodyFont: {
+                        size: 12
+                    },
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            return 'Nilai: ' + context.parsed.y.toFixed(2);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 11
+                        },
+                        color: '#64748b'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 11
+                        },
+                        color: '#64748b'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Chart 2: Progress Belajar (Donut Chart)
+const ctx2 = document.getElementById('progressBelajarChart');
+if (ctx2) {
+    const totalSoal = <?php echo $stats['total_soal_aktif'] + $stats['total_soal_selesai']; ?>;
+    const soalSelesai = <?php echo $stats['total_soal_selesai']; ?>;
+    const soalAktif = <?php echo $stats['total_soal_aktif']; ?>;
+    const persentase = totalSoal > 0 ? Math.round((soalSelesai / totalSoal) * 100) : 0;
+
+    new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: ['Selesai', 'Belum Dikerjakan'],
+            datasets: [{
+                data: [soalSelesai, soalAktif],
+                backgroundColor: [
+                    '#10b981',
+                    '#e5e7eb'
+                ],
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 15,
+                        font: {
+                            size: 12,
+                            weight: '500'
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: {
+                        size: 13,
+                        weight: '600'
+                    },
+                    bodyFont: {
+                        size: 12
+                    },
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                            return label + ': ' + value + ' (' + percentage + '%)';
+                        }
+                    }
+                }
+            }
+        },
+        plugins: [{
+            id: 'centerText',
+            beforeDraw: function(chart) {
+                const ctx = chart.ctx;
+                const centerX = chart.chartArea.left + (chart.chartArea.right - chart.chartArea.left) / 2;
+                const centerY = chart.chartArea.top + (chart.chartArea.bottom - chart.chartArea.top) / 2;
+                
+                ctx.save();
+                ctx.font = 'bold 24px Inter, sans-serif';
+                ctx.fillStyle = '#1e293b';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(persentase + '%', centerX, centerY - 10);
+                
+                ctx.font = '12px Inter, sans-serif';
+                ctx.fillStyle = '#64748b';
+                ctx.fillText('Selesai', centerX, centerY + 15);
+                ctx.restore();
+            }
+        }]
+    });
+}
+
+// Chart 3: Aktivitas Belajar (Stacked Bar Chart)
+const ctx3 = document.getElementById('aktivitasBelajarChart');
+if (ctx3) {
+    new Chart(ctx3, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Soal Selesai',
+                    data: trendSoalSelesaiData,
+                    backgroundColor: '#10b981',
+                    borderColor: '#059669',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    borderSkipped: false
+                },
+                {
+                    label: 'Soal Aktif',
+                    data: trendSoalAktifData,
+                    backgroundColor: '#3b82f6',
+                    borderColor: '#2563eb',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    borderSkipped: false
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 15,
+                        font: {
+                            size: 12,
+                            weight: '500'
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: {
+                        size: 13,
+                        weight: '600'
+                    },
+                    bodyFont: {
+                        size: 12
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    stacked: true,
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 11
+                        },
+                        color: '#64748b'
+                    }
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 11
+                        },
+                        color: '#64748b',
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+}
+</script>
 
 <?php
 // Menggunakan footer standar
