@@ -735,69 +735,74 @@ $conn->close();
 
 /* Jadwal Items - Updated Style */
 .jadwal-item {
-    padding: 14px 0;
+    padding: 16px;
     border-bottom: 1px solid #f1f5f9;
     transition: all 0.2s ease;
     cursor: pointer;
+    background: #ffffff;
+    border-radius: 8px;
+    margin-bottom: 8px;
 }
 
 .jadwal-item:last-child {
     border-bottom: none;
+    margin-bottom: 0;
 }
 
 .jadwal-item:hover {
-    padding-left: 4px;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.03) 0%, rgba(16, 185, 129, 0.02) 100%);
-    border-radius: 8px;
-    padding-left: 8px;
-    padding-right: 8px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(16, 185, 129, 0.03) 100%);
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .jadwal-icon {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 20px;
     margin-right: 16px;
     flex-shrink: 0;
     transition: all 0.3s ease;
 }
 
 .jadwal-item:hover .jadwal-icon {
-    transform: scale(1.05);
+    transform: scale(1.08);
 }
 
 .jadwal-content-horizontal {
     display: flex;
     align-items: center;
-    gap: 20px;
-    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px;
     flex: 1;
+    min-width: 0;
 }
 
 .jadwal-mata-pelajaran {
     font-size: 15px;
     font-weight: 600;
     color: #1e293b;
-    min-width: 150px;
-    flex-shrink: 0;
+    flex: 0 0 auto;
+    min-width: 180px;
 }
 
 .jadwal-guru {
     font-size: 13px;
     color: #64748b;
-    min-width: 120px;
-    flex-shrink: 0;
+    flex: 0 0 auto;
+    min-width: 140px;
 }
 
 .jadwal-jam {
     font-size: 13px;
     color: #64748b;
-    margin-left: auto;
-    flex-shrink: 0;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding-left: 16px;
+    border-left: 1px solid #e5e7eb;
 }
 
 .chart-container {
