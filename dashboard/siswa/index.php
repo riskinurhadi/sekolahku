@@ -735,7 +735,7 @@ $conn->close();
 
 /* Jadwal Items - Updated Style */
 .jadwal-item {
-    padding: 12px 0;
+    padding: 14px 0;
     border-bottom: 1px solid #f1f5f9;
     transition: all 0.2s ease;
     cursor: pointer;
@@ -747,6 +747,10 @@ $conn->close();
 
 .jadwal-item:hover {
     padding-left: 4px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.03) 0%, rgba(16, 185, 129, 0.02) 100%);
+    border-radius: 8px;
+    padding-left: 8px;
+    padding-right: 8px;
 }
 
 .jadwal-icon {
@@ -757,13 +761,43 @@ $conn->close();
     align-items: center;
     justify-content: center;
     font-size: 18px;
-    margin-right: 12px;
+    margin-right: 16px;
     flex-shrink: 0;
     transition: all 0.3s ease;
 }
 
 .jadwal-item:hover .jadwal-icon {
     transform: scale(1.05);
+}
+
+.jadwal-content-horizontal {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+.jadwal-mata-pelajaran {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+    min-width: 150px;
+    flex-shrink: 0;
+}
+
+.jadwal-guru {
+    font-size: 13px;
+    color: #64748b;
+    min-width: 120px;
+    flex-shrink: 0;
+}
+
+.jadwal-jam {
+    font-size: 13px;
+    color: #64748b;
+    margin-left: auto;
+    flex-shrink: 0;
 }
 
 .chart-container {
@@ -916,14 +950,14 @@ $conn->close();
                                         <div class="jadwal-icon <?php echo $icon_class; ?>">
                                             <i class="bi bi-<?php echo $icon_name; ?>"></i>
                                         </div>
-                                        <div class="flex-grow-1">
-                                            <div class="dashboard-list-item-title">
+                                        <div class="jadwal-content-horizontal">
+                                            <div class="jadwal-mata-pelajaran">
                                                 <?php echo htmlspecialchars($jadwal['nama_pelajaran']); ?>
                                             </div>
-                                            <div class="dashboard-list-item-subtitle">
+                                            <div class="jadwal-guru">
                                                 <?php echo htmlspecialchars($jadwal['nama_guru']); ?>
                                             </div>
-                                            <div class="dashboard-list-item-date">
+                                            <div class="jadwal-jam">
                                                 <?php echo date('H:i', strtotime($jadwal['jam_mulai'])); ?> - <?php echo date('H:i', strtotime($jadwal['jam_selesai'])); ?>
                                             </div>
                                         </div>
