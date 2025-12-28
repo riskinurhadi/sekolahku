@@ -55,6 +55,7 @@ $stmt->close();
 // Get jadwal minggu ini untuk statistik per mata pelajaran
 $week_start = date('Y-m-d', strtotime('monday this week'));
 $week_end = date('Y-m-d', strtotime('sunday this week'));
+$today = date('Y-m-d');
 $stmt = $conn->prepare("SELECT jp.*, mp.nama_pelajaran, mp.kode_pelajaran, k.nama_kelas
     FROM jadwal_pelajaran jp
     JOIN mata_pelajaran mp ON jp.mata_pelajaran_id = mp.id
@@ -65,6 +66,14 @@ $stmt->bind_param("iss", $guru_id, $week_start, $week_end);
 $stmt->execute();
 $jadwal_minggu_ini = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
+
+// Get jadwal hari ini
+$jadwal_hari_ini = [];
+foreach ($jadwal_minggu_ini as $j) {
+    if ($j['tanggal'] == $today) {
+        $jadwal_hari_ini[] = $j;
+    }
+}
 
 // Get statistics per mata pelajaran
 $stats_per_pelajaran = [];
@@ -625,8 +634,55 @@ $conn->close();
                 </div>
             <?php endif; ?>
             
+            <!-- Jadwal Hari Ini -->
+            <div class="col-lg-3 mb-4 d-flex">
+                <div class="chart-section w-100">
+                    <div class="chart-section-header">
+                        <h5 class="chart-section-title">Jadwal Hari Ini</h5>
+                        <p class="chart-section-desc">Daftar jadwal pelajaran untuk hari ini.</p>
+                    </div>
+                    <?php if (!empty($jadwal_hari_ini)): ?>
+                        <div style="flex: 1; overflow-y: auto;">
+                            <?php 
+                            $icon_classes = ['icon-blue', 'icon-purple', 'icon-teal', 'icon-green'];
+                            $icon_names = ['book', 'journal-bookmark', 'book-half', 'journal-text'];
+                            $index = 0;
+                            foreach ($jadwal_hari_ini as $jadwal): 
+                                $icon_class = $icon_classes[$index % count($icon_classes)];
+                                $icon_name = $icon_names[$index % count($icon_names)];
+                                $index++;
+                            ?>
+                                <div class="mb-3 pb-2 border-bottom">
+                                    <div class="d-flex align-items-start">
+                                        <div class="me-2 flex-shrink-0" style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 16px;">
+                                            <i class="bi bi-<?php echo $icon_name; ?>"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1" style="font-size: 13px; font-weight: 600; color: #1e293b;">
+                                                <?php echo htmlspecialchars($jadwal['nama_pelajaran']); ?>
+                                            </h6>
+                                            <p class="mb-0 text-muted" style="font-size: 12px;">
+                                                <?php echo htmlspecialchars($jadwal['nama_kelas']); ?>
+                                            </p>
+                                            <p class="mb-0 text-muted" style="font-size: 11px;">
+                                                <?php echo date('H:i', strtotime($jadwal['jam_mulai'])); ?> - <?php echo date('H:i', strtotime($jadwal['jam_selesai'])); ?>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="text-center py-4" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                            <i class="bi bi-calendar-x text-muted" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                            <p class="text-muted mt-3 mb-0" style="font-size: 13px;">Tidak ada jadwal untuk hari ini</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            
             <!-- History Pembelajaran -->
-            <div class="col-lg-6 mb-4 d-flex">
+            <div class="col-lg-3 mb-4 d-flex">
                 <div class="chart-section w-100">
                     <div class="chart-section-header">
                         <h5 class="chart-section-title">History Pembelajaran</h5>
@@ -646,16 +702,16 @@ $conn->close();
                                 $style = $icon_styles[$index % count($icon_styles)];
                                 $index++;
                             ?>
-                                <div class="mb-3 pb-3 border-bottom">
+                                <div class="mb-3 pb-2 border-bottom">
                                     <div class="d-flex align-items-start">
-                                        <div class="me-3 flex-shrink-0" style="width: 40px; height: 40px; border-radius: 10px; background: <?php echo $style['gradient']; ?>; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;">
+                                        <div class="me-2 flex-shrink-0" style="width: 36px; height: 36px; border-radius: 10px; background: <?php echo $style['gradient']; ?>; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px;">
                                             <i class="bi bi-<?php echo $style['icon']; ?>"></i>
                                         </div>
                                         <div class="flex-grow-1">
-                                            <h6 class="mb-1" style="font-size: 14px; font-weight: 600; color: #1e293b;">
+                                            <h6 class="mb-1" style="font-size: 13px; font-weight: 600; color: #1e293b;">
                                                 <?php echo htmlspecialchars($history['nama_pelajaran']); ?>
                                             </h6>
-                                            <p class="mb-0 text-muted" style="font-size: 13px;">
+                                            <p class="mb-0 text-muted" style="font-size: 12px;">
                                                 Kelas <?php echo htmlspecialchars($history['nama_kelas']); ?> - Selesai
                                             </p>
                                         </div>
@@ -665,8 +721,8 @@ $conn->close();
                         </div>
                     <?php else: ?>
                         <div class="text-center py-4" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                            <i class="bi bi-inbox text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
-                            <p class="text-muted mt-3 mb-0">Belum ada history pembelajaran</p>
+                            <i class="bi bi-inbox text-muted" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                            <p class="text-muted mt-3 mb-0" style="font-size: 13px;">Belum ada history pembelajaran</p>
                         </div>
                     <?php endif; ?>
                 </div>
