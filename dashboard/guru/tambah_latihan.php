@@ -55,36 +55,86 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $deadline = !empty($_POST['deadline']) ? $_POST['deadline'] : null;
         $poin = intval($_POST['poin'] ?? 100);
         $random_soal = isset($_POST['random_soal']) ? 1 : 0;
-        $jumlah_soal = ($jenis == 'soal' && $random_soal) ? intval($_POST['jumlah_soal'] ?? 0) : null;
-        $waktu_pengerjaan = ($jenis == 'soal') ? intval($_POST['waktu_pengerjaan'] ?? 0) : null;
+        $jumlah_soal = ($jenis == 'soal' && $random_soal && !empty($_POST['jumlah_soal'])) ? intval($_POST['jumlah_soal']) : null;
+        $waktu_pengerjaan = ($jenis == 'soal' && !empty($_POST['waktu_pengerjaan'])) ? intval($_POST['waktu_pengerjaan']) : null;
         $status = $_POST['status'] ?? 'draft';
+        
+        // Handle null values properly for bind_param
+        $deadline_bind = $deadline ?? '';
+        $jumlah_soal_bind = $jumlah_soal ?? 0;
+        $waktu_pengerjaan_bind = $waktu_pengerjaan ?? 0;
         
         $stmt = $conn->prepare("INSERT INTO latihan (materi_id, judul, deskripsi, jenis, deadline, poin, random_soal, jumlah_soal, waktu_pengerjaan, status) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("issssiiis", $materi_id, $judul, $deskripsi, $jenis, $deadline, $poin, $random_soal, $jumlah_soal, $waktu_pengerjaan, $status);
         
-        if ($stmt->execute()) {
-            $latihan_id = $stmt->insert_id;
-            $stmt->close();
+        if (!$stmt) {
+            $message = 'error:Gagal menyiapkan query: ' . $conn->error;
+        } else {
+            // Bind parameters: format "issssiiis" = 10 characters for 10 parameters
+            // 1=i(materi_id), 2=s(judul), 3=s(deskripsi), 4=s(jenis), 5=s(deadline), 
+            // 6=i(poin), 7=i(random_soal), 8=i(jumlah_soal), 9=i(waktu_pengerjaan), 10=s(status)
+            $bind_result = $stmt->bind_param("issssiiis", 
+                $materi_id,
+                $judul,
+                $deskripsi,
+                $jenis,
+                $deadline_bind,
+                $poin,
+                $random_soal,
+                $jumlah_soal_bind,
+                $waktu_pengerjaan_bind,
+                $status
+            );
             
-            // Insert soal jika jenis = soal
-            if ($jenis == 'soal' && !empty($_POST['soal_ids'])) {
-                $urutan = 1;
-                foreach ($_POST['soal_ids'] as $soal_id) {
-                    $soal_id = intval($soal_id);
-                    $stmt = $conn->prepare("INSERT INTO latihan_soal (latihan_id, soal_id, urutan) VALUES (?, ?, ?)");
-                    $stmt->bind_param("iii", $latihan_id, $soal_id, $urutan);
-                    $stmt->execute();
+            if (!$bind_result) {
+                $message = 'error:Gagal bind parameter: ' . $stmt->error;
+            } else {
+        
+                if ($stmt->execute()) {
+                    $latihan_id = $stmt->insert_id;
+                    
+                    // Update null values if needed
+                    if (empty($deadline_bind) && $deadline === null) {
+                        $stmt_update = $conn->prepare("UPDATE latihan SET deadline = NULL WHERE id = ?");
+                        $stmt_update->bind_param("i", $latihan_id);
+                        $stmt_update->execute();
+                        $stmt_update->close();
+                    }
+                    if ($jumlah_soal_bind == 0 && $jumlah_soal === null) {
+                        $stmt_update = $conn->prepare("UPDATE latihan SET jumlah_soal = NULL WHERE id = ?");
+                        $stmt_update->bind_param("i", $latihan_id);
+                        $stmt_update->execute();
+                        $stmt_update->close();
+                    }
+                    if ($waktu_pengerjaan_bind == 0 && $waktu_pengerjaan === null) {
+                        $stmt_update = $conn->prepare("UPDATE latihan SET waktu_pengerjaan = NULL WHERE id = ?");
+                        $stmt_update->bind_param("i", $latihan_id);
+                        $stmt_update->execute();
+                        $stmt_update->close();
+                    }
+                    
                     $stmt->close();
-                    $urutan++;
+                    
+                    // Insert soal jika jenis = soal
+                    if ($jenis == 'soal' && !empty($_POST['soal_ids'])) {
+                        $urutan = 1;
+                        foreach ($_POST['soal_ids'] as $soal_id) {
+                            $soal_id = intval($soal_id);
+                            $stmt = $conn->prepare("INSERT INTO latihan_soal (latihan_id, soal_id, urutan) VALUES (?, ?, ?)");
+                            $stmt->bind_param("iii", $latihan_id, $soal_id, $urutan);
+                            $stmt->execute();
+                            $stmt->close();
+                            $urutan++;
+                        }
+                    }
+                    
+                    $message = 'success:Latihan berhasil ditambahkan.';
+                    header("Location: materi.php?msg=" . urlencode($message));
+                    exit;
+                } else {
+                    $message = 'error:Gagal menyimpan latihan: ' . $stmt->error;
                 }
             }
-            
-            $message = 'success:Latihan berhasil ditambahkan.';
-            header("Location: materi.php?msg=" . urlencode($message));
-            exit;
-        } else {
-            $message = 'error:Gagal menyimpan latihan.';
         }
     } else {
         $message = 'error:' . implode(', ', $errors);
