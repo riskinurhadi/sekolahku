@@ -1,16 +1,17 @@
 <?php
 $page_title = 'Kelola Kelas';
 require_once '../../config/session.php';
+require_once '../../config/database.php';
 requireRole(['kepala_sekolah']);
-require_once '../../includes/header.php';
 
 $conn = getConnection();
 $sekolah_id = $_SESSION['sekolah_id'];
 $message = '';
 
-// Handle AJAX request
+// Handle AJAX request FIRST (before any HTML output)
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['ajax'])) {
-    header('Content-Type: application/json');
+    // Set header first before any output
+    header('Content-Type: application/json; charset=utf-8');
     
     if (isset($_POST['action'])) {
         if ($_POST['action'] == 'add') {
@@ -23,8 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['ajax'])) {
             $checkStmt->execute();
             if ($checkStmt->get_result()->num_rows > 0) {
                 $checkStmt->close();
-                echo json_encode(['success' => false, 'message' => 'Kelas dengan nama ini sudah ada!']);
                 $conn->close();
+                echo json_encode(['success' => false, 'message' => 'Kelas dengan nama ini sudah ada!']);
                 exit;
             }
             $checkStmt->close();
@@ -33,31 +34,49 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['ajax'])) {
             $stmt->bind_param("sii", $nama_kelas, $tingkat, $sekolah_id);
             
             if ($stmt->execute()) {
+                $stmt->close();
+                $conn->close();
                 echo json_encode(['success' => true, 'message' => 'Kelas berhasil ditambahkan!']);
             } else {
-                echo json_encode(['success' => false, 'message' => 'Gagal menambahkan kelas!']);
+                $error = $conn->error;
+                $stmt->close();
+                $conn->close();
+                echo json_encode(['success' => false, 'message' => 'Gagal menambahkan kelas: ' . $error]);
             }
-            $stmt->close();
-            $conn->close();
             exit;
         } elseif ($_POST['action'] == 'edit') {
-            $id = $_POST['id'];
+            $id = intval($_POST['id'] ?? 0);
             $nama_kelas = $_POST['nama_kelas'];
-            $tingkat = $_POST['tingkat'];
+            $tingkat = intval($_POST['tingkat']);
+            
+            if ($id <= 0) {
+                $conn->close();
+                echo json_encode(['success' => false, 'message' => 'ID tidak valid!']);
+                exit;
+            }
             
             $stmt = $conn->prepare("UPDATE kelas SET nama_kelas = ?, tingkat = ? WHERE id = ? AND sekolah_id = ?");
             $stmt->bind_param("siii", $nama_kelas, $tingkat, $id, $sekolah_id);
             
             if ($stmt->execute()) {
+                $stmt->close();
+                $conn->close();
                 echo json_encode(['success' => true, 'message' => 'Kelas berhasil diupdate!']);
             } else {
-                echo json_encode(['success' => false, 'message' => 'Gagal mengupdate kelas!']);
+                $error = $conn->error;
+                $stmt->close();
+                $conn->close();
+                echo json_encode(['success' => false, 'message' => 'Gagal mengupdate kelas: ' . $error]);
             }
-            $stmt->close();
-            $conn->close();
             exit;
         } elseif ($_POST['action'] == 'delete') {
-            $id = $_POST['id'];
+            $id = intval($_POST['id'] ?? 0);
+            
+            if ($id <= 0) {
+                $conn->close();
+                echo json_encode(['success' => false, 'message' => 'ID tidak valid!']);
+                exit;
+            }
             
             // Cek apakah ada siswa di kelas ini
             $check_stmt = $conn->prepare("SELECT COUNT(*) as total FROM users WHERE kelas_id = ?");
@@ -67,8 +86,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['ajax'])) {
             $check_stmt->close();
             
             if ($check_result['total'] > 0) {
-                echo json_encode(['success' => false, 'message' => 'Kelas tidak bisa dihapus karena masih ada siswa di kelas ini!']);
                 $conn->close();
+                echo json_encode(['success' => false, 'message' => 'Kelas tidak bisa dihapus karena masih ada siswa di kelas ini!']);
                 exit;
             }
             
@@ -76,16 +95,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['ajax'])) {
             $stmt->bind_param("ii", $id, $sekolah_id);
             
             if ($stmt->execute()) {
-                echo json_encode(['success' => true, 'message' => 'Kelas berhasil dihapus!']);
+                $affected_rows = $stmt->affected_rows;
+                $stmt->close();
+                $conn->close();
+                
+                if ($affected_rows > 0) {
+                    echo json_encode(['success' => true, 'message' => 'Kelas berhasil dihapus!']);
+                } else {
+                    echo json_encode(['success' => false, 'message' => 'Kelas tidak ditemukan atau tidak memiliki akses!']);
+                }
             } else {
-                echo json_encode(['success' => false, 'message' => 'Gagal menghapus kelas!']);
+                $error = $conn->error;
+                $stmt->close();
+                $conn->close();
+                echo json_encode(['success' => false, 'message' => 'Gagal menghapus kelas: ' . $error]);
             }
-            $stmt->close();
-            $conn->close();
             exit;
         }
     }
+    
+    // If no action matched
+    $conn->close();
+    echo json_encode(['success' => false, 'message' => 'Aksi tidak valid!']);
+    exit;
 }
+
+// Now include header for non-AJAX requests
+require_once '../../includes/header.php';
 
 // Handle form submission (non-AJAX fallback)
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -154,38 +190,23 @@ $kelas = $conn->query("SELECT k.*,
 $conn->close();
 ?>
 
-<?php if ($message): ?>
-    <script>
-        <?php 
-        $msg = explode(':', $message);
-        if ($msg[0] == 'success') {
-            echo "Swal.fire({ icon: 'success', title: 'Berhasil', text: '" . addslashes($msg[1]) . "', timer: 2000, showConfirmButton: false });";
-            echo "setTimeout(function(){ window.location.reload(); }, 2000);";
-        } else {
-            echo "Swal.fire({ icon: 'error', title: 'Error', text: '" . addslashes($msg[1]) . "' });";
-        }
-        ?>
-    </script>
-<?php endif; ?>
-
-<div class="page-header">
-    <h2><i class="bi bi-building"></i> Kelola Kelas</h2>
-    <p>Tambah dan kelola data kelas (10 D, 11 D, 12 D, dll)</p>
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2><i class="bi bi-building"></i> Kelola Kelas</h2>
+        <p>Tambah dan kelola data kelas (10 D, 11 D, 12 D, dll)</p>
+    </div>
+    <a href="tambah_kelas.php" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-circle"></i> Tambah Kelas
+    </a>
 </div>
 
 <!-- Classes List -->
 <div class="row">
     <div class="col-12">
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="bi bi-building"></i> Daftar Kelas</h5>
-                <a href="tambah_kelas.php" class="btn btn-primary btn-sm">
-                    <i class="bi bi-plus-circle"></i> Tambah Kelas
-                </a>
-            </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table id="kelasTable" class="table" style="width:100%">
+                    <table id="kelasTable" class="table table-hover" style="width:100%">
                         <thead>
                             <tr>
                                 <th>Nama Kelas</th>
@@ -224,7 +245,73 @@ $conn->close();
     </div>
 </div>
 
+<?php 
+// Prepare message for JavaScript
+$js_message = '';
+if ($message) {
+    $msg = explode(':', $message);
+    if ($msg[0] == 'success') {
+        $js_message = json_encode([
+            'type' => 'success',
+            'title' => 'Berhasil',
+            'text' => $msg[1]
+        ]);
+    } else {
+        $js_message = json_encode([
+            'type' => 'error',
+            'title' => 'Gagal',
+            'text' => $msg[1]
+        ]);
+    }
+} elseif (isset($_GET['success']) && $_GET['success'] == 1) {
+    $js_message = json_encode([
+        'type' => 'success',
+        'title' => 'Berhasil',
+        'text' => isset($_SESSION['success_message']) ? $_SESSION['success_message'] : 'Operasi berhasil!'
+    ]);
+    unset($_SESSION['success_message']);
+}
+require_once '../../includes/footer.php'; 
+?>
+
 <script>
+$(document).ready(function() {
+    // Show message if exists
+    <?php if ($js_message): ?>
+    var msg = <?php echo $js_message; ?>;
+    if (msg.type === 'success') {
+        Swal.fire({
+            icon: 'success',
+            title: msg.title,
+            text: msg.text,
+            timer: 2000,
+            showConfirmButton: false
+        }).then(function() {
+            window.location.href = 'kelas.php';
+        });
+    } else {
+        Swal.fire({
+            icon: 'error',
+            title: msg.title,
+            text: msg.text,
+            confirmButtonText: 'OK'
+        });
+    }
+    <?php endif; ?>
+    
+    // Initialize DataTables
+    $('#kelasTable').DataTable({
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
+        },
+        responsive: true,
+        order: [[1, 'asc'], [0, 'asc']],
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
+    });
+});
+
 function deleteKelas(id) {
     Swal.fire({
         title: 'Apakah Anda yakin?',
@@ -252,7 +339,7 @@ function deleteKelas(id) {
                             icon: 'success',
                             title: 'Berhasil',
                             text: response.message,
-                            timer: 1500,
+                            timer: 2000,
                             showConfirmButton: false
                         }).then(function() {
                             location.reload();
@@ -261,34 +348,41 @@ function deleteKelas(id) {
                         Swal.fire({
                             icon: 'error',
                             title: 'Gagal',
-                            text: response.message
+                            text: response.message,
+                            confirmButtonText: 'OK'
                         });
                     }
                 },
-                error: function() {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Terjadi kesalahan saat menghapus data'
-                    });
+                error: function(xhr, status, error) {
+                    console.log('AJAX Error:', status, error);
+                    console.log('Response:', xhr.responseText);
+                    
+                    // Try to parse response as JSON
+                    var response = null;
+                    try {
+                        response = JSON.parse(xhr.responseText);
+                    } catch (e) {
+                        // If not JSON, show generic error
+                    }
+                    
+                    if (response && response.message) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: response.message,
+                            confirmButtonText: 'OK'
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Terjadi kesalahan saat menghapus data. Status: ' + status,
+                            confirmButtonText: 'OK'
+                        });
+                    }
                 }
             });
         }
     });
 }
-
-$(document).ready(function() {
-    $('#kelasTable').DataTable({
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
-        },
-        responsive: true,
-        order: [[1, 'asc'], [0, 'asc']],
-        pageLength: 10,
-        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
-        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
-    });
-});
 </script>
-
-<?php require_once '../../includes/footer.php'; ?>
