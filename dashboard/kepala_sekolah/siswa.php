@@ -2,15 +2,15 @@
 $page_title = 'Kelola Siswa';
 require_once '../../config/session.php';
 requireRole(['kepala_sekolah']);
-require_once '../../includes/header.php';
 
 $conn = getConnection();
 $sekolah_id = $_SESSION['sekolah_id'];
 $message = '';
 
-// Handle AJAX request
+// Handle AJAX request FIRST (before any HTML output)
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['ajax'])) {
-    header('Content-Type: application/json');
+    // Set header first before any output
+    header('Content-Type: application/json; charset=utf-8');
     
     if (isset($_POST['action'])) {
         if ($_POST['action'] == 'add') {
@@ -26,8 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['ajax'])) {
             $checkStmt->execute();
             if ($checkStmt->get_result()->num_rows > 0) {
                 $checkStmt->close();
-                echo json_encode(['success' => false, 'message' => 'Username sudah digunakan!']);
                 $conn->close();
+                echo json_encode(['success' => false, 'message' => 'Username sudah digunakan!']);
                 exit;
             }
             $checkStmt->close();
@@ -36,34 +36,55 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['ajax'])) {
             $stmt->bind_param("ssssii", $username, $password, $nama_lengkap, $email, $sekolah_id, $kelas_id);
             
             if ($stmt->execute()) {
+                $stmt->close();
+                $conn->close();
                 echo json_encode(['success' => true, 'message' => 'Siswa berhasil ditambahkan!']);
             } else {
-                echo json_encode(['success' => false, 'message' => 'Gagal menambahkan siswa!']);
+                $error = $conn->error;
+                $stmt->close();
+                $conn->close();
+                echo json_encode(['success' => false, 'message' => 'Gagal menambahkan siswa: ' . $error]);
             }
-            $stmt->close();
-            $conn->close();
             exit;
         } elseif ($_POST['action'] == 'delete') {
             $id = intval($_POST['id'] ?? 0);
             if ($id <= 0) {
-                echo json_encode(['success' => false, 'message' => 'ID tidak valid!']);
                 $conn->close();
+                echo json_encode(['success' => false, 'message' => 'ID tidak valid!']);
                 exit;
             }
+            
             $stmt = $conn->prepare("DELETE FROM users WHERE id = ? AND role = 'siswa' AND sekolah_id = ?");
             $stmt->bind_param("ii", $id, $sekolah_id);
             
             if ($stmt->execute()) {
-                echo json_encode(['success' => true, 'message' => 'Siswa berhasil dihapus!']);
+                $affected_rows = $stmt->affected_rows;
+                $stmt->close();
+                $conn->close();
+                
+                if ($affected_rows > 0) {
+                    echo json_encode(['success' => true, 'message' => 'Siswa berhasil dihapus!']);
+                } else {
+                    echo json_encode(['success' => false, 'message' => 'Siswa tidak ditemukan atau tidak memiliki akses!']);
+                }
             } else {
-                echo json_encode(['success' => false, 'message' => 'Gagal menghapus siswa!']);
+                $error = $conn->error;
+                $stmt->close();
+                $conn->close();
+                echo json_encode(['success' => false, 'message' => 'Gagal menghapus siswa: ' . $error]);
             }
-            $stmt->close();
-            $conn->close();
             exit;
         }
     }
+    
+    // If no action matched
+    $conn->close();
+    echo json_encode(['success' => false, 'message' => 'Aksi tidak valid!']);
+    exit;
 }
+
+// Now include header for non-AJAX requests
+require_once '../../includes/header.php';
 
 // Handle form submission (non-AJAX fallback)
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -281,13 +302,33 @@ function deleteStudent(id) {
                         });
                     }
                 },
-                error: function() {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Terjadi kesalahan saat menghapus data',
-                        confirmButtonText: 'OK'
-                    });
+                error: function(xhr, status, error) {
+                    console.log('AJAX Error:', status, error);
+                    console.log('Response:', xhr.responseText);
+                    
+                    // Try to parse response as JSON
+                    var response = null;
+                    try {
+                        response = JSON.parse(xhr.responseText);
+                    } catch (e) {
+                        // If not JSON, show generic error
+                    }
+                    
+                    if (response && response.message) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: response.message,
+                            confirmButtonText: 'OK'
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Terjadi kesalahan saat menghapus data. Status: ' + status,
+                            confirmButtonText: 'OK'
+                        });
+                    }
                 }
             });
         }
