@@ -1,6 +1,7 @@
 <?php
 $page_title = 'Kelola Siswa';
 require_once '../../config/session.php';
+require_once '../../config/database.php';
 requireRole(['kepala_sekolah']);
 
 $conn = getConnection();
