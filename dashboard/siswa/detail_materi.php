@@ -29,10 +29,10 @@ if (!$materi) {
     exit;
 }
 
-// Update progress (mark as selesai/sudah dibaca)
-$stmt = $conn->prepare("INSERT INTO progress_materi_siswa (materi_id, siswa_id, status, terakhir_dibaca) 
-    VALUES (?, ?, 'selesai', NOW())
-    ON DUPLICATE KEY UPDATE status = 'selesai', terakhir_dibaca = NOW()");
+// Update progress (mark as selesai/sudah dibaca dengan progress 100%)
+$stmt = $conn->prepare("INSERT INTO progress_materi_siswa (materi_id, siswa_id, status, progress, terakhir_dibaca) 
+    VALUES (?, ?, 'selesai', 100, NOW())
+    ON DUPLICATE KEY UPDATE status = 'selesai', progress = 100, terakhir_dibaca = NOW()");
 $stmt->bind_param("ii", $materi_id, $siswa_id);
 $stmt->execute();
 $stmt->close();

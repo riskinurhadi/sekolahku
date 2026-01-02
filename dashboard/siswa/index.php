@@ -1144,14 +1144,14 @@ $conn->close();
         <div class="col-md-8">
             <h1>Hai, selamat datang kembali!</h1>
             <p>Dashboard monitoring pembelajaran Anda.</p>
-        </div>
+                        </div>
         <div class="col-md-4 text-md-end">
             <div class="date-range-selector" style="display: flex; align-items: center; gap: 12px; font-size: 14px; color: #64748b;">
                 <span class="date-text" style="font-weight: 600; color: #1e293b;"><?php echo date('d M Y'); ?></span>
                 <span><?php echo date('l'); ?></span>
-            </div>
-        </div>
-    </div>
+                        </div>
+                    </div>
+                </div>
     
     <!-- Tabs -->
     <ul class="nav dashboard-tabs" role="tablist">
@@ -1166,29 +1166,29 @@ $conn->close();
             </button>
         </li>
     </ul>
-</div>
+    </div>
 
 <!-- Tab Content -->
 <div class="tab-content" id="dashboardTabsContent">
     <!-- Overview Tab -->
     <div class="tab-pane fade show active" id="overview" role="tabpanel">
         <!-- Statistics Cards dengan Mini Charts -->
-        <div class="row mb-4">
+    <div class="row mb-4">
             <div class="col-xl-3 col-md-6 mb-4">
                 <div class="metric-card metric-card-blue">
                     <div class="metric-card-header">
                         <div class="flex-grow-1">
                             <div class="metric-icon">
-                                <i class="bi bi-journal-check"></i>
-                            </div>
+                    <i class="bi bi-journal-check"></i>
+                </div>
                             <div class="metric-title">Soal Aktif</div>
                             <div class="metric-value"><?php echo $stats['total_soal_aktif']; ?></div>
-                        </div>
+                </div>
                         <div class="metric-change <?php echo $change_soal_aktif >= 0 ? 'positive' : 'negative'; ?>">
                             <i class="bi bi-arrow-<?php echo $change_soal_aktif >= 0 ? 'up' : 'down'; ?>"></i>
                             <?php echo abs($change_soal_aktif); ?>%
-                        </div>
-                    </div>
+            </div>
+        </div>
                 </div>
             </div>
             
@@ -1197,16 +1197,16 @@ $conn->close();
                     <div class="metric-card-header">
                         <div class="flex-grow-1">
                             <div class="metric-icon">
-                                <i class="bi bi-patch-check-fill"></i>
-                            </div>
+                    <i class="bi bi-patch-check-fill"></i>
+                </div>
                             <div class="metric-title">Soal Selesai</div>
                             <div class="metric-value"><?php echo $stats['total_soal_selesai']; ?></div>
-                        </div>
+                </div>
                         <div class="metric-change <?php echo $change_soal_selesai >= 0 ? 'positive' : 'negative'; ?>">
                             <i class="bi bi-arrow-<?php echo $change_soal_selesai >= 0 ? 'up' : 'down'; ?>"></i>
                             <?php echo abs($change_soal_selesai); ?>%
-                        </div>
-                    </div>
+            </div>
+        </div>
                 </div>
             </div>
             
@@ -1233,8 +1233,8 @@ $conn->close();
                     <div class="metric-card-header">
                         <div class="flex-grow-1">
                             <div class="metric-icon">
-                                <i class="bi bi-bar-chart-line-fill"></i>
-                            </div>
+                    <i class="bi bi-bar-chart-line-fill"></i>
+                </div>
                             <div class="metric-title">Rata-rata Nilai</div>
                             <div class="metric-value"><?php echo $stats['rata_rata_nilai']; ?></div>
                         </div>
@@ -1242,10 +1242,10 @@ $conn->close();
                             <i class="bi bi-arrow-<?php echo $change_rata_nilai >= 0 ? 'up' : 'down'; ?>"></i>
                             <?php echo abs($change_rata_nilai); ?>%
                         </div>
-                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
         <!-- Tugas Reminder Card -->
         <?php if (!empty($tugas_reminders['aktif']) || !empty($tugas_reminders['hampir_tenggat']) || !empty($tugas_reminders['overdue'])): ?>
@@ -1259,7 +1259,7 @@ $conn->close();
                                 Pengingat Tugas
                             </h5>
                             <p class="chart-section-desc mb-0">Tugas yang perlu perhatian Anda</p>
-                        </div>
+                </div>
                     </div>
                     
                     <div class="tugas-reminder-content">
@@ -1296,10 +1296,10 @@ $conn->close();
                                         </a>
                                     </div>
                                 </div>
-                                <?php endforeach; ?>
-                            </div>
+                                    <?php endforeach; ?>
                         </div>
-                        <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
                         
                         <!-- Hampir Tenggat Tasks -->
                         <?php if (!empty($tugas_reminders['hampir_tenggat'])): ?>
@@ -1308,7 +1308,7 @@ $conn->close();
                                 <i class="bi bi-clock-fill me-2"></i>
                                 <span class="fw-bold">Hampir Tenggat</span>
                                 <span class="badge bg-warning text-dark ms-2"><?php echo count($tugas_reminders['hampir_tenggat']); ?></span>
-                            </div>
+                </div>
                             <div class="tugas-list">
                                 <?php foreach ($tugas_reminders['hampir_tenggat'] as $tugas): ?>
                                 <div class="tugas-item tugas-item-warning">
@@ -1317,7 +1317,7 @@ $conn->close();
                                             <div class="tugas-judul">
                                                 <i class="bi bi-<?php echo $tugas['jenis'] == 'tugas_file' ? 'file-earmark-arrow-up' : 'pencil-square'; ?> me-2"></i>
                                                 <?php echo htmlspecialchars($tugas['judul']); ?>
-                                            </div>
+            </div>
                                             <div class="tugas-info">
                                                 <span class="text-muted small">
                                                     <i class="bi bi-book me-1"></i><?php echo htmlspecialchars($tugas['materi_judul']); ?>
@@ -1357,7 +1357,7 @@ $conn->close();
                                 <i class="bi bi-check-circle-fill me-2"></i>
                                 <span class="fw-bold">Tugas Aktif</span>
                                 <span class="badge bg-primary ms-2"><?php echo count($tugas_reminders['aktif']); ?></span>
-                            </div>
+                </div>
                             <div class="tugas-list">
                                 <?php foreach (array_slice($tugas_reminders['aktif'], 0, 5) as $tugas): // Limit to 5 active tasks ?>
                                 <div class="tugas-item tugas-item-active">
@@ -1366,37 +1366,37 @@ $conn->close();
                                             <div class="tugas-judul">
                                                 <i class="bi bi-<?php echo $tugas['jenis'] == 'tugas_file' ? 'file-earmark-arrow-up' : 'pencil-square'; ?> me-2"></i>
                                                 <?php echo htmlspecialchars($tugas['judul']); ?>
-                                            </div>
+                            </div>
                                             <div class="tugas-info">
                                                 <span class="text-muted small">
                                                     <i class="bi bi-book me-1"></i><?php echo htmlspecialchars($tugas['materi_judul']); ?>
                                                     <span class="ms-2"><i class="bi bi-mortarboard me-1"></i><?php echo htmlspecialchars($tugas['nama_pelajaran']); ?></span>
-                                                </span>
-                                            </div>
+                                </span>
+                            </div>
                                             <?php if ($tugas['deadline']): ?>
                                             <div class="tugas-deadline text-muted mt-1">
                                                 <i class="bi bi-calendar me-1"></i>
                                                 Deadline: <?php echo date('d M Y H:i', strtotime($tugas['deadline'])); ?>
-                                            </div>
+                        </div>
                                             <?php else: ?>
                                             <div class="tugas-deadline text-muted mt-1">
                                                 <i class="bi bi-infinity me-1"></i>
                                                 Tidak ada deadline
-                                            </div>
+                                </div>
                                             <?php endif; ?>
-                                        </div>
+                                </div>
                                         <a href="detail_materi.php?id=<?php echo $tugas['materi_id']; ?>" class="btn btn-sm btn-primary">
                                             <i class="bi bi-arrow-right me-1"></i>Kerjakan
                                         </a>
-                                    </div>
-                                </div>
+                            </div>
+                        </div>
                                 <?php endforeach; ?>
                             </div>
                         </div>
-                        <?php endif; ?>
-                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
+        </div>
         </div>
         <?php endif; ?>
 
@@ -1424,11 +1424,11 @@ $conn->close();
                                     <div class="d-flex align-items-start">
                                         <div class="jadwal-icon <?php echo $icon_class; ?>">
                                             <i class="bi bi-<?php echo $icon_name; ?>"></i>
-                                        </div>
+                                            </div>
                                         <div class="jadwal-content-vertical">
                                             <div class="jadwal-mata-pelajaran">
                                                 <?php echo htmlspecialchars($jadwal['nama_pelajaran']); ?>
-                                            </div>
+                                        </div>
                                             <div class="jadwal-jam">
                                                 <?php echo date('H:i', strtotime($jadwal['jam_mulai'])); ?> - <?php echo date('H:i', strtotime($jadwal['jam_selesai'])); ?>
                                             </div>
@@ -1441,8 +1441,8 @@ $conn->close();
                         <div class="text-center py-4" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                             <i class="bi bi-calendar-x text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
                             <p class="text-muted mt-3 mb-0">Tidak ada jadwal untuk hari ini</p>
-                        </div>
-                    <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
                 </div>
             </div>
 
@@ -1486,8 +1486,8 @@ $conn->close();
                         </div>
                     <?php endif; ?>
                 </div>
+                </div>
             </div>
-        </div>
 
 
         <!-- Charts Section -->
@@ -1499,8 +1499,8 @@ $conn->close();
                         <div>
                             <h5 class="chart-section-title">Aktivitas Belajar</h5>
                             <p class="chart-section-desc">Perbandingan soal aktif dan selesai dalam 7 hari terakhir</p>
-                        </div>
-                    </div>
+                </div>
+                            </div>
                     <div class="chart-container">
                         <canvas id="aktivitasBelajarChart"></canvas>
                     </div>
