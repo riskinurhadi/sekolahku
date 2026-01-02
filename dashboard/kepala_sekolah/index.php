@@ -187,67 +187,187 @@ $conn->close();
     background: transparent;
 }
 
-/* Stat Cards dengan Mini Charts */
+/* Stat Cards - Modern Design */
 .metric-card {
-    background: #ffffff;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e5e7eb;
+    padding: 18px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: none;
     transition: all 0.3s ease;
     height: 100%;
     position: relative;
     overflow: hidden;
 }
 
+.metric-card.metric-card-blue {
+    background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%);
+}
+
+.metric-card.metric-card-green {
+    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+}
+
+.metric-card.metric-card-orange {
+    background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
+}
+
+.metric-card.metric-card-purple {
+    background: linear-gradient(135deg, #ffffff 0%, #faf5ff 100%);
+}
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 6px;
+    height: 100%;
+    background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+    z-index: 1;
+    border-radius: 0 16px 16px 0;
+}
+
+.metric-card.metric-card-blue::before {
+    background: linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+    box-shadow: -4px 0 20px rgba(99, 102, 241, 0.5), -2px 0 10px rgba(99, 102, 241, 0.3);
+}
+
+.metric-card.metric-card-green::before {
+    background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+    box-shadow: -4px 0 20px rgba(16, 185, 129, 0.5), -2px 0 10px rgba(16, 185, 129, 0.3);
+}
+
+.metric-card.metric-card-orange::before {
+    background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+    box-shadow: -4px 0 20px rgba(245, 158, 11, 0.5), -2px 0 10px rgba(245, 158, 11, 0.3);
+}
+
+.metric-card.metric-card-purple::before {
+    background: linear-gradient(180deg, #8b5cf6 0%, #7c3aed 100%);
+    box-shadow: -4px 0 20px rgba(139, 92, 246, 0.5), -2px 0 10px rgba(139, 92, 246, 0.3);
+}
+
 .metric-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    border-color: #3b82f6;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16), 0 5px 14px rgba(0, 0, 0, 0.12);
+}
+
+.metric-card.metric-card-blue:hover {
+    box-shadow: 0 10px 28px rgba(99, 102, 241, 0.25), 0 5px 14px rgba(99, 102, 241, 0.15);
+}
+
+.metric-card.metric-card-green:hover {
+    box-shadow: 0 10px 28px rgba(16, 185, 129, 0.25), 0 5px 14px rgba(16, 185, 129, 0.15);
+}
+
+.metric-card.metric-card-orange:hover {
+    box-shadow: 0 10px 28px rgba(245, 158, 11, 0.25), 0 5px 14px rgba(245, 158, 11, 0.15);
+}
+
+.metric-card.metric-card-purple:hover {
+    box-shadow: 0 10px 28px rgba(139, 92, 246, 0.25), 0 5px 14px rgba(139, 92, 246, 0.15);
 }
 
 .metric-card-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 2;
+}
+
+.metric-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+.metric-card:hover .metric-icon {
+    transform: scale(1.05) rotate(5deg);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.metric-card-blue .metric-icon {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: #ffffff;
+}
+
+.metric-card-green .metric-icon {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+}
+
+.metric-card-orange .metric-icon {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #ffffff;
+}
+
+.metric-card-purple .metric-icon {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: #ffffff;
 }
 
 .metric-title {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 600;
     color: #64748b;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .metric-value {
-    font-size: 32px;
+    font-size: 28px;
     font-weight: 700;
     color: #1e293b;
     line-height: 1;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
 }
 
 .metric-change {
-    font-size: 12px;
-    font-weight: 600;
-    display: flex;
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-flex;
     align-items: center;
-    gap: 4px;
+    justify-content: center;
+    gap: 3px;
+    padding: 6px 10px;
+    border-radius: 16px;
+    min-width: 55px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
 }
 
 .metric-change.positive {
-    color: #10b981;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.15) 100%);
+    color: #059669;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3), 0 2px 6px rgba(16, 185, 129, 0.2);
+    border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 .metric-change.negative {
-    color: #ef4444;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.15) 100%);
+    color: #dc2626;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3), 0 2px 6px rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
-.metric-chart {
-    height: 60px;
-    margin-top: 16px;
-    position: relative;
+.metric-card:hover .metric-change {
+    transform: scale(1.05);
+}
+
+.metric-change i {
+    font-size: 9px;
 }
 
 /* Chart Sections */
@@ -331,76 +451,76 @@ $conn->close();
 <div class="tab-content" id="dashboardTabsContent">
     <!-- Overview Tab -->
     <div class="tab-pane fade show active" id="overview" role="tabpanel">
-        <!-- Statistics Cards dengan Mini Charts -->
+        <!-- Statistics Cards -->
         <div class="row mb-4">
-    <div class="col-xl-3 col-md-6 mb-4">
-                <div class="metric-card">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="metric-card metric-card-blue">
                     <div class="metric-card-header">
-                        <div>
+                        <div class="flex-grow-1">
+                            <div class="metric-icon">
+                                <i class="bi bi-person-workspace"></i>
+                            </div>
                             <div class="metric-title">Total Guru</div>
                             <div class="metric-value"><?php echo $stats['total_guru']; ?></div>
-                            <div class="metric-change <?php echo $change_guru >= 0 ? 'positive' : 'negative'; ?>">
-                                <i class="bi bi-arrow-<?php echo $change_guru >= 0 ? 'up' : 'down'; ?>"></i>
-                                <?php echo abs($change_guru); ?>%
-                            </div>
                         </div>
-            </div>
-                    <div class="metric-chart">
-                        <canvas id="chartGuru"></canvas>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xl-3 col-md-6 mb-4">
-                <div class="metric-card">
-                    <div class="metric-card-header">
-                        <div>
-                            <div class="metric-title">Total Siswa</div>
-                            <div class="metric-value"><?php echo $stats['total_siswa']; ?></div>
-                            <div class="metric-change <?php echo $change_siswa >= 0 ? 'positive' : 'negative'; ?>">
-                                <i class="bi bi-arrow-<?php echo $change_siswa >= 0 ? 'up' : 'down'; ?>"></i>
-                                <?php echo abs($change_siswa); ?>%
-                            </div>
-                        </div>
-            </div>
-                    <div class="metric-chart">
-                        <canvas id="chartSiswa"></canvas>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xl-3 col-md-6 mb-4">
-                <div class="metric-card">
-                    <div class="metric-card-header">
-                        <div>
-                            <div class="metric-title">Mata Pelajaran</div>
-                            <div class="metric-value"><?php echo $stats['total_mata_pelajaran']; ?></div>
-                            <div class="metric-change <?php echo $change_mata_pelajaran >= 0 ? 'positive' : 'negative'; ?>">
-                                <i class="bi bi-arrow-<?php echo $change_mata_pelajaran >= 0 ? 'up' : 'down'; ?>"></i>
-                                <?php echo abs($change_mata_pelajaran); ?>%
-                            </div>
-                        </div>
-            </div>
-                    <div class="metric-chart">
-                        <canvas id="chartMataPelajaran"></canvas>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xl-3 col-md-6 mb-4">
-                <div class="metric-card">
-                    <div class="metric-card-header">
-                        <div>
-                            <div class="metric-title">Total Soal</div>
-                            <div class="metric-value"><?php echo $stats['total_soal']; ?></div>
-                            <div class="metric-change <?php echo $change_soal >= 0 ? 'positive' : 'negative'; ?>">
-                                <i class="bi bi-arrow-<?php echo $change_soal >= 0 ? 'up' : 'down'; ?>"></i>
-                                <?php echo abs($change_soal); ?>%
-                            </div>
+                        <div class="metric-change <?php echo $change_guru >= 0 ? 'positive' : 'negative'; ?>">
+                            <i class="bi bi-arrow-<?php echo $change_guru >= 0 ? 'up' : 'down'; ?>"></i>
+                            <?php echo abs($change_guru); ?>%
                         </div>
                     </div>
-                    <div class="metric-chart">
-                        <canvas id="chartSoal"></canvas>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="metric-card metric-card-green">
+                    <div class="metric-card-header">
+                        <div class="flex-grow-1">
+                            <div class="metric-icon">
+                                <i class="bi bi-people"></i>
+                            </div>
+                            <div class="metric-title">Total Siswa</div>
+                            <div class="metric-value"><?php echo $stats['total_siswa']; ?></div>
+                        </div>
+                        <div class="metric-change <?php echo $change_siswa >= 0 ? 'positive' : 'negative'; ?>">
+                            <i class="bi bi-arrow-<?php echo $change_siswa >= 0 ? 'up' : 'down'; ?>"></i>
+                            <?php echo abs($change_siswa); ?>%
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="metric-card metric-card-orange">
+                    <div class="metric-card-header">
+                        <div class="flex-grow-1">
+                            <div class="metric-icon">
+                                <i class="bi bi-book"></i>
+                            </div>
+                            <div class="metric-title">Mata Pelajaran</div>
+                            <div class="metric-value"><?php echo $stats['total_mata_pelajaran']; ?></div>
+                        </div>
+                        <div class="metric-change <?php echo $change_mata_pelajaran >= 0 ? 'positive' : 'negative'; ?>">
+                            <i class="bi bi-arrow-<?php echo $change_mata_pelajaran >= 0 ? 'up' : 'down'; ?>"></i>
+                            <?php echo abs($change_mata_pelajaran); ?>%
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="metric-card metric-card-purple">
+                    <div class="metric-card-header">
+                        <div class="flex-grow-1">
+                            <div class="metric-icon">
+                                <i class="bi bi-question-circle"></i>
+                            </div>
+                            <div class="metric-title">Total Soal</div>
+                            <div class="metric-value"><?php echo $stats['total_soal']; ?></div>
+                        </div>
+                        <div class="metric-change <?php echo $change_soal >= 0 ? 'positive' : 'negative'; ?>">
+                            <i class="bi bi-arrow-<?php echo $change_soal >= 0 ? 'up' : 'down'; ?>"></i>
+                            <?php echo abs($change_soal); ?>%
+                        </div>
                     </div>
                 </div>
             </div>
@@ -562,84 +682,6 @@ $conn->close();
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-// Mini Charts untuk Stat Cards
-const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-        legend: { display: false },
-        tooltip: { enabled: false }
-    },
-    scales: {
-        x: { display: false },
-        y: { display: false }
-    },
-    elements: {
-        point: { radius: 0 },
-        line: { borderWidth: 2, tension: 0.4 }
-    }
-};
-
-// Chart Guru
-new Chart(document.getElementById('chartGuru'), {
-    type: 'line',
-    data: {
-        labels: ['', '', '', '', '', '', ''],
-        datasets: [{
-            data: <?php echo json_encode($trend_data['guru']); ?>,
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            fill: true
-        }]
-    },
-    options: chartOptions
-});
-
-// Chart Siswa
-new Chart(document.getElementById('chartSiswa'), {
-    type: 'line',
-    data: {
-        labels: ['', '', '', '', '', '', ''],
-        datasets: [{
-            data: <?php echo json_encode($trend_data['siswa']); ?>,
-            borderColor: '#10b981',
-            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-            fill: true
-        }]
-    },
-    options: chartOptions
-});
-
-// Chart Mata Pelajaran
-new Chart(document.getElementById('chartMataPelajaran'), {
-    type: 'line',
-    data: {
-        labels: ['', '', '', '', '', '', ''],
-        datasets: [{
-            data: <?php echo json_encode($trend_data['mata_pelajaran']); ?>,
-            borderColor: '#f59e0b',
-            backgroundColor: 'rgba(245, 158, 11, 0.1)',
-            fill: true
-        }]
-    },
-    options: chartOptions
-});
-
-// Chart Soal
-new Chart(document.getElementById('chartSoal'), {
-    type: 'line',
-    data: {
-        labels: ['', '', '', '', '', '', ''],
-        datasets: [{
-            data: <?php echo json_encode($trend_data['soal']); ?>,
-            borderColor: '#8b5cf6',
-            backgroundColor: 'rgba(139, 92, 246, 0.1)',
-            fill: true
-        }]
-    },
-    options: chartOptions
-});
-
 // Distribusi User Pie Chart
 new Chart(document.getElementById('chartDistribusiUser'), {
     type: 'pie',
