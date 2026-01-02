@@ -215,7 +215,7 @@ $(document).ready(function() {
             timer: 2000,
             showConfirmButton: false
         }).then(function() {
-            window.location.reload();
+            window.location.href = 'siswa.php';
         });
     } else {
         Swal.fire({
