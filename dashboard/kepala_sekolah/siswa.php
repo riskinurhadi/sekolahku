@@ -107,19 +107,6 @@ $students = $conn->query("SELECT u.*, k.nama_kelas
 $conn->close();
 ?>
 
-<?php if ($message): ?>
-    <script>
-        <?php 
-        $msg = explode(':', $message);
-        if ($msg[0] == 'success') {
-            echo "Swal.fire({ icon: 'success', title: 'Berhasil', text: '" . addslashes($msg[1]) . "', timer: 1500, showConfirmButton: false });";
-            echo "setTimeout(function(){ window.location.reload(); }, 1500);";
-        } else {
-            echo "Swal.fire({ icon: 'error', title: 'Gagal', text: '" . addslashes($msg[1]) . "' });";
-        }
-        ?>
-    </script>
-<?php endif; ?>
 
 <div class="page-header">
     <h2>Kelola Siswa</h2>
@@ -178,14 +165,60 @@ $conn->close();
     </div>
 </div>
 
+<?php 
+// Prepare message for JavaScript
+$js_message = '';
+if ($message) {
+    $msg = explode(':', $message);
+    if ($msg[0] == 'success') {
+        $js_message = json_encode([
+            'type' => 'success',
+            'title' => 'Berhasil',
+            'text' => $msg[1]
+        ]);
+    } else {
+        $js_message = json_encode([
+            'type' => 'error',
+            'title' => 'Gagal',
+            'text' => $msg[1]
+        ]);
+    }
+}
+require_once '../../includes/footer.php'; 
+?>
+
 <script>
 $(document).ready(function() {
+    // Show message if exists
+    <?php if ($js_message): ?>
+    var msg = <?php echo $js_message; ?>;
+    if (msg.type === 'success') {
+        Swal.fire({
+            icon: 'success',
+            title: msg.title,
+            text: msg.text,
+            timer: 2000,
+            showConfirmButton: false
+        }).then(function() {
+            window.location.reload();
+        });
+    } else {
+        Swal.fire({
+            icon: 'error',
+            title: msg.title,
+            text: msg.text,
+            confirmButtonText: 'OK'
+        });
+    }
+    <?php endif; ?>
+    
+    // Initialize DataTables
     $('#studentsTable').DataTable({
         language: {
             url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
         },
         responsive: true,
-        order: [[0, 'asc']],
+        order: [[1, 'asc']],
         pageLength: 10,
         lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
         dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
@@ -219,7 +252,7 @@ function deleteStudent(id) {
                             icon: 'success',
                             title: 'Berhasil',
                             text: response.message,
-                            timer: 1500,
+                            timer: 2000,
                             showConfirmButton: false
                         }).then(function() {
                             location.reload();
@@ -228,7 +261,8 @@ function deleteStudent(id) {
                         Swal.fire({
                             icon: 'error',
                             title: 'Gagal',
-                            text: response.message
+                            text: response.message,
+                            confirmButtonText: 'OK'
                         });
                     }
                 },
@@ -236,7 +270,8 @@ function deleteStudent(id) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: 'Terjadi kesalahan saat menghapus data'
+                        text: 'Terjadi kesalahan saat menghapus data',
+                        confirmButtonText: 'OK'
                     });
                 }
             });
@@ -244,5 +279,3 @@ function deleteStudent(id) {
     });
 }
 </script>
-
-<?php require_once '../../includes/footer.php'; ?>
