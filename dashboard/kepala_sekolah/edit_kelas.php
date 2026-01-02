@@ -52,13 +52,31 @@ $conn->close();
 ?>
 
 <?php if ($message): ?>
-    <div class="alert alert-<?php echo strpos($message, 'success') === 0 ? 'success' : 'danger'; ?> alert-dismissible fade show" role="alert">
-        <?php 
-        $msg = explode(':', $message);
-        echo htmlspecialchars($msg[1]); 
-        ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+    <script>
+        $(document).ready(function() {
+            <?php 
+            $msg = explode(':', $message);
+            if ($msg[0] == 'success') {
+                echo "Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '" . addslashes($msg[1]) . "',
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(function() {
+                    window.location.href = 'kelas.php';
+                });";
+            } else {
+                echo "Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: '" . addslashes($msg[1]) . "',
+                    confirmButtonText: 'OK'
+                });";
+            }
+            ?>
+        });
+    </script>
 <?php endif; ?>
 
 <div class="page-header">
@@ -70,7 +88,7 @@ $conn->close();
     <div class="col-12">
         <div class="card">
             <div class="card-body">
-                <form method="POST">
+                <form method="POST" id="editKelasForm">
                     <div class="mb-3">
                         <label for="tingkat" class="form-label">Tingkat <span class="text-danger">*</span></label>
                         <select class="form-select" id="tingkat" name="tingkat" required>
@@ -96,6 +114,29 @@ $conn->close();
                         </button>
                     </div>
                 </form>
+                
+                <script>
+                $(document).ready(function() {
+                    $('#editKelasForm').on('submit', function(e) {
+                        e.preventDefault();
+                        
+                        Swal.fire({
+                            title: 'Update Data?',
+                            text: 'Apakah Anda yakin ingin mengupdate data kelas ini?',
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Ya, Update!',
+                            cancelButtonText: 'Batal'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                this.submit();
+                            }
+                        });
+                    });
+                });
+                </script>
             </div>
         </div>
     </div>
