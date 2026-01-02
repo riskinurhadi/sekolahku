@@ -231,6 +231,12 @@ $unread_count = 0;
                             <span>Informasi Akademik</span>
                         </a>
                     </li>
+                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'informasi_sekolah.php' ? 'active' : ''; ?>">
+                        <a href="<?php echo getBasePath(); ?>dashboard/kepala_sekolah/informasi_sekolah.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'informasi_sekolah.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-info-circle"></i>
+                            <span>Informasi Sekolah</span>
+                        </a>
+                    </li>
                     <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'profil.php' ? 'active' : ''; ?>">
                         <a href="<?php echo getBasePath(); ?>dashboard/kepala_sekolah/profil.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'profil.php' ? 'active' : ''; ?>">
                             <i class="bi bi-person-circle"></i>
