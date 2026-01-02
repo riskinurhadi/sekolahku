@@ -131,18 +131,6 @@ $unread_count = 0;
                             <span>Soal</span>
                         </a>
                     </li>
-                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'mata_pelajaran.php' ? 'active' : ''; ?>">
-                        <a href="<?php echo getBasePath(); ?>dashboard/guru/mata_pelajaran.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'mata_pelajaran.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-book"></i>
-                            <span>Mata Pelajaran</span>
-                        </a>
-                    </li>
-                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'siswa.php' ? 'active' : ''; ?>">
-                        <a href="<?php echo getBasePath(); ?>dashboard/guru/siswa.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'siswa.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-people"></i>
-                            <span>Siswa</span>
-                        </a>
-                    </li>
                     <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'soal_ujian.php' || basename($_SERVER['PHP_SELF']) == 'tambah_soal_ujian.php' || (isset($_GET['tipe']) && in_array($_GET['tipe'], ['uts', 'uas'])) ? 'active' : ''; ?>">
                         <a href="#ujianGuruSubmenu" data-bs-toggle="collapse" aria-expanded="<?php echo (basename($_SERVER['PHP_SELF']) == 'soal_ujian.php' || basename($_SERVER['PHP_SELF']) == 'tambah_soal_ujian.php') ? 'true' : 'false'; ?>" class="dropdown-toggle">
                             <i class="bi bi-journal-text"></i>
@@ -157,18 +145,6 @@ $unread_count = 0;
                         <a href="<?php echo getBasePath(); ?>dashboard/guru/mulai_pelajaran.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'mulai_pelajaran.php' ? 'active' : ''; ?>">
                             <i class="bi bi-play-circle-fill"></i>
                             <span>Mulai Pelajaran</span>
-                        </a>
-                    </li>
-                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'informasi_akademik.php' || basename($_SERVER['PHP_SELF']) == 'tambah_informasi.php' ? 'active' : ''; ?>">
-                        <a href="<?php echo getBasePath(); ?>dashboard/guru/informasi_akademik.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'informasi_akademik.php' || basename($_SERVER['PHP_SELF']) == 'tambah_informasi.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-megaphone-fill"></i>
-                            <span>Informasi Akademik</span>
-                        </a>
-                    </li>
-                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'profil.php' ? 'active' : ''; ?>">
-                        <a href="<?php echo getBasePath(); ?>dashboard/guru/profil.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'profil.php' ? 'active' : ''; ?>">
-                            <i class="bi bi-person-circle"></i>
-                            <span>Profil</span>
                         </a>
                     </li>
                 <?php elseif ($user_role == 'akademik'): ?>
@@ -189,6 +165,12 @@ $unread_count = 0;
                         <a href="<?php echo getBasePath(); ?>dashboard/akademik/mata_pelajaran.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'mata_pelajaran.php' || basename($_SERVER['PHP_SELF']) == 'tambah_mata_pelajaran.php' || basename($_SERVER['PHP_SELF']) == 'edit_mata_pelajaran.php' ? 'active' : ''; ?>">
                             <i class="bi bi-book"></i>
                             <span>Mata Pelajaran</span>
+                        </a>
+                    </li>
+                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'siswa.php' || basename($_SERVER['PHP_SELF']) == 'tambah_siswa.php' || basename($_SERVER['PHP_SELF']) == 'edit_siswa.php' ? 'active' : ''; ?>">
+                        <a href="<?php echo getBasePath(); ?>dashboard/akademik/siswa.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'siswa.php' || basename($_SERVER['PHP_SELF']) == 'tambah_siswa.php' || basename($_SERVER['PHP_SELF']) == 'edit_siswa.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-people"></i>
+                            <span>Kelola Siswa</span>
                         </a>
                     </li>
                     <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'jadwal_ujian.php' ? 'active' : ''; ?>">
