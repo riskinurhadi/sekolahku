@@ -934,7 +934,6 @@ body.sidebar-collapsed .content {
 
 .table tbody tr:hover {
     background: #f8fafc;
-    transform: scale(1.01);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
@@ -970,7 +969,6 @@ body.sidebar-collapsed .content {
 
 .dashboard-card .table tbody tr:hover {
     background: #f8fafc;
-    transform: scale(1.01);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
@@ -1690,34 +1688,13 @@ body.modal-open .watermark {
     margin-bottom: 24px;
     background: #ffffff;
     border: 1px solid #e5e7eb;
-    transition: all 0.3s ease;
     overflow: hidden;
     position: relative;
 }
 
-.card::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #3b82f6, #10b981, #3b82f6);
-    background-size: 200% 100%;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
+/* Removed card::after shimmer effect for cleaner design */
 
-.card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.08);
-    border-color: #3b82f6;
-}
-
-.card:hover::after {
-    opacity: 1;
-    animation: shimmer 2s infinite;
-}
+/* Removed hover animations for cleaner, simpler design */
 
 .card-header {
     background: #ffffff;
