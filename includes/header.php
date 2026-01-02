@@ -143,6 +143,16 @@ $unread_count = 0;
                             <span>Siswa</span>
                         </a>
                     </li>
+                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'soal_ujian.php' || basename($_SERVER['PHP_SELF']) == 'tambah_soal_ujian.php' || (isset($_GET['tipe']) && in_array($_GET['tipe'], ['uts', 'uas'])) ? 'active' : ''; ?>">
+                        <a href="#ujianGuruSubmenu" data-bs-toggle="collapse" aria-expanded="<?php echo (basename($_SERVER['PHP_SELF']) == 'soal_ujian.php' || basename($_SERVER['PHP_SELF']) == 'tambah_soal_ujian.php') ? 'true' : 'false'; ?>" class="dropdown-toggle">
+                            <i class="bi bi-journal-text"></i>
+                            <span>Ujian</span>
+                        </a>
+                        <ul class="collapse list-unstyled <?php echo (basename($_SERVER['PHP_SELF']) == 'soal_ujian.php' || basename($_SERVER['PHP_SELF']) == 'tambah_soal_ujian.php') ? 'show' : ''; ?>" id="ujianGuruSubmenu">
+                            <li><a href="<?php echo getBasePath(); ?>dashboard/guru/soal_ujian.php?tipe=uts" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'soal_ujian.php' && isset($_GET['tipe']) && $_GET['tipe'] == 'uts') || (basename($_SERVER['PHP_SELF']) == 'tambah_soal_ujian.php' && isset($_GET['tipe']) && $_GET['tipe'] == 'uts') ? 'active' : ''; ?>">UTS</a></li>
+                            <li><a href="<?php echo getBasePath(); ?>dashboard/guru/soal_ujian.php?tipe=uas" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'soal_ujian.php' && isset($_GET['tipe']) && $_GET['tipe'] == 'uas') || (basename($_SERVER['PHP_SELF']) == 'tambah_soal_ujian.php' && isset($_GET['tipe']) && $_GET['tipe'] == 'uas') ? 'active' : ''; ?>">UAS</a></li>
+                        </ul>
+                    </li>
                     <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'mulai_pelajaran.php' ? 'active' : ''; ?>">
                         <a href="<?php echo getBasePath(); ?>dashboard/guru/mulai_pelajaran.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'mulai_pelajaran.php' ? 'active' : ''; ?>">
                             <i class="bi bi-play-circle-fill"></i>
