@@ -8,6 +8,39 @@ $conn = getConnection();
 $sekolah_id = $_SESSION['sekolah_id'];
 $message = '';
 
+// Fungsi untuk mapping spesialisasi ke nama mata pelajaran
+function getMataPelajaranFromSpesialisasi($spesialisasi) {
+    $mapping = [
+        'Guru Matematika' => 'Matematika',
+        'Guru Bahasa Indonesia' => 'Bahasa Indonesia',
+        'Guru Bahasa Inggris' => 'Bahasa Inggris',
+        'Guru Fisika' => 'Fisika',
+        'Guru Kimia' => 'Kimia',
+        'Guru Biologi' => 'Biologi',
+        'Guru Sejarah' => 'Sejarah',
+        'Guru Geografi' => 'Geografi',
+        'Guru Ekonomi' => 'Ekonomi',
+        'Guru Sosiologi' => 'Sosiologi',
+        'Guru Pendidikan Agama' => 'Pendidikan Agama',
+        'Guru Pendidikan Jasmani' => 'Pendidikan Jasmani',
+        'Guru Seni Budaya' => 'Seni Budaya',
+        'Guru Teknologi Informasi' => 'Teknologi Informasi',
+    ];
+    
+    // Jika ada di mapping, return nama mata pelajaran
+    if (isset($mapping[$spesialisasi])) {
+        return $mapping[$spesialisasi];
+    }
+    
+    // Jika tidak ada, hapus prefix "Guru " dan return sisanya
+    if (strpos($spesialisasi, 'Guru ') === 0) {
+        return substr($spesialisasi, 5); // Hapus "Guru "
+    }
+    
+    // Default: return spesialisasi as-is
+    return $spesialisasi;
+}
+
 // Handle AJAX request
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['ajax'])) {
     header('Content-Type: application/json');
@@ -49,12 +82,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['ajax'])) {
             $stmt->bind_param("sssssis", $username, $password, $nama_lengkap, $email, $role, $sekolah_id, $spesialisasi);
             
             if ($stmt->execute()) {
+                $guru_id = $stmt->insert_id;
+                $stmt->close();
+                
+                // Jika role adalah guru, otomatis buat mata pelajaran
+                if ($role == 'guru' && !empty($spesialisasi)) {
+                    $nama_pelajaran = getMataPelajaranFromSpesialisasi($spesialisasi);
+                    
+                    // Check apakah mata pelajaran dengan nama yang sama sudah ada untuk guru ini
+                    $checkMataPelajaran = $conn->prepare("SELECT id FROM mata_pelajaran WHERE guru_id = ? AND nama_pelajaran = ?");
+                    $checkMataPelajaran->bind_param("is", $guru_id, $nama_pelajaran);
+                    $checkMataPelajaran->execute();
+                    
+                    if ($checkMataPelajaran->get_result()->num_rows == 0) {
+                        // Buat mata pelajaran baru
+                        $kode_pelajaran = strtoupper(substr($nama_pelajaran, 0, 3)); // Ambil 3 huruf pertama sebagai kode
+                        $insertMataPelajaran = $conn->prepare("INSERT INTO mata_pelajaran (nama_pelajaran, kode_pelajaran, sekolah_id, guru_id) VALUES (?, ?, ?, ?)");
+                        $insertMataPelajaran->bind_param("ssii", $nama_pelajaran, $kode_pelajaran, $sekolah_id, $guru_id);
+                        $insertMataPelajaran->execute();
+                        $insertMataPelajaran->close();
+                    }
+                    $checkMataPelajaran->close();
+                }
+                
                 $role_text = $role == 'akademik' ? 'Akademik' : 'Guru';
                 echo json_encode(['success' => true, 'message' => $role_text . ' berhasil ditambahkan!']);
             } else {
                 echo json_encode(['success' => false, 'message' => 'Gagal menambahkan user!']);
             }
-            $stmt->close();
             $conn->close();
             exit;
         } elseif ($_POST['action'] == 'delete') {
@@ -98,12 +153,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $stmt->bind_param("sssssis", $username, $password, $nama_lengkap, $email, $role, $sekolah_id, $spesialisasi);
                 
                 if ($stmt->execute()) {
+                    $guru_id = $stmt->insert_id;
+                    $stmt->close();
+                    
+                    // Jika role adalah guru, otomatis buat mata pelajaran
+                    if ($role == 'guru' && !empty($spesialisasi)) {
+                        $nama_pelajaran = getMataPelajaranFromSpesialisasi($spesialisasi);
+                        
+                        // Check apakah mata pelajaran dengan nama yang sama sudah ada untuk guru ini
+                        $checkMataPelajaran = $conn->prepare("SELECT id FROM mata_pelajaran WHERE guru_id = ? AND nama_pelajaran = ?");
+                        $checkMataPelajaran->bind_param("is", $guru_id, $nama_pelajaran);
+                        $checkMataPelajaran->execute();
+                        
+                        if ($checkMataPelajaran->get_result()->num_rows == 0) {
+                            // Buat mata pelajaran baru
+                            $kode_pelajaran = strtoupper(substr($nama_pelajaran, 0, 3)); // Ambil 3 huruf pertama sebagai kode
+                            $insertMataPelajaran = $conn->prepare("INSERT INTO mata_pelajaran (nama_pelajaran, kode_pelajaran, sekolah_id, guru_id) VALUES (?, ?, ?, ?)");
+                            $insertMataPelajaran->bind_param("ssii", $nama_pelajaran, $kode_pelajaran, $sekolah_id, $guru_id);
+                            $insertMataPelajaran->execute();
+                            $insertMataPelajaran->close();
+                        }
+                        $checkMataPelajaran->close();
+                    }
+                    
                     $role_text = $role == 'akademik' ? 'Akademik' : 'Guru';
                     $message = 'success:' . $role_text . ' berhasil ditambahkan!';
                 } else {
                     $message = 'error:Gagal menambahkan user!';
                 }
-                $stmt->close();
             }
         } elseif ($_POST['action'] == 'delete') {
             $id = $_POST['id'];
