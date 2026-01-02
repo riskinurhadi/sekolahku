@@ -635,7 +635,7 @@ $conn->close();
             <?php endif; ?>
             
             <!-- Jadwal Hari Ini -->
-            <div class="col-lg-3 mb-4 d-flex">
+            <div class="col-lg-6 mb-4 d-flex">
                 <div class="chart-section w-100">
                     <div class="chart-section-header">
                         <h5 class="chart-section-title">Jadwal Hari Ini</h5>
@@ -682,7 +682,7 @@ $conn->close();
             </div>
             
             <!-- History Pembelajaran -->
-            <div class="col-lg-3 mb-4 d-flex">
+            <div class="col-lg-6 mb-4 d-flex">
                 <div class="chart-section w-100">
                     <div class="chart-section-header">
                         <h5 class="chart-section-title">History Pembelajaran</h5>
