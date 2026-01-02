@@ -68,7 +68,13 @@ $stmt->close();
             'sedang_dibaca' => 'warning',
             'selesai' => 'success'
         ];
+        $status_labels = [
+            'belum_dibaca' => 'Belum Dibaca',
+            'sedang_dibaca' => 'Sedang Dibaca',
+            'selesai' => 'Sudah Dibaca'
+        ];
         $status_color = $status_colors[$progress_status] ?? 'secondary';
+        $status_label = $status_labels[$progress_status] ?? 'Belum Dibaca';
         ?>
         <div class="mentor-row d-flex align-items-center mb-3">
             <div class="mentor-avatar">
@@ -77,7 +83,7 @@ $stmt->close();
             <div class="mentor-info flex-grow-1">
                 <div class="d-flex flex-wrap align-items-center gap-2">
                     <h6 class="mb-0"><?php echo htmlspecialchars($materi['judul']); ?></h6>
-                    <span class="badge bg-<?php echo $status_color; ?>"><?php echo ucfirst(str_replace('_', ' ', $progress_status)); ?></span>
+                    <span class="badge bg-<?php echo $status_color; ?>"><?php echo $status_label; ?></span>
                 </div>
                 <?php if ($materi['deskripsi']): ?>
                     <div class="text-muted small"><?php echo htmlspecialchars(substr($materi['deskripsi'], 0, 120)); ?><?php echo strlen($materi['deskripsi']) > 120 ? '...' : ''; ?></div>
