@@ -19,7 +19,7 @@ $stats = [
     'total_guru' => 0,
     'total_siswa' => 0,
     'total_mata_pelajaran' => 0,
-    'total_soal' => 0
+    'total_kelas' => 0
 ];
 
 $stmt = $conn->prepare("SELECT COUNT(*) as total FROM users WHERE role = 'guru' AND sekolah_id = ?");
@@ -40,12 +40,10 @@ $stmt->execute();
 $stats['total_mata_pelajaran'] = $stmt->get_result()->fetch_assoc()['total'];
 $stmt->close();
 
-$stmt = $conn->prepare("SELECT COUNT(*) as total FROM soal s 
-    JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id 
-    WHERE mp.sekolah_id = ?");
+$stmt = $conn->prepare("SELECT COUNT(*) as total FROM kelas WHERE sekolah_id = ?");
 $stmt->bind_param("i", $sekolah_id);
 $stmt->execute();
-$stats['total_soal'] = $stmt->get_result()->fetch_assoc()['total'];
+$stats['total_kelas'] = $stmt->get_result()->fetch_assoc()['total'];
 $stmt->close();
 
 // Get recent teachers
@@ -63,7 +61,7 @@ $trend_data = [
     'guru' => [],
     'siswa' => [],
     'mata_pelajaran' => [],
-    'soal' => []
+    'kelas' => []
 ];
 
 for ($i = 6; $i >= 0; $i--) {
@@ -91,13 +89,11 @@ for ($i = 6; $i >= 0; $i--) {
     $trend_data['mata_pelajaran'][] = $stmt->get_result()->fetch_assoc()['total'];
     $stmt->close();
     
-    // Total soal sampai tanggal tersebut
-    $stmt = $conn->prepare("SELECT COUNT(*) as total FROM soal s 
-        JOIN mata_pelajaran mp ON s.mata_pelajaran_id = mp.id 
-        WHERE mp.sekolah_id = ? AND DATE(s.created_at) <= ?");
+    // Total kelas sampai tanggal tersebut
+    $stmt = $conn->prepare("SELECT COUNT(*) as total FROM kelas WHERE sekolah_id = ? AND DATE(created_at) <= ?");
     $stmt->bind_param("is", $sekolah_id, $date);
     $stmt->execute();
-    $trend_data['soal'][] = $stmt->get_result()->fetch_assoc()['total'];
+    $trend_data['kelas'][] = $stmt->get_result()->fetch_assoc()['total'];
     $stmt->close();
 }
 
@@ -105,12 +101,12 @@ for ($i = 6; $i >= 0; $i--) {
 $prev_guru = count($trend_data['guru']) > 1 ? $trend_data['guru'][count($trend_data['guru']) - 2] : $stats['total_guru'];
 $prev_siswa = count($trend_data['siswa']) > 1 ? $trend_data['siswa'][count($trend_data['siswa']) - 2] : $stats['total_siswa'];
 $prev_mata_pelajaran = count($trend_data['mata_pelajaran']) > 1 ? $trend_data['mata_pelajaran'][count($trend_data['mata_pelajaran']) - 2] : $stats['total_mata_pelajaran'];
-$prev_soal = count($trend_data['soal']) > 1 ? $trend_data['soal'][count($trend_data['soal']) - 2] : $stats['total_soal'];
+$prev_kelas = count($trend_data['kelas']) > 1 ? $trend_data['kelas'][count($trend_data['kelas']) - 2] : $stats['total_kelas'];
 
 $change_guru = $prev_guru > 0 ? round((($stats['total_guru'] - $prev_guru) / $prev_guru) * 100, 1) : 0;
 $change_siswa = $prev_siswa > 0 ? round((($stats['total_siswa'] - $prev_siswa) / $prev_siswa) * 100, 1) : 0;
 $change_mata_pelajaran = $prev_mata_pelajaran > 0 ? round((($stats['total_mata_pelajaran'] - $prev_mata_pelajaran) / $prev_mata_pelajaran) * 100, 1) : 0;
-$change_soal = $prev_soal > 0 ? round((($stats['total_soal'] - $prev_soal) / $prev_soal) * 100, 1) : 0;
+$change_kelas = $prev_kelas > 0 ? round((($stats['total_kelas'] - $prev_kelas) / $prev_kelas) * 100, 1) : 0;
 
 // Get data untuk chart distribusi
 $role_distribution = [
@@ -512,14 +508,14 @@ $conn->close();
                     <div class="metric-card-header">
                         <div class="flex-grow-1">
                             <div class="metric-icon">
-                                <i class="bi bi-question-circle"></i>
+                                <i class="bi bi-building"></i>
                             </div>
-                            <div class="metric-title">Total Soal</div>
-                            <div class="metric-value"><?php echo $stats['total_soal']; ?></div>
+                            <div class="metric-title">Total Kelas</div>
+                            <div class="metric-value"><?php echo $stats['total_kelas']; ?></div>
                         </div>
-                        <div class="metric-change <?php echo $change_soal >= 0 ? 'positive' : 'negative'; ?>">
-                            <i class="bi bi-arrow-<?php echo $change_soal >= 0 ? 'up' : 'down'; ?>"></i>
-                            <?php echo abs($change_soal); ?>%
+                        <div class="metric-change <?php echo $change_kelas >= 0 ? 'positive' : 'negative'; ?>">
+                            <i class="bi bi-arrow-<?php echo $change_kelas >= 0 ? 'up' : 'down'; ?>"></i>
+                            <?php echo abs($change_kelas); ?>%
                         </div>
                     </div>
                 </div>
