@@ -44,7 +44,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['ajax'])) {
             $conn->close();
             exit;
         } elseif ($_POST['action'] == 'delete') {
-            $id = $_POST['id'];
+            $id = intval($_POST['id'] ?? 0);
+            if ($id <= 0) {
+                echo json_encode(['success' => false, 'message' => 'ID tidak valid!']);
+                $conn->close();
+                exit;
+            }
             $stmt = $conn->prepare("DELETE FROM users WHERE id = ? AND role = 'siswa' AND sekolah_id = ?");
             $stmt->bind_param("ii", $id, $sekolah_id);
             
@@ -151,6 +156,9 @@ $conn->close();
                                     <td><?php echo htmlspecialchars($student['email'] ?? '-'); ?></td>
                                     <td><?php echo date('d/m/Y', strtotime($student['created_at'])); ?></td>
                                     <td>
+                                        <a href="edit_siswa.php?id=<?php echo $student['id']; ?>" class="btn btn-sm btn-info">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </a>
                                         <button type="button" class="btn btn-sm btn-danger" onclick="deleteStudent(<?php echo $student['id']; ?>)">
                                             <i class="bi bi-trash"></i> Hapus
                                         </button>
@@ -183,6 +191,13 @@ if ($message) {
             'text' => $msg[1]
         ]);
     }
+} elseif (isset($_GET['success']) && $_GET['success'] == 1) {
+    $js_message = json_encode([
+        'type' => 'success',
+        'title' => 'Berhasil',
+        'text' => isset($_SESSION['success_message']) ? $_SESSION['success_message'] : 'Operasi berhasil!'
+    ]);
+    unset($_SESSION['success_message']);
 }
 require_once '../../includes/footer.php'; 
 ?>
