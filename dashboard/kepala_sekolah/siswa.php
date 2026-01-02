@@ -135,21 +135,20 @@ $conn->close();
 ?>
 
 
-<div class="page-header">
-    <h2>Kelola Siswa</h2>
-    <p>Tambah dan kelola data siswa</p>
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2>Kelola Siswa</h2>
+        <p>Tambah dan kelola data siswa</p>
+    </div>
+    <a href="tambah_siswa.php" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-circle"></i> Tambah Siswa
+    </a>
 </div>
 
 <!-- Students List -->
 <div class="row">
     <div class="col-12">
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="bi bi-people"></i> Daftar Siswa</h5>
-                <a href="tambah_siswa.php" class="btn btn-primary btn-sm">
-                    <i class="bi bi-plus-circle"></i> Tambah Siswa
-                </a>
-            </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table id="studentsTable" class="table table-hover" style="width:100%">
