@@ -42,7 +42,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $sekolah_data = $stmt->get_result()->fetch_assoc();
         $stmt->close();
         
-        $conn->close();
         $message = 'success:Informasi sekolah berhasil diupdate!';
     } else {
         $message = 'error:Gagal mengupdate informasi sekolah: ' . $conn->error;
