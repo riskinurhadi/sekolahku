@@ -26,14 +26,14 @@ if (!$mapel) {
     exit;
 }
 
-// Ambil materi per mapel
+// Ambil materi per mapel (diurutkan berdasarkan waktu submit: yang paling pertama di atas, yang paling akhir di bawah)
 $stmt = $conn->prepare("SELECT m.*, 
     (SELECT COUNT(*) FROM latihan WHERE materi_id = m.id AND status = 'aktif') as jumlah_latihan,
     (SELECT status FROM progress_materi_siswa WHERE materi_id = m.id AND siswa_id = ?) as progress_status,
     (SELECT progress FROM progress_materi_siswa WHERE materi_id = m.id AND siswa_id = ?) as progress_percent
     FROM materi_pelajaran m
     WHERE m.mata_pelajaran_id = ? AND m.status = 'aktif'
-    ORDER BY m.urutan ASC, m.created_at DESC");
+    ORDER BY m.created_at ASC");
 $stmt->bind_param("iii", $siswa_id, $siswa_id, $mapel_id);
 $stmt->execute();
 $materi_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
