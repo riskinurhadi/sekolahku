@@ -1497,20 +1497,126 @@ body.modal-open .watermark {
     body,
     body.sidebar-collapsed {
         padding-left: 0;
+        padding-bottom: 70px; /* Space for bottom navigation */
     }
 
+    /* Hide sidebar header and AI promo on mobile */
+    .sidebar-header,
+    .sidebar-ai-promo {
+        display: none !important;
+    }
+
+    /* Transform sidebar to bottom navigation */
     .sidebar {
-        transform: translateX(-100%);
-        left: 0;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        top: auto !important;
+        width: 100% !important;
+        height: 70px !important;
+        transform: translateX(0) !important;
+        background: #ffffff !important;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1) !important;
+        border-top: 1px solid #e5e7eb !important;
+        border-radius: 0 !important;
+        z-index: 1040 !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
     }
-    
+
     body.sidebar-visible .sidebar {
-        transform: translateX(0);
-        box-shadow: 4px 0 24px rgba(0,0,0,0.2);
+        transform: translateX(0) !important;
     }
-    
+
+    /* Transform components to horizontal navigation */
+    .sidebar .components {
+        display: flex !important;
+        flex-direction: row !important;
+        padding: 0 !important;
+        padding-bottom: 0 !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important; /* Firefox */
+        -ms-overflow-style: none !important; /* IE and Edge */
+    }
+
+    .sidebar .components::-webkit-scrollbar {
+        display: none !important; /* Chrome, Safari, Opera */
+    }
+
+    .sidebar .components li {
+        margin: 0 !important;
+        flex-shrink: 0 !important;
+        min-width: 70px !important;
+    }
+
+    /* Style menu items for bottom nav */
+    .sidebar .components > li > a {
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 8px 12px !important;
+        height: 70px !important;
+        color: #64748b !important;
+        text-decoration: none !important;
+        border-radius: 0 !important;
+        position: relative !important;
+        min-width: 70px !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .sidebar .components > li > a:hover {
+        color: #1e3a8a !important;
+        background: #f8fafc !important;
+        transform: none !important;
+    }
+
+    .sidebar .components > li > a.active {
+        color: #1e3a8a !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        font-weight: 600 !important;
+    }
+
+    .sidebar .components > li > a.active::after {
+        content: '' !important;
+        position: absolute !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 3px !important;
+        background: #1e3a8a !important;
+        border-radius: 3px 3px 0 0 !important;
+    }
+
+    /* Hide dropdown menus on mobile bottom nav */
+    .sidebar .components li .collapse,
+    .sidebar .components li .dropdown-toggle::after {
+        display: none !important;
+    }
+
+    /* Style icons */
+    .sidebar .components > li > a i {
+        margin: 0 0 4px 0 !important;
+        font-size: 20px !important;
+        width: auto !important;
+        display: block !important;
+    }
+
+    /* Style text/labels */
+    .sidebar .components > li > a span {
+        font-size: 11px !important;
+        font-weight: 500 !important;
+        text-align: center !important;
+        line-height: 1.2 !important;
+        white-space: nowrap !important;
+        display: block !important;
+    }
+
     .content, .dashboard-top-header {
-        margin-left: 0;
+        margin-left: 0 !important;
     }
 
     .dashboard-top-header {
@@ -1519,6 +1625,7 @@ body.modal-open .watermark {
 
     .container-fluid {
         padding: 16px;
+        padding-bottom: 86px; /* Extra padding for bottom nav */
     }
 }
 
