@@ -235,6 +235,32 @@ $unread_count = 0;
                             <span>Profil</span>
                         </a>
                     </li>
+                <?php elseif ($user_role == 'developer'): ?>
+                    <!-- Menu Developer -->
+                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">
+                        <a href="<?php echo getBasePath(); ?>dashboard/developer/index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-house-door-fill"></i>
+                            <span>Beranda</span>
+                        </a>
+                    </li>
+                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'sekolah.php' || basename($_SERVER['PHP_SELF']) == 'tambah_sekolah.php' ? 'active' : ''; ?>">
+                        <a href="<?php echo getBasePath(); ?>dashboard/developer/sekolah.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'sekolah.php' || basename($_SERVER['PHP_SELF']) == 'tambah_sekolah.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-building"></i>
+                            <span>Sekolah</span>
+                        </a>
+                    </li>
+                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'kepala_sekolah.php' || basename($_SERVER['PHP_SELF']) == 'tambah_kepala_sekolah.php' ? 'active' : ''; ?>">
+                        <a href="<?php echo getBasePath(); ?>dashboard/developer/kepala_sekolah.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'kepala_sekolah.php' || basename($_SERVER['PHP_SELF']) == 'tambah_kepala_sekolah.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-person-badge"></i>
+                            <span>Kepala Sekolah</span>
+                        </a>
+                    </li>
+                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'profil.php' ? 'active' : ''; ?>">
+                        <a href="<?php echo getBasePath(); ?>dashboard/developer/profil.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'profil.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-person-circle"></i>
+                            <span>Profil</span>
+                        </a>
+                    </li>
                 <?php endif; ?>
             </ul>
 
