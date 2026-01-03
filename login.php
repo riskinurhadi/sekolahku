@@ -361,6 +361,141 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .alert-danger i {
             margin-right: 8px;
         }
+        
+        /* Responsive Styles */
+        @media (max-width: 991.98px) {
+            /* Tablet and below */
+            body.login-page .login-card {
+                flex-direction: column !important;
+                max-width: 600px !important;
+                min-height: auto !important;
+            }
+            
+            .login-left-panel {
+                padding: 40px 30px !important;
+                min-height: 250px !important;
+            }
+            
+            .login-right-panel {
+                padding: 40px 30px !important;
+            }
+            
+            .login-brand-title {
+                font-size: 36px !important;
+                margin-bottom: 20px !important;
+            }
+            
+            .login-system-description {
+                font-size: 14px !important;
+            }
+            
+            .login-form-title {
+                font-size: 28px !important;
+            }
+            
+            .login-form-subtitle {
+                font-size: 14px !important;
+                margin-bottom: 30px !important;
+            }
+        }
+        
+        @media (max-width: 575.98px) {
+            /* Mobile */
+            body.login-page .login-container {
+                padding: 15px !important;
+            }
+            
+            body.login-page .login-card {
+                border-radius: 16px !important;
+                max-width: 100% !important;
+            }
+            
+            .login-left-panel {
+                padding: 30px 20px !important;
+                min-height: 200px !important;
+            }
+            
+            .login-right-panel {
+                padding: 30px 20px !important;
+            }
+            
+            .login-brand-title {
+                font-size: 28px !important;
+                margin-bottom: 16px !important;
+                letter-spacing: 0.5px !important;
+            }
+            
+            .login-system-description {
+                font-size: 13px !important;
+                line-height: 1.6 !important;
+            }
+            
+            .login-form-title {
+                font-size: 24px !important;
+                margin-bottom: 6px !important;
+            }
+            
+            .login-form-subtitle {
+                font-size: 13px !important;
+                margin-bottom: 25px !important;
+            }
+            
+            .login-form .input-group {
+                border-radius: 10px !important;
+            }
+            
+            .login-form .input-group-text {
+                padding: 10px 14px !important;
+                font-size: 16px !important;
+            }
+            
+            .login-form .form-control {
+                padding: 10px 14px !important;
+                font-size: 14px !important;
+            }
+            
+            .btn-login {
+                padding: 12px 18px !important;
+                font-size: 15px !important;
+                border-radius: 10px !important;
+            }
+            
+            .alert-danger {
+                padding: 10px 14px !important;
+                font-size: 13px !important;
+                margin-bottom: 20px !important;
+            }
+            
+            .login-footer {
+                margin-top: 25px !important;
+                padding-top: 15px !important;
+                font-size: 12px !important;
+            }
+        }
+        
+        @media (max-width: 375px) {
+            /* Small mobile */
+            .login-left-panel {
+                padding: 25px 15px !important;
+                min-height: 180px !important;
+            }
+            
+            .login-right-panel {
+                padding: 25px 15px !important;
+            }
+            
+            .login-brand-title {
+                font-size: 24px !important;
+            }
+            
+            .login-system-description {
+                font-size: 12px !important;
+            }
+            
+            .login-form-title {
+                font-size: 22px !important;
+            }
+        }
     </style>
 </head>
 <body class="login-page">
