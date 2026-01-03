@@ -521,6 +521,8 @@ body.sidebar-collapsed .content {
 .dashboard-top-header .user-details {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
 }
 
 .dashboard-top-header .user-details .user-name {
@@ -529,6 +531,7 @@ body.sidebar-collapsed .content {
     font-size: 13px;
     margin: 0;
     line-height: 1.2;
+    text-align: left;
 }
 
 .dashboard-top-header .user-details .user-role {
@@ -536,6 +539,7 @@ body.sidebar-collapsed .content {
     color: #64748b;
     margin: 0;
     line-height: 1.2;
+    text-align: left;
 }
 
 /* Main Content Container */
