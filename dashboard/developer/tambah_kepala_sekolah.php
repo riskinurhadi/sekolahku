@@ -113,7 +113,9 @@ $conn->close();
                                     <i class="bi bi-exclamation-triangle"></i> Tidak ada sekolah yang tersedia atau semua sekolah sudah memiliki kepala sekolah.
                                 </small>
                             <?php else: ?>
-                                <small class="text-muted">Pilih sekolah untuk kepala sekolah ini</small>
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle"></i> Hanya menampilkan sekolah yang belum memiliki kepala sekolah (<?php echo count($schools); ?> sekolah tersedia)
+                                </small>
                             <?php endif; ?>
                         </div>
                         <div class="col-md-12 mb-3">
