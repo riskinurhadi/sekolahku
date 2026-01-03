@@ -272,6 +272,24 @@ if (!empty($user_data['foto_profil']) && file_exists(__DIR__ . '/../../uploads/p
                 echo "} else {";
                 echo "    alert('" . addslashes($msg[1]) . "');";
                 echo "}";
+                // Update header photo if profile photo was updated
+                if (!empty($user_data['foto_profil']) && file_exists(__DIR__ . '/../../uploads/profil/' . $user_data['foto_profil'])) {
+                    $new_photo_path = getBasePath() . 'uploads/profil/' . $user_data['foto_profil'];
+                    echo "    // Update header photo";
+                    echo "    const headerPhoto = document.getElementById('headerProfilePhoto');";
+                    echo "    if (headerPhoto) {";
+                    echo "        if (headerPhoto.tagName === 'IMG') {";
+                    echo "            headerPhoto.src = '" . addslashes($new_photo_path) . "?t=' + new Date().getTime();";
+                    echo "        } else {";
+                    echo "            const img = document.createElement('img');";
+                    echo "            img.src = '" . addslashes($new_photo_path) . "?t=' + new Date().getTime();";
+                    echo "            img.alt = 'Avatar';";
+                    echo "            img.className = 'user-avatar';";
+                    echo "            img.id = 'headerProfilePhoto';";
+                    echo "            headerPhoto.parentNode.replaceChild(img, headerPhoto);";
+                    echo "        }";
+                    echo "    }";
+                }
             } else {
                 echo "if (typeof Swal !== 'undefined') {";
                 echo "    Swal.fire({icon: 'error', title: 'Error', text: '" . addslashes($msg[1]) . "', timer: 3000});";
@@ -398,8 +416,28 @@ function previewPhoto(input) {
                 img.alt = 'Foto Profil';
                 preview.parentNode.replaceChild(img, preview);
             }
+            
+            // Also update header photo preview (temporary preview until form is submitted)
+            updateHeaderPhotoPreview(e.target.result);
         };
         reader.readAsDataURL(file);
+    }
+}
+
+function updateHeaderPhotoPreview(imageSrc) {
+    const headerPhoto = document.getElementById('headerProfilePhoto');
+    if (headerPhoto) {
+        if (headerPhoto.tagName === 'IMG') {
+            headerPhoto.src = imageSrc;
+        } else {
+            // Replace placeholder div with image
+            const img = document.createElement('img');
+            img.src = imageSrc;
+            img.alt = 'Avatar';
+            img.className = 'user-avatar';
+            img.id = 'headerProfilePhoto';
+            headerPhoto.parentNode.replaceChild(img, headerPhoto);
+        }
     }
 }
 </script>

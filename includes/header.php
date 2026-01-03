@@ -301,9 +301,9 @@ $unread_count = 0;
                             $foto_profil_path = getBasePath() . 'uploads/profil/' . ($user['foto_profil'] ?? '');
                             if (!empty($user['foto_profil']) && file_exists(dirname(__DIR__).'/uploads/profil/' . $user['foto_profil'])):
                             ?>
-                                <img src="<?php echo $foto_profil_path; ?>" alt="Avatar" class="user-avatar">
+                                <img src="<?php echo $foto_profil_path; ?>" alt="Avatar" class="user-avatar" id="headerProfilePhoto">
                             <?php else: ?>
-                                <div class="user-avatar">
+                                <div class="user-avatar" id="headerProfilePhoto">
                                     <?php echo strtoupper(substr($user['nama_lengkap'], 0, 1)); ?>
                                 </div>
                             <?php endif; ?>
