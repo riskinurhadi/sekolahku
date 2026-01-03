@@ -236,6 +236,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             letter-spacing: -0.3px !important;
         }
         
+        .login-brand-title {
+            font-size: 48px !important;
+            font-weight: 700 !important;
+            color: #ffffff !important;
+            margin-bottom: 30px !important;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+            letter-spacing: 1px !important;
+        }
+        
         .login-system-description {
             color: #ffffff !important;
             font-size: 16px !important;
@@ -360,7 +369,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <!-- Left Panel: System Info -->
             <div class="login-left-panel">
                 <div class="login-logo-section">
-                    <img src="assets/img/sekolahku-login.png" alt="Sekolahku" style="max-width: 250px; height: auto; margin-bottom: 30px;">
+                    <h1 class="login-brand-title">sekolahpintar</h1>
                     
                     <p class="login-system-description">
                         Portal pembelajaran online untuk mengelola kegiatan belajar mengajar dengan mudah dan efisien. 

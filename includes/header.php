@@ -52,8 +52,8 @@ $unread_count = 0;
         <!-- Sidebar -->
         <nav class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <a href="<?php echo getBasePath(); ?>dashboard/<?php echo $user_role; ?>/index.php">
-                    <img src="<?php echo getBasePath(); ?>assets/img/sekolahku.png" alt="Sekolahku" class="logo-image">
+                <a href="<?php echo getBasePath(); ?>dashboard/<?php echo $user_role; ?>/index.php" class="logo-text-link">
+                    <span class="logo-text">sekolahpintar</span>
                 </a>
             </div>
 
