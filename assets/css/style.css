@@ -157,6 +157,7 @@ body.sidebar-collapsed .sidebar-header .logo-text {
     padding-bottom: 120px; /* Space for AI promo section */
     list-style: none;
     flex: 1;
+    margin-bottom: 0.5rem; /* mb-2 equivalent */
 }
 
 .sidebar .components li {
