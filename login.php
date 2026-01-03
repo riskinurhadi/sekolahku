@@ -430,14 +430,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 line-height: 1.6 !important;
             }
             
+            .login-form-wrapper {
+                text-align: center !important;
+            }
+            
             .login-form-title {
                 font-size: 24px !important;
                 margin-bottom: 6px !important;
+                text-align: center !important;
             }
             
             .login-form-subtitle {
                 font-size: 13px !important;
                 margin-bottom: 25px !important;
+                text-align: center !important;
             }
             
             .login-form .input-group {
