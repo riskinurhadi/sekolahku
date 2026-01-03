@@ -263,33 +263,55 @@ if (!empty($user_data['foto_profil']) && file_exists(__DIR__ . '/../../uploads/p
 
 <?php if ($message): ?>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        (function() {
             <?php 
             $msg = explode(':', $message);
             if ($msg[0] == 'success') {
+                // Update header photo if profile photo was updated
+                if (!empty($user_data['foto_profil']) && file_exists(__DIR__ . '/../../uploads/profil/' . $user_data['foto_profil'])) {
+                    $new_photo_path = getBasePath() . 'uploads/profil/' . $user_data['foto_profil'];
+                    echo "// Function to update header photo";
+                    echo "function updateHeaderPhoto() {";
+                    echo "    const headerPhoto = document.getElementById('headerProfilePhoto');";
+                    echo "    if (headerPhoto) {";
+                    echo "        const timestamp = new Date().getTime();";
+                    echo "        const photoPath = '" . addslashes($new_photo_path) . "?t=' + timestamp;";
+                    echo "        if (headerPhoto.tagName === 'IMG') {";
+                    echo "            headerPhoto.src = photoPath;";
+                    echo "        } else {";
+                    echo "            const img = document.createElement('img');";
+                    echo "            img.src = photoPath;";
+                    echo "            img.alt = 'Avatar';";
+                    echo "            img.className = 'user-avatar';";
+                    echo "            img.id = 'headerProfilePhoto';";
+                    echo "            img.style.width = '32px';";
+                    echo "            img.style.height = '32px';";
+                    echo "            img.style.borderRadius = '50%';";
+                    echo "            img.style.objectFit = 'cover';";
+                    echo "            headerPhoto.parentNode.replaceChild(img, headerPhoto);";
+                    echo "        }";
+                    echo "    }";
+                    echo "}";
+                    echo "// Try to update immediately if DOM is ready";
+                    echo "if (document.readyState === 'loading') {";
+                    echo "    document.addEventListener('DOMContentLoaded', function() {";
+                    echo "        updateHeaderPhoto();";
+                    echo "        setTimeout(updateHeaderPhoto, 200);";
+                    echo "        setTimeout(updateHeaderPhoto, 500);";
+                    echo "    });";
+                    echo "} else {";
+                    echo "    updateHeaderPhoto();";
+                    echo "    setTimeout(updateHeaderPhoto, 200);";
+                    echo "    setTimeout(updateHeaderPhoto, 500);";
+                    echo "}";
+                }
+                
+                echo "// Show success message";
                 echo "if (typeof Swal !== 'undefined') {";
                 echo "    Swal.fire({icon: 'success', title: 'Berhasil!', text: '" . addslashes($msg[1]) . "', timer: 3000});";
                 echo "} else {";
                 echo "    alert('" . addslashes($msg[1]) . "');";
                 echo "}";
-                // Update header photo if profile photo was updated
-                if (!empty($user_data['foto_profil']) && file_exists(__DIR__ . '/../../uploads/profil/' . $user_data['foto_profil'])) {
-                    $new_photo_path = getBasePath() . 'uploads/profil/' . $user_data['foto_profil'];
-                    echo "    // Update header photo";
-                    echo "    const headerPhoto = document.getElementById('headerProfilePhoto');";
-                    echo "    if (headerPhoto) {";
-                    echo "        if (headerPhoto.tagName === 'IMG') {";
-                    echo "            headerPhoto.src = '" . addslashes($new_photo_path) . "?t=' + new Date().getTime();";
-                    echo "        } else {";
-                    echo "            const img = document.createElement('img');";
-                    echo "            img.src = '" . addslashes($new_photo_path) . "?t=' + new Date().getTime();";
-                    echo "            img.alt = 'Avatar';";
-                    echo "            img.className = 'user-avatar';";
-                    echo "            img.id = 'headerProfilePhoto';";
-                    echo "            headerPhoto.parentNode.replaceChild(img, headerPhoto);";
-                    echo "        }";
-                    echo "    }";
-                }
             } else {
                 echo "if (typeof Swal !== 'undefined') {";
                 echo "    Swal.fire({icon: 'error', title: 'Error', text: '" . addslashes($msg[1]) . "', timer: 3000});";
@@ -298,7 +320,7 @@ if (!empty($user_data['foto_profil']) && file_exists(__DIR__ . '/../../uploads/p
                 echo "}";
             }
             ?>
-        });
+        })();
     </script>
 <?php endif; ?>
 
@@ -436,6 +458,10 @@ function updateHeaderPhotoPreview(imageSrc) {
             img.alt = 'Avatar';
             img.className = 'user-avatar';
             img.id = 'headerProfilePhoto';
+            img.style.width = '32px';
+            img.style.height = '32px';
+            img.style.borderRadius = '50%';
+            img.style.objectFit = 'cover';
             headerPhoto.parentNode.replaceChild(img, headerPhoto);
         }
     }
