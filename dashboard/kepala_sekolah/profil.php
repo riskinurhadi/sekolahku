@@ -20,72 +20,71 @@ if (!file_exists($upload_dir)) {
     mkdir($upload_dir, 0777, true);
 }
 
-// Handle photo upload
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['foto_profil']) && $_FILES['foto_profil']['error'] == 0) {
-    $file = $_FILES['foto_profil'];
-    $allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-    $max_size = 5 * 1024 * 1024; // 5MB
-    
-    if (in_array($file['type'], $allowed_types) && $file['size'] <= $max_size) {
-        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $filename = 'profil_' . $user_id . '_' . time() . '.' . $extension;
-        $filepath = $upload_dir . $filename;
-        
-        // Get old photo to delete
-        $stmt = $conn->prepare("SELECT foto_profil FROM users WHERE id = ?");
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $old_photo = $stmt->get_result()->fetch_assoc()['foto_profil'];
-        $stmt->close();
-        
-        if (move_uploaded_file($file['tmp_name'], $filepath)) {
-            // Delete old photo if exists
-            if ($old_photo && file_exists(__DIR__ . '/../../uploads/profil/' . $old_photo)) {
-                unlink(__DIR__ . '/../../uploads/profil/' . $old_photo);
-            }
-            
-            // Update database
-            $stmt = $conn->prepare("UPDATE users SET foto_profil = ? WHERE id = ?");
-            $stmt->bind_param("si", $filename, $user_id);
-            if ($stmt->execute()) {
-                $message = 'success:Foto profil berhasil diupdate!';
-            } else {
-                $message = 'error:Gagal mengupdate foto profil!';
-            }
-            $stmt->close();
-        } else {
-            $message = 'error:Gagal mengupload foto!';
-        }
-    } else {
-        $message = 'error:Format file tidak didukung atau ukuran file terlalu besar (maks 5MB)!';
-    }
-}
-
-// Handle form submission
+// Handle form submission (including photo upload)
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['nama_lengkap'])) {
     $nama_lengkap = $_POST['nama_lengkap'];
     $email = $_POST['email'] ?? '';
+    $foto_filename = null;
     
-    if (!empty($_POST['password'])) {
-        $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-        $stmt = $conn->prepare("UPDATE users SET nama_lengkap = ?, email = ?, password = ? WHERE id = ?");
-        $stmt->bind_param("sssi", $nama_lengkap, $email, $password, $user_id);
-    } else {
-        $stmt = $conn->prepare("UPDATE users SET nama_lengkap = ?, email = ? WHERE id = ?");
-        $stmt->bind_param("ssi", $nama_lengkap, $email, $user_id);
+    // Handle photo upload if file is uploaded
+    if (isset($_FILES['foto_profil']) && $_FILES['foto_profil']['error'] == 0) {
+        $file = $_FILES['foto_profil'];
+        $allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        $max_size = 5 * 1024 * 1024; // 5MB
+        
+        if (in_array($file['type'], $allowed_types) && $file['size'] <= $max_size) {
+            $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $filename = 'profil_' . $user_id . '_' . time() . '.' . $extension;
+            $filepath = $upload_dir . $filename;
+            
+            // Get old photo to delete
+            $stmt = $conn->prepare("SELECT foto_profil FROM users WHERE id = ?");
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $old_photo = $stmt->get_result()->fetch_assoc()['foto_profil'];
+            $stmt->close();
+            
+            if (move_uploaded_file($file['tmp_name'], $filepath)) {
+                // Delete old photo if exists
+                if ($old_photo && file_exists(__DIR__ . '/../../uploads/profil/' . $old_photo)) {
+                    unlink(__DIR__ . '/../../uploads/profil/' . $old_photo);
+                }
+                $foto_filename = $filename;
+            }
+        } else {
+            $message = 'error:Format file tidak didukung atau ukuran file terlalu besar (maks 5MB)!';
+        }
     }
     
-    if ($stmt->execute()) {
-        $_SESSION['user_nama'] = $nama_lengkap;
-        if (empty($message)) {
-            $message = 'success:Profil berhasil diupdate!';
+    // Update profile data
+    if (empty($message)) {
+        if (!empty($_POST['password'])) {
+            $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+            if ($foto_filename) {
+                $stmt = $conn->prepare("UPDATE users SET nama_lengkap = ?, email = ?, password = ?, foto_profil = ? WHERE id = ?");
+                $stmt->bind_param("ssssi", $nama_lengkap, $email, $password, $foto_filename, $user_id);
+            } else {
+                $stmt = $conn->prepare("UPDATE users SET nama_lengkap = ?, email = ?, password = ? WHERE id = ?");
+                $stmt->bind_param("sssi", $nama_lengkap, $email, $password, $user_id);
+            }
+        } else {
+            if ($foto_filename) {
+                $stmt = $conn->prepare("UPDATE users SET nama_lengkap = ?, email = ?, foto_profil = ? WHERE id = ?");
+                $stmt->bind_param("sssi", $nama_lengkap, $email, $foto_filename, $user_id);
+            } else {
+                $stmt = $conn->prepare("UPDATE users SET nama_lengkap = ?, email = ? WHERE id = ?");
+                $stmt->bind_param("ssi", $nama_lengkap, $email, $user_id);
+            }
         }
-    } else {
-        if (empty($message)) {
+        
+        if ($stmt->execute()) {
+            $_SESSION['user_nama'] = $nama_lengkap;
+            $message = 'success:Profil berhasil diupdate!';
+        } else {
             $message = 'error:Gagal mengupdate profil!';
         }
+        $stmt->close();
     }
-    $stmt->close();
 }
 
 // Get user info
@@ -303,17 +302,12 @@ if (!empty($user_data['foto_profil']) && file_exists(__DIR__ . '/../../uploads/p
                     </div>
                 <?php endif; ?>
             </div>
-            <form method="POST" enctype="multipart/form-data" id="photoUploadForm">
-                <div class="photo-upload-btn">
-                    <input type="file" name="foto_profil" id="foto_profil" accept="image/jpeg,image/jpg,image/png,image/gif" onchange="previewPhoto(this)">
-                    <label for="foto_profil" class="photo-upload-label">
-                        <i class="bi bi-camera"></i> <?php echo $foto_profil ? 'Ganti Foto' : 'Upload Foto'; ?>
-                    </label>
-                </div>
-                <button type="submit" class="btn btn-primary mt-3" style="display: none;" id="savePhotoBtn">
-                    <i class="bi bi-save"></i> Simpan Foto
-                </button>
-            </form>
+            <div class="photo-upload-btn">
+                <input type="file" name="foto_profil" id="foto_profil" accept="image/jpeg,image/jpg,image/png,image/gif" onchange="previewPhoto(this)" form="profilForm">
+                <label for="foto_profil" class="photo-upload-label">
+                    <i class="bi bi-camera"></i> <?php echo $foto_profil ? 'Ganti Foto' : 'Upload Foto'; ?>
+                </label>
+            </div>
             <p class="text-muted small mt-4 mb-0">Format: JPG, PNG, GIF<br>Maksimal: 5MB</p>
         </div>
     </div>
@@ -324,7 +318,7 @@ if (!empty($user_data['foto_profil']) && file_exists(__DIR__ . '/../../uploads/p
             <div class="card-header">
                 <h5><i class="bi bi-person-circle"></i> Informasi Profil</h5>
             </div>
-            <form method="POST" id="profilForm">
+            <form method="POST" id="profilForm" enctype="multipart/form-data">
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label">Username</label>
@@ -364,6 +358,32 @@ if (!empty($user_data['foto_profil']) && file_exists(__DIR__ . '/../../uploads/p
 <script>
 function previewPhoto(input) {
     if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        
+        // Validate file type
+        if (!allowedTypes.includes(file.type)) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({icon: 'error', title: 'Error', text: 'Format file tidak didukung! Gunakan JPG, PNG, atau GIF.'});
+            } else {
+                alert('Format file tidak didukung! Gunakan JPG, PNG, atau GIF.');
+            }
+            input.value = '';
+            return;
+        }
+        
+        // Validate file size
+        if (file.size > maxSize) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({icon: 'error', title: 'Error', text: 'Ukuran file terlalu besar! Maksimal 5MB.'});
+            } else {
+                alert('Ukuran file terlalu besar! Maksimal 5MB.');
+            }
+            input.value = '';
+            return;
+        }
+        
         const reader = new FileReader();
         reader.onload = function(e) {
             const preview = document.getElementById('profilePhotoPreview');
@@ -378,49 +398,10 @@ function previewPhoto(input) {
                 img.alt = 'Foto Profil';
                 preview.parentNode.replaceChild(img, preview);
             }
-            document.getElementById('savePhotoBtn').style.display = 'inline-block';
         };
-        reader.readAsDataURL(input.files[0]);
+        reader.readAsDataURL(file);
     }
 }
-
-// Handle photo form submission
-document.getElementById('photoUploadForm').addEventListener('submit', function(e) {
-    const fileInput = document.getElementById('foto_profil');
-    if (!fileInput.files || !fileInput.files[0]) {
-        e.preventDefault();
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({icon: 'warning', title: 'Peringatan', text: 'Pilih foto terlebih dahulu!'});
-        } else {
-            alert('Pilih foto terlebih dahulu!');
-        }
-        return false;
-    }
-    
-    const file = fileInput.files[0];
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-    
-    if (!allowedTypes.includes(file.type)) {
-        e.preventDefault();
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({icon: 'error', title: 'Error', text: 'Format file tidak didukung! Gunakan JPG, PNG, atau GIF.'});
-        } else {
-            alert('Format file tidak didukung! Gunakan JPG, PNG, atau GIF.');
-        }
-        return false;
-    }
-    
-    if (file.size > maxSize) {
-        e.preventDefault();
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({icon: 'error', title: 'Error', text: 'Ukuran file terlalu besar! Maksimal 5MB.'});
-        } else {
-            alert('Ukuran file terlalu besar! Maksimal 5MB.');
-        }
-        return false;
-    }
-});
 </script>
 
 <?php require_once '../../includes/footer.php'; ?>
