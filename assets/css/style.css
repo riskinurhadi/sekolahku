@@ -1611,41 +1611,47 @@ body.modal-open .watermark {
     .floating-ai-button {
         display: flex !important;
         position: fixed !important;
-        bottom: 90px !important; /* Above bottom nav (70px) + margin */
-        right: 20px !important;
-        width: 60px !important;
-        height: 60px !important;
+        bottom: 85px !important; /* Above bottom nav (70px) + margin */
+        right: 12px !important;
+        padding: 8px 14px !important;
+        height: auto !important;
+        min-height: 36px !important;
         background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%) !important;
         color: #ffffff !important;
-        border-radius: 50% !important;
-        box-shadow: 0 4px 16px rgba(30, 64, 175, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+        border-radius: 20px !important;
+        box-shadow: 0 2px 8px rgba(30, 64, 175, 0.3), 0 1px 4px rgba(0, 0, 0, 0.15) !important;
         align-items: center !important;
         justify-content: center !important;
         text-decoration: none !important;
         z-index: 1041 !important; /* Above bottom nav (1040) */
         transition: all 0.3s ease !important;
-        border: 3px solid #ffffff !important;
+        border: 2px solid #ffffff !important;
         cursor: pointer !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        white-space: nowrap !important;
+        line-height: 1.2 !important;
     }
 
     .floating-ai-button:hover,
     .floating-ai-button:active {
         background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
         color: #ffffff !important;
-        transform: translateY(-2px) scale(1.05) !important;
-        box-shadow: 0 6px 20px rgba(30, 64, 175, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 3px 10px rgba(30, 64, 175, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2) !important;
     }
 
     .floating-ai-button:active {
-        transform: translateY(0) scale(0.98) !important;
+        transform: translateY(0) !important;
+        box-shadow: 0 2px 6px rgba(30, 64, 175, 0.3), 0 1px 3px rgba(0, 0, 0, 0.15) !important;
     }
 
     .floating-ai-button i {
-        font-size: 24px !important;
+        display: none !important;
     }
 
     .floating-ai-button span {
-        display: none !important;
+        display: inline-block !important;
     }
 
     /* Style icons */
