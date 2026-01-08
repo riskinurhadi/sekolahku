@@ -147,6 +147,12 @@ $unread_count = 0;
                             <span>Mulai Pelajaran</span>
                         </a>
                     </li>
+                    <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'rekap_kehadiran.php' ? 'active' : ''; ?>">
+                        <a href="<?php echo getBasePath(); ?>dashboard/guru/rekap_kehadiran.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'rekap_kehadiran.php' ? 'active' : ''; ?>">
+                            <i class="bi bi-clipboard-data"></i>
+                            <span>Rekap Kehadiran</span>
+                        </a>
+                    </li>
                 <?php elseif ($user_role == 'akademik'): ?>
                     <!-- Menu Akademik -->
                     <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">
