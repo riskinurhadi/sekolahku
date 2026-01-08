@@ -283,6 +283,12 @@ $unread_count = 0;
             </div>
         </nav>
 
+        <!-- Floating Chat Ilmuna AI Button for Mobile -->
+        <a href="https://chatgpt.com/g/g-tR22j7U8L-ilmuna/" target="_blank" class="floating-ai-button" aria-label="Chat Ilmuna AI">
+            <i class="bi bi-chat-dots-fill"></i>
+            <span>Chat Ilmuna Ai</span>
+        </a>
+
         <!-- Main Content -->
         <div class="content" id="content">
             <!-- Top Navbar -->

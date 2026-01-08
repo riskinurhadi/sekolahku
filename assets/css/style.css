@@ -336,6 +336,11 @@ body.sidebar-collapsed .sidebar-ai-promo .ai-promo-button i {
     margin: 0;
 }
 
+/* Floating Chat Ilmuna AI Button - Hidden on desktop by default */
+.floating-ai-button {
+    display: none !important;
+}
+
 /* --- Content & Header --- */
 .content {
     width: 100%;
@@ -1501,8 +1506,12 @@ body.modal-open .watermark {
         padding-bottom: 70px; /* Space for bottom navigation */
     }
 
-    /* Hide sidebar header and AI promo on mobile */
-    .sidebar-header,
+    /* Hide sidebar header on mobile */
+    .sidebar-header {
+        display: none !important;
+    }
+
+    /* Hide sidebar AI promo card on mobile */
     .sidebar-ai-promo {
         display: none !important;
     }
@@ -1595,6 +1604,47 @@ body.modal-open .watermark {
     /* Hide dropdown menus on mobile bottom nav */
     .sidebar .components li .collapse,
     .sidebar .components li .dropdown-toggle::after {
+        display: none !important;
+    }
+
+    /* Floating Chat Ilmuna AI Button for Mobile */
+    .floating-ai-button {
+        display: flex !important;
+        position: fixed !important;
+        bottom: 90px !important; /* Above bottom nav (70px) + margin */
+        right: 20px !important;
+        width: 60px !important;
+        height: 60px !important;
+        background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%) !important;
+        color: #ffffff !important;
+        border-radius: 50% !important;
+        box-shadow: 0 4px 16px rgba(30, 64, 175, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-decoration: none !important;
+        z-index: 1041 !important; /* Above bottom nav (1040) */
+        transition: all 0.3s ease !important;
+        border: 3px solid #ffffff !important;
+        cursor: pointer !important;
+    }
+
+    .floating-ai-button:hover,
+    .floating-ai-button:active {
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
+        color: #ffffff !important;
+        transform: translateY(-2px) scale(1.05) !important;
+        box-shadow: 0 6px 20px rgba(30, 64, 175, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .floating-ai-button:active {
+        transform: translateY(0) scale(0.98) !important;
+    }
+
+    .floating-ai-button i {
+        font-size: 24px !important;
+    }
+
+    .floating-ai-button span {
         display: none !important;
     }
 
