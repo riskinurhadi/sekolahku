@@ -77,7 +77,7 @@ function processImport($conn, $sekolah_id, $file) {
                 $headers = array_map('strtolower', $headers);
                 
                 // Validate headers
-                $required_headers = ['username', 'nama lengkap', 'kelas'];
+                $required_headers = ['username', 'password', 'nama lengkap', 'kelas'];
                 
                 foreach ($required_headers as $req_header) {
                     $key = array_search(strtolower($req_header), $headers);
@@ -95,7 +95,7 @@ function processImport($conn, $sekolah_id, $file) {
                         fclose($handle);
                         return [
                             'success' => false,
-                            'message' => "Header '$req_header' tidak ditemukan! Pastikan file memiliki header: Username, Nama Lengkap, Kelas, Email (opsional).",
+                            'message' => "Header '$req_header' tidak ditemukan! Pastikan file memiliki header: Username, Password, Nama Lengkap, Kelas, Email (opsional).",
                             'success_count' => 0,
                             'error_count' => 0,
                             'errors' => []
@@ -116,14 +116,15 @@ function processImport($conn, $sekolah_id, $file) {
             
             // Process data rows
             $username = isset($data[$header_keys['username']]) ? trim($data[$header_keys['username']]) : '';
+            $password = isset($data[$header_keys['password']]) ? trim($data[$header_keys['password']]) : '';
             $nama_lengkap = isset($data[$header_keys['nama lengkap']]) ? trim($data[$header_keys['nama lengkap']]) : '';
             $kelas_nama = isset($data[$header_keys['kelas']]) ? trim($data[$header_keys['kelas']]) : '';
             $email = (isset($header_keys['email']) && isset($data[$header_keys['email']])) ? trim($data[$header_keys['email']]) : '';
             
             // Validate required fields
-            if (empty($username) || empty($nama_lengkap) || empty($kelas_nama)) {
+            if (empty($username) || empty($password) || empty($nama_lengkap) || empty($kelas_nama)) {
                 $error_count++;
-                $errors[] = "Baris $line_number: Data tidak lengkap (Username, Nama Lengkap, atau Kelas kosong)";
+                $errors[] = "Baris $line_number: Data tidak lengkap (Username, Password, Nama Lengkap, atau Kelas kosong)";
                 continue;
             }
             
@@ -165,11 +166,11 @@ function processImport($conn, $sekolah_id, $file) {
             $check_stmt->close();
             
             // Insert student
-            // Generate default password (username + "123" or you can generate random)
-            $default_password = password_hash($username . '123', PASSWORD_DEFAULT);
+            // Hash password from CSV
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
             
             $insert_stmt = $conn->prepare("INSERT INTO users (username, password, nama_lengkap, email, role, sekolah_id, kelas_id) VALUES (?, ?, ?, ?, 'siswa', ?, ?)");
-            $insert_stmt->bind_param("ssssii", $username, $default_password, $nama_lengkap, $email, $sekolah_id, $kelas_id);
+            $insert_stmt->bind_param("ssssii", $username, $hashed_password, $nama_lengkap, $email, $sekolah_id, $kelas_id);
             
             if ($insert_stmt->execute()) {
                 $success_count++;
@@ -257,9 +258,10 @@ require_once '../../includes/header.php';
                     <p class="mb-0">File harus memiliki header dengan format berikut (urutan kolom bebas):</p>
                     <ul class="mb-0 mt-2">
                         <li><strong>A. Username</strong> (wajib)</li>
-                        <li><strong>B. Nama Lengkap</strong> (wajib)</li>
-                        <li><strong>C. Kelas</strong> (wajib) - Gunakan nama kelas yang sudah ada di sistem</li>
-                        <li><strong>D. Email</strong> (opsional)</li>
+                        <li><strong>B. Password</strong> (wajib)</li>
+                        <li><strong>C. Nama Lengkap</strong> (wajib)</li>
+                        <li><strong>D. Kelas</strong> (wajib) - Gunakan nama kelas yang sudah ada di sistem</li>
+                        <li><strong>E. Email</strong> (opsional)</li>
                     </ul>
                 </div>
                 
@@ -273,7 +275,7 @@ require_once '../../includes/header.php';
                     <div class="alert alert-warning">
                         <strong><i class="bi bi-exclamation-triangle"></i> Catatan:</strong>
                         <ul class="mb-0 mt-2">
-                            <li>Password default untuk setiap siswa adalah: <strong>username + "123"</strong> (contoh: jika username "siswa01", maka password "siswa01123")</li>
+                            <li>Password harus diisi di file CSV/Excel untuk setiap siswa</li>
                             <li>Pastikan nama kelas sudah ada di sistem sebelum melakukan import</li>
                             <li>Username harus unik (tidak boleh duplikat)</li>
                         </ul>
@@ -322,6 +324,7 @@ require_once '../../includes/header.php';
                         <thead>
                             <tr>
                                 <th>Username</th>
+                                <th>Password</th>
                                 <th>Nama Lengkap</th>
                                 <th>Kelas</th>
                                 <th>Email</th>
@@ -330,12 +333,14 @@ require_once '../../includes/header.php';
                         <tbody>
                             <tr>
                                 <td>siswa01</td>
+                                <td>password123</td>
                                 <td>Budi Santoso</td>
                                 <td>10 D</td>
                                 <td>budi@email.com</td>
                             </tr>
                             <tr>
                                 <td>siswa02</td>
+                                <td>password456</td>
                                 <td>Siti Nurhaliza</td>
                                 <td>10 D</td>
                                 <td></td>
