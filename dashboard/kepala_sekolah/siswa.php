@@ -140,9 +140,14 @@ $conn->close();
         <h2>Kelola Siswa</h2>
         <p>Tambah dan kelola data siswa</p>
     </div>
-    <a href="tambah_siswa.php" class="btn btn-primary btn-sm">
-        <i class="bi bi-plus-circle"></i> Tambah Siswa
-    </a>
+    <div class="d-flex gap-2">
+        <a href="import_siswa.php" class="btn btn-success btn-sm">
+            <i class="bi bi-upload"></i> Import CSV/Excel
+        </a>
+        <a href="tambah_siswa.php" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle"></i> Tambah Siswa
+        </a>
+    </div>
 </div>
 
 <!-- Students List -->
