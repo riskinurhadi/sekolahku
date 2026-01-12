@@ -114,16 +114,24 @@ function processImport($conn, $sekolah_id, $file) {
                 continue;
             }
             
-            // Process data rows (skip if header_keys not set)
-            if (empty($header_keys)) {
+            // Process data rows (skip if header_keys not set or not enough keys)
+            if (empty($header_keys) || !isset($header_keys['username']) || !isset($header_keys['password']) || !isset($header_keys['nama lengkap']) || !isset($header_keys['kelas'])) {
                 continue;
             }
             
-            $username = isset($header_keys['username']) && isset($data[$header_keys['username']]) ? trim($data[$header_keys['username']]) : '';
-            $password = isset($header_keys['password']) && isset($data[$header_keys['password']]) ? trim($data[$header_keys['password']]) : '';
-            $nama_lengkap = isset($header_keys['nama lengkap']) && isset($data[$header_keys['nama lengkap']]) ? trim($data[$header_keys['nama lengkap']]) : '';
-            $kelas_nama = isset($header_keys['kelas']) && isset($data[$header_keys['kelas']]) ? trim($data[$header_keys['kelas']]) : '';
-            $email = (isset($header_keys['email']) && isset($data[$header_keys['email']])) ? trim($data[$header_keys['email']]) : '';
+            // Get column indexes
+            $username_idx = $header_keys['username'];
+            $password_idx = $header_keys['password'];
+            $nama_lengkap_idx = $header_keys['nama lengkap'];
+            $kelas_idx = $header_keys['kelas'];
+            $email_idx = isset($header_keys['email']) ? $header_keys['email'] : null;
+            
+            // Extract data
+            $username = isset($data[$username_idx]) ? trim($data[$username_idx]) : '';
+            $password = isset($data[$password_idx]) ? trim($data[$password_idx]) : '';
+            $nama_lengkap = isset($data[$nama_lengkap_idx]) ? trim($data[$nama_lengkap_idx]) : '';
+            $kelas_nama = isset($data[$kelas_idx]) ? trim($data[$kelas_idx]) : '';
+            $email = ($email_idx !== null && isset($data[$email_idx])) ? trim($data[$email_idx]) : '';
             
             // Validate required fields
             if (empty($username) || empty($password) || empty($nama_lengkap) || empty($kelas_nama)) {
@@ -198,9 +206,12 @@ function processImport($conn, $sekolah_id, $file) {
     }
     
     // Build result message
-    $result_message = "Import selesai: $success_count berhasil";
-    if ($error_count > 0) {
-        $result_message .= ", $error_count gagal";
+    if ($success_count > 0 && $error_count == 0) {
+        $result_message = "Import berhasil! $success_count siswa berhasil ditambahkan.";
+    } elseif ($success_count > 0 && $error_count > 0) {
+        $result_message = "Import selesai dengan beberapa error. $success_count siswa berhasil ditambahkan, $error_count data gagal.";
+    } else {
+        $result_message = "Import gagal! Tidak ada data yang berhasil ditambahkan. $error_count error ditemukan.";
     }
     
     return [
