@@ -21,9 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file'])) {
     } else {
         $file_ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
         
-        // Check file extension
-        if (!in_array($file_ext, ['csv', 'xls', 'xlsx'])) {
-            $message = 'error:Format file tidak didukung! Gunakan CSV, XLS, atau XLSX.';
+        // Check file extension - only CSV is supported
+        if ($file_ext != 'csv') {
+            $message = 'error:Format file tidak didukung! Hanya file CSV yang didukung. Untuk file Excel (.xls/.xlsx), silakan export/save as ke format CSV terlebih dahulu.';
         } else {
             // Process file
             $import_result = processImport($conn, $sekolah_id, $file);
@@ -236,7 +236,7 @@ require_once '../../includes/header.php';
 ?>
 
 <div class="page-header">
-    <h2><i class="bi bi-upload"></i> Import Siswa dari CSV/Excel</h2>
+    <h2><i class="bi bi-upload"></i> Import Siswa dari CSV</h2>
     <p>Upload file CSV untuk mengimpor data siswa secara massal</p>
 </div>
 
@@ -260,9 +260,9 @@ require_once '../../includes/header.php';
                 
                 <form method="POST" enctype="multipart/form-data" id="importForm">
                     <div class="mb-3">
-                        <label for="file" class="form-label">Pilih File CSV/Excel <span class="text-danger">*</span></label>
-                        <input type="file" class="form-control" id="file" name="file" accept=".csv,.xls,.xlsx" required>
-                        <small class="form-text text-muted">Format yang didukung: CSV, XLS, XLSX (Maksimal 5MB). <strong>Catatan:</strong> Untuk file Excel, silakan export ke CSV terlebih dahulu.</small>
+                        <label for="file" class="form-label">Pilih File CSV <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".csv" required>
+                        <small class="form-text text-muted">Format yang didukung: CSV (Maksimal 5MB). <strong>Catatan:</strong> Untuk file Excel (.xls/.xlsx), silakan export/save as ke format CSV terlebih dahulu.</small>
                     </div>
                     
                     <div class="alert alert-warning">
@@ -451,8 +451,9 @@ $(document).ready(function() {
                     }
                 });
                 
-                // Submit form
-                this.submit();
+                // Submit form - use form element reference
+                var form = document.getElementById('importForm');
+                form.submit();
             }
         });
         
