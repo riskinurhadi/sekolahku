@@ -393,6 +393,8 @@ require_once '../../includes/header.php';
 </div>
 <?php endif; ?>
 
+<?php require_once '../../includes/footer.php'; ?>
+
 <script>
 $(document).ready(function() {
     // Show message if exists
@@ -402,8 +404,9 @@ $(document).ready(function() {
         Swal.fire({
             icon: 'success',
             title: msg.title,
-            text: msg.text,
-            confirmButtonText: 'OK'
+            html: msg.text,
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#3085d6'
         }).then(function() {
             window.location.href = 'siswa.php';
         });
@@ -411,8 +414,9 @@ $(document).ready(function() {
         Swal.fire({
             icon: 'error',
             title: msg.title,
-            text: msg.text,
-            confirmButtonText: 'OK'
+            html: msg.text,
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#d33'
         });
     }
     <?php endif; ?>
@@ -476,6 +480,4 @@ $(document).ready(function() {
     });
 });
 </script>
-
-<?php require_once '../../includes/footer.php'; ?>
 

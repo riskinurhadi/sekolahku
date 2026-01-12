@@ -124,12 +124,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 // Get all classes
 $kelas = $conn->query("SELECT * FROM kelas WHERE sekolah_id = $sekolah_id ORDER BY tingkat ASC, nama_kelas ASC")->fetch_all(MYSQLI_ASSOC);
 
-// Get all students with kelas info
-$students = $conn->query("SELECT u.*, k.nama_kelas 
-    FROM users u 
-    LEFT JOIN kelas k ON u.kelas_id = k.id 
-    WHERE u.role = 'siswa' AND u.sekolah_id = $sekolah_id 
-    ORDER BY k.tingkat ASC, k.nama_kelas ASC, u.nama_lengkap ASC")->fetch_all(MYSQLI_ASSOC);
+// Get selected kelas from URL parameter
+$selected_kelas_id = isset($_GET['kelas_id']) ? intval($_GET['kelas_id']) : 0;
+
+// Get all students with kelas info (filter by kelas if selected)
+if ($selected_kelas_id > 0) {
+    $stmt = $conn->prepare("SELECT u.*, k.nama_kelas 
+        FROM users u 
+        LEFT JOIN kelas k ON u.kelas_id = k.id 
+        WHERE u.role = 'siswa' AND u.sekolah_id = ? AND u.kelas_id = ?
+        ORDER BY u.nama_lengkap ASC");
+    $stmt->bind_param("ii", $sekolah_id, $selected_kelas_id);
+    $stmt->execute();
+    $students = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+} else {
+    $students = $conn->query("SELECT u.*, k.nama_kelas 
+        FROM users u 
+        LEFT JOIN kelas k ON u.kelas_id = k.id 
+        WHERE u.role = 'siswa' AND u.sekolah_id = $sekolah_id 
+        ORDER BY k.tingkat ASC, k.nama_kelas ASC, u.nama_lengkap ASC")->fetch_all(MYSQLI_ASSOC);
+}
 
 $conn->close();
 ?>
@@ -147,6 +162,36 @@ $conn->close();
         <a href="tambah_siswa.php" class="btn btn-primary btn-sm">
             <i class="bi bi-plus-circle"></i> Tambah Siswa
         </a>
+    </div>
+</div>
+
+<!-- Tab Navigation for Classes -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div style="background: #f8fafc; border-bottom: 2px solid #e5e7eb; padding: 0;">
+            <nav>
+                <ul class="nav" role="tablist" style="border-bottom: none; margin-bottom: 0;">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" 
+                           href="?kelas_id=0"
+                           style="<?php echo $selected_kelas_id == 0 ? 'color: #3b82f6; border-bottom: 3px solid #3b82f6; background: transparent;' : 'color: #64748b; border-bottom: 3px solid transparent; background: transparent;'; ?> font-weight: 600; padding: 12px 24px; border: none; transition: all 0.2s ease; text-decoration: none;">
+                            Semua
+                        </a>
+                    </li>
+                    <?php foreach ($kelas as $k): 
+                        $is_active = $selected_kelas_id == $k['id'];
+                    ?>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" 
+                               href="?kelas_id=<?php echo $k['id']; ?>"
+                               style="<?php echo $is_active ? 'color: #3b82f6; border-bottom: 3px solid #3b82f6; background: transparent;' : 'color: #64748b; border-bottom: 3px solid transparent; background: transparent;'; ?> font-weight: 600; padding: 12px 24px; border: none; transition: all 0.2s ease; text-decoration: none;">
+                                <?php echo htmlspecialchars($k['nama_kelas']); ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            </nav>
+        </div>
     </div>
 </div>
 
@@ -296,7 +341,13 @@ function deleteStudent(id) {
                             timer: 2000,
                             showConfirmButton: false
                         }).then(function() {
-                            location.reload();
+                            // Preserve kelas_id parameter when reloading
+                            var kelasId = new URLSearchParams(window.location.search).get('kelas_id');
+                            if (kelasId) {
+                                window.location.href = 'siswa.php?kelas_id=' + kelasId;
+                            } else {
+                                location.reload();
+                            }
                         });
                     } else {
                         Swal.fire({
