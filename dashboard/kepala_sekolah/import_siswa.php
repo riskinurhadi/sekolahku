@@ -114,11 +114,15 @@ function processImport($conn, $sekolah_id, $file) {
                 continue;
             }
             
-            // Process data rows
-            $username = isset($data[$header_keys['username']]) ? trim($data[$header_keys['username']]) : '';
-            $password = isset($data[$header_keys['password']]) ? trim($data[$header_keys['password']]) : '';
-            $nama_lengkap = isset($data[$header_keys['nama lengkap']]) ? trim($data[$header_keys['nama lengkap']]) : '';
-            $kelas_nama = isset($data[$header_keys['kelas']]) ? trim($data[$header_keys['kelas']]) : '';
+            // Process data rows (skip if header_keys not set)
+            if (empty($header_keys)) {
+                continue;
+            }
+            
+            $username = isset($header_keys['username']) && isset($data[$header_keys['username']]) ? trim($data[$header_keys['username']]) : '';
+            $password = isset($header_keys['password']) && isset($data[$header_keys['password']]) ? trim($data[$header_keys['password']]) : '';
+            $nama_lengkap = isset($header_keys['nama lengkap']) && isset($data[$header_keys['nama lengkap']]) ? trim($data[$header_keys['nama lengkap']]) : '';
+            $kelas_nama = isset($header_keys['kelas']) && isset($data[$header_keys['kelas']]) ? trim($data[$header_keys['kelas']]) : '';
             $email = (isset($header_keys['email']) && isset($data[$header_keys['email']])) ? trim($data[$header_keys['email']]) : '';
             
             // Validate required fields
